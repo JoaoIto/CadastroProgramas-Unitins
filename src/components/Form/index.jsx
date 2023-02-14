@@ -1,10 +1,9 @@
 import { Input } from "./input"
 
 export function Form(){
+  return (
     <>
-    <h1>sjfbjbfssfbd</h1>
-        <Input />
+      <Input />
     </>
+  );
 }
-
-export default Form;
