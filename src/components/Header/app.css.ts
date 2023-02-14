@@ -1,11 +1,24 @@
 import { style } from '@vanilla-extract/css';
 
-export const title = style({
-    fontSize: "2.6rem",
+export const header = style({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
     fontFamily: 'Inter',
+    width: '100%',
+});
+
+export const title = style({
+    fontSize: '2.6rem',
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#222831',
-    textShadow: '2px 2px 2px #322785',
-    margin: 30
+    color: '#000',
+    textShadow: '3px 2px 1px #322785',
+    margin: 30,
+});
+
+export const subtitle = style({
+    fontSize: '1.4rem',
 });

@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter&family=Noto+Serif+Ahom&family=Poppins&family=Roboto&display=swap');
 
+body{
+    overflow-x: hidden;
+    background-color: #eeeeee;
+}
 .banner {
     box-shadow: 8px 8px 8px #8d8d8d;
 }
