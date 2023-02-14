@@ -11,6 +11,8 @@ export function Header() {
       />
       <h1 className={title}>Cadastro de Programas de Computadores</h1>
       <span className={subtitle}>Cadastre seu programa de computador juntamente com a universidade!</span>
+    
+    
     </header>
   );
 }
