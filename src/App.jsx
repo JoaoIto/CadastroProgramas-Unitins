@@ -1,3 +1,5 @@
+import reset from "./assets/styles/reset.css"
+
 export function App() {
 
   return (
