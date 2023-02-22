@@ -1,10 +1,18 @@
-import { input } from "./index.css";
+import { input, labelInput } from "./index.css";
 
-export function Input({ type, name, label, register, ...rest }) {
+export function Input({ type, name, label, register, placeholder, ...rest }) {
   return (
     <>
-      <label htmlFor={name}>{label}</label>
-      <input type={type} name={name} className={input} {...register(label, { ...rest })} />
+      <label className={labelInput} htmlFor={name}>
+        {label}
+      </label>
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        className={input}
+        {...register(name, { ...rest })}
+      />
     </>
   );
 }

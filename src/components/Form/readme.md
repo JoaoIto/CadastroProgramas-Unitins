@@ -24,6 +24,7 @@ const App = () => {
   const onSubmit = data => console.log(data);
 
   return (
+    // Form com renderização dos dados
     <form onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="firstName"

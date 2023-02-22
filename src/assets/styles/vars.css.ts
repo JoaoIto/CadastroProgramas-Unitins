@@ -2,12 +2,17 @@ import { createTheme } from '@vanilla-extract/css';
 
 export const [themeClass, vars] = createTheme({
   color: {
-    brand: 'blue',
-    white: '#fff',
-    backWhite: '#cacaca'
+    backWhite: '#cacaca',
+    purple: '#2E2784'
   },
+  
   space: {
-    small: '4px',
-    medium: '8px',
+    small: '5px',
+    medium: '10px',
+  },
+
+  fonts: {
+    Poppins: 'Poppins',
+    Inter: 'Inter',
   }
 });

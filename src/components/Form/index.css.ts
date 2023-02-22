@@ -14,9 +14,27 @@ export const container = style({
 });
 
 export const input = style({
-    height: 30,
+    height: 40,
     width: '70%',
+    fontSize: 18,
+    fontFamily: 'Inter',
     padding: 10,
     margin: 20,
-    border: '5 solid #cacaca'
+    border: '3px solid #cacaca',
+    borderRadius: 10,
+});
+
+export const labelInput = style({
+    fontSize: '1.7rem',
+    fontFamily: 'Inter',
+});
+
+export const submit = style({
+    height: 50,
+    width: '50%',
+    borderRadius: 10,
+    fontSize: '1.5rem',
+    backgroundColor: '#2E2784',
+    color: '#fff',
+    border: '3px solid #0a0a0a'
 });
