@@ -1,4 +1,4 @@
-import { header, title, subtitle} from "./app.css";
+import { header, title, subtitle} from "./index.css";
 
 export function Header() {
   return (

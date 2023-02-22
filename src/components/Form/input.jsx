@@ -1,8 +1,10 @@
-import { style } from "@vanilla-extract/css";
+import { input } from "./index.css";
 
-export function Input() {
+export function Input({ type, name, label, register, ...rest }) {
   return (
     <>
+      <label htmlFor={name}>{label}</label>
+      <input type={type} name={name} className={input} {...register(label, { ...rest })} />
     </>
   );
 }
