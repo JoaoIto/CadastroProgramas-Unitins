@@ -28,6 +28,15 @@ export function Form() {
           placeholder="Insira seu nome completo: "
           required
         />
+
+        <Input
+          type="date"
+          name="aluno1.dataDeNascimento"
+          label="Data de Nascimento: "
+          register={register}
+          required
+        />
+
         <Input
           type="email"
           name="aluno1.email"
@@ -48,16 +57,33 @@ export function Form() {
 
         <Input
           type="number"
-          name="aluno1.rg"
+          name="aluno1.documentos.rg.RG"
           label="RG: "
           register={register}
           placeholder="Insira seu registro civil:"
           required
         />
-        
+
         <Input
           type="text"
-          name="aluno1.address.rua"
+          name="aluno1.documentos.rg.orgãoEmissor"
+          register={register}
+          placeholder="Insira o orgão emissor:"
+          required
+        />
+
+        <Input
+          type="text"
+          label="CPF: "
+          name="aluno1.documentos.CPF"
+          register={register}
+          placeholder="Insira o seu número de CPF:"
+          required
+        />
+
+        <Input
+          type="text"
+          name="aluno1.endereco.rua"
           label="Endereço: "
           register={register}
           placeholder="Insira seu endereço:"
@@ -66,7 +92,7 @@ export function Form() {
 
         <Input
           type="text"
-          name="aluno1.address.bairro"
+          name="aluno1.endereco.bairro"
           label="Bairro: "
           register={register}
           placeholder="Bairro:"
@@ -75,7 +101,7 @@ export function Form() {
 
         <Input
           type="number"
-          name="aluno1.address.cep"
+          name="aluno1.endereco.cep"
           label="CEP: "
           register={register}
           placeholder="CEP:"
