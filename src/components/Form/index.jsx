@@ -1,6 +1,8 @@
 import { Input } from "./input";
+import { Select } from "./select"
 import { useForm } from "react-hook-form";
 import { container, submit } from "./index.css";
+
 
 export function Form() {
   const {
@@ -8,16 +10,17 @@ export function Form() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm();
-
-  const onSubmit = (data) => {
-    console.log(JSON.stringify(data));
-    console.log(data);
-  }; // watch input value by passing the name of it
+  } = useForm();// watch input value by passing the name of it
 
   return (
     <>
-      <form className={container} onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className={container}
+        onSubmit={handleSubmit((data) => {
+          console.log(JSON.stringify(data));
+          console.log(watch(data));
+        })}
+      >
         <Input
           type="text"
           name="aluno1.nome"
@@ -53,6 +56,12 @@ export function Form() {
           required
         />
 
+        <Select 
+        label="Estado e Município: "
+        register={register}
+        required 
+        />
+        
         <Input
           type="text"
           name="aluno1.address.rua"
@@ -72,20 +81,12 @@ export function Form() {
         />
 
         <Input
-          type="text"
+          type="number"
           name="aluno1.address.cep"
           label="CEP: "
           register={register}
           placeholder="CEP:"
-          required
-        />
-
-        <Input
-          type="text"
-          name="aluno1.address.cidade"
-          label="Cidade: "
-          register={register}
-          placeholder="Cidade:"
+          maxlength="10"
           required
         />
 
