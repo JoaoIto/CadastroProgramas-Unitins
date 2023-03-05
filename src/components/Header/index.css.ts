@@ -20,5 +20,6 @@ export const title = style({
 });
 
 export const subtitle = style({
+    textAlign: 'center',
     fontSize: '1.4rem',
 });

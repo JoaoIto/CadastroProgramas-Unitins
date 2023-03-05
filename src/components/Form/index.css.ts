@@ -8,8 +8,7 @@ export const container = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: 20,
-  margin: 0,
+  margin: '50px 0',
   backgroundColor: vars.color.backWhite,
 });
 
