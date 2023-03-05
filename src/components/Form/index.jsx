@@ -1,5 +1,4 @@
 import { Input } from "./input";
-import { Select } from "./select"
 import { useForm } from "react-hook-form";
 import { container, submit } from "./index.css";
 
@@ -54,12 +53,6 @@ export function Form() {
           register={register}
           placeholder="Insira seu registro civil:"
           required
-        />
-
-        <Select 
-        label="Estado e Município: "
-        register={register}
-        required 
         />
         
         <Input
