@@ -1,6 +1,6 @@
 import { Input } from "./input";
 import { useForm } from "react-hook-form";
-import { container, submit } from "./index.css";
+import { styles } from "./index.css";
 
 
 export function Form() {
@@ -14,7 +14,7 @@ export function Form() {
   return (
     <>
       <form
-        className={container}
+        className={styles.container}
         onSubmit={handleSubmit((data) => {
           console.log(JSON.stringify(data));
           console.log(watch(data));
@@ -109,7 +109,7 @@ export function Form() {
           required
         />
 
-        <input className={submit} type="submit" />
+        <input className={styles.submit} type="submit" />
       </form>
     </>
   );
