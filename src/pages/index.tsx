@@ -1,12 +1,8 @@
-import { Form } from '../components/Form'
-
 export default function Home() {
   return (
     <main
-      className="h-3/5 w-screen flex items-center">
-      <h1>Hello World!</h1>
-
-      <Form/>
+      className="h-screen w-screen flex justify-center p-6">
+      <h1 className="text-4xl">Cadastro de Programas de Computadores</h1>
     </main>
   )
 }
