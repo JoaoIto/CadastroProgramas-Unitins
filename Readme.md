@@ -11,7 +11,7 @@
 
 ## Dentro do projeto estão sendo usados:
 
-- [vanilla-extract-css](https://vanilla-extract.style/): Um processador de estilos em CSS com variáveis, usadas em JS e pré-processadas pelo supertipo de TypeScript;
+- [TailwindCSS](https://tailwindcss.com/docs/installation): Estilização de componentes dinâmicos a partir das classes;
 
 - [vite.js](https://vitejs.dev/): Para o build do projeto React.js do projeto;
 
