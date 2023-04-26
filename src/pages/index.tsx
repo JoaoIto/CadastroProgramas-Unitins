@@ -13,10 +13,12 @@ export default function Home() {
       </div>
 
       <div id="btns" className="h-40 flex flex-col justify-around">
+       <Link href="./cadastro">
         <button className="h-16 w-40 text-white font-bold bg-blue-800 rounded-md border-2 border-solid border-zinc-700">
           CADASTRAR PROPRIEDADE
         </button>
-        <Link href="./cadastro">
+        </Link>
+        <Link href="./consulta">
         <button className="h-16 w-40 text-white font-bold bg-blue-800 rounded-md border-2 border-solid border-zinc-700">
           CONSULTAR PROPRIEDADE
         </button>
