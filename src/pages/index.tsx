@@ -2,9 +2,11 @@ import Link from "next/link";
 
 export default function Home() {
   return (
+    <>
+    <img src="../src/assets/img/governoTO-logo.jpg" alt="" />
     <main className="h-screen w-screen font-inter flex flex-col items-center p-6">
       <div id="texts" className="h-1/6 w-3/5 text-center flex flex-col justify-around">
-        <h1 className="text-4xl">Cadastro de Programas de Computadores</h1>
+        <h1 style={{textShadow: '2px 2px 2px rgb(30 64 175)'}} className="text-4xl font-bold">Cadastro de Programas de Computadores</h1>
         <p>
           Este é o serviço de cadastro e consulta para a propriedade de
           programas de computadores! Para você que precisa cadastrar sua
@@ -25,5 +27,6 @@ export default function Home() {
         </Link>
       </div>
     </main>
+    </>
   );
 }
