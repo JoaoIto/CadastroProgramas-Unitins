@@ -10,11 +10,11 @@ const nextConfig = {
       },
       {
         source: "/:path*",
-        destination: "http://localhost:5173/:path*",
+        destination: "http://localhost:3000/:path*",
       },
       {
         source: "/",
-        destination: "http://localhost:5173/",
+        destination: "http://localhost:3000/",
       },
     ];
   }
