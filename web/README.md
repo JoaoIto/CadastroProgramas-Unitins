@@ -2,7 +2,7 @@
 
 - ### **Projeto dedicado a inciação científica do PIBIC, Universidade Estadual do Tocantins juntamente com o Ministério da Ciência e Tecnologia. Um sistema web de cadastro de projetos para programas de computadores...**
 
-<img src="./public/print.png">
+<img src="./.github/print.png">
 
 ## [Figjam - Fluxograma](https://www.figma.com/file/HqW6H7awPQV2vcWUTlUja0/Fluxograma-Cadastro-Programas-de-Computadores---PIBIC?node-id=0%3A1&t=y9G0qPcIryB9JzH4-1)
 
