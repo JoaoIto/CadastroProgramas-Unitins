@@ -2,18 +2,12 @@
 
 - ### **Projeto dedicado a inciação científica do PIBIC, Universidade Estadual do Tocantins juntamente com o Ministério da Ciência e Tecnologia. Um sistema web de cadastro de projetos para programas de computadores...**
 
-<img src="./public/print.png">
+<img src=".github\img/printInicial.png"/>
+
+## Links figma:
 
 ## [Figjam - Fluxograma](https://www.figma.com/file/HqW6H7awPQV2vcWUTlUja0/Fluxograma-Cadastro-Programas-de-Computadores---PIBIC?node-id=0%3A1&t=y9G0qPcIryB9JzH4-1)
 
----
-
-## Dentro do projeto estão sendo usados
-
-- [TailwindCSS](https://tailwindcss.com/docs/installation): Estilização de CSS e variantes de componentes a partir de classes base de HTML;
-
-- [vite.js](https://vitejs.dev/): Para o build do projeto React.js do projeto;
-
-- [React-Hook-Form](https://react-hook-form.com/): Biblioteca do próprio React para construção de formulários, desde layout, validação e guarda de dados;
+## [ FigDessign - Design wireframe final](https://www.figma.com/file/5Lmauoi9y0gQppPdFHEU7Y/Unitins-Software-Hub?type=design&node-id=9%3A2&mode=design&t=g7I8q8xzApcHDm30-1)
 
 ---
