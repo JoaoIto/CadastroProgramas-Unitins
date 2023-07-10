@@ -6,8 +6,8 @@ import Button from '@mui/material/Button';
 
 export const CardProgram = () => {
   return (
-    <Card>
-      <CardContent>
+    <Card className='w-2/5 m-8'>
+      <CardContent className='p-4'>
         <Typography variant="h5" component="div">
           Título do Card
         </Typography>
@@ -17,7 +17,7 @@ export const CardProgram = () => {
         <Typography variant="body2">
           Data de Publicação: 01/01/2022
         </Typography>
-        <Button variant="contained" size="small">
+        <Button className="bg-indigo-900" variant="contained" size="small">
           Visualizar
         </Button>
       </CardContent>

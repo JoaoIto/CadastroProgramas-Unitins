@@ -71,9 +71,14 @@ const DashboardPage: React.FC = () => {
           <span className="font-bold">Perfil</span>
         </header>
         {/* Conteúdo principal */}
-        <CardProgram/>
-        <CardProgram/>
-        <CardProgram/>
+        <div className="flex flex-wrap">
+          <CardProgram/>
+          <CardProgram/>
+          <CardProgram/>
+          <CardProgram/>
+          <CardProgram/>
+          <CardProgram/>
+        </div>
       </main>
     </div>
   );
