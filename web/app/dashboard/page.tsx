@@ -12,6 +12,8 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
+import { CardProgram } from "../components/CardPrograma/Card";
+
 const DashboardPage: React.FC = () => {
   // Dados dos cards
   const cardsData = [
@@ -69,27 +71,9 @@ const DashboardPage: React.FC = () => {
           <span className="font-bold">Perfil</span>
         </header>
         {/* Conteúdo principal */}
-        {/* Cards no meio da tela */}
-      <div className="flex flex-wrap justify-center mt-8 space-x-4 space-y-4">
-        {cardsData.map((card, index) => (
-          <Card key={index} sx={{ minWidth: 275 }}>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                {card.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {card.description}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mt={2}>
-                Publicado em: {card.date}
-              </Typography>
-              <Button variant="contained" size="small" mt={2}>
-                Visualizar
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        <CardProgram/>
+        <CardProgram/>
+        <CardProgram/>
       </main>
     </div>
   );
