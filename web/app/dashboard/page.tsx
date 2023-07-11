@@ -7,11 +7,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../public/logoUnitins.png";
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-
 import { CardProgram } from "../components/CardPrograma/Card";
 
 const DashboardPage: React.FC = () => {
