@@ -1,7 +1,7 @@
 "use client"
 import React from "react";
-import { Sidebar } from "../components/MenuLateral/sidebar"
-import { Cabecalho } from "../components/HeaderSearch/cabecalho";
+import { Sidebar } from "../../components/MenuLateral/sidebar"
+import { Cabecalho } from "../../components/HeaderSearch/cabecalho";
 
 const Programas = () => {
     return (

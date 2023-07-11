@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
@@ -8,7 +8,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { Sidebar } from '../components/MenuLateral/sidebar';
+import { Sidebar } from '../../components/MenuLateral/sidebar';
 
 type FormData = {
   nomeCompleto: string;
@@ -21,8 +21,24 @@ type FormData = {
 const NovaSolicitacao = () => {
   const { register, handleSubmit } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      const response = await fetch('localhost:3333/solicitacao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        console.log('Dados enviados com sucesso');
+      } else {
+        console.log('Erro ao enviar os dados');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -35,7 +51,7 @@ const NovaSolicitacao = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 label="Nome Completo"
-                {...register("nomeCompleto", { required: true })}
+                {...register('nomeCompleto', { required: true })}
                 fullWidth
                 type="text"
               />
@@ -43,7 +59,7 @@ const NovaSolicitacao = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 label="RG"
-                {...register("rg", { required: true, pattern: /^[0-9]+$/ })}
+                {...register('rg', { required: true, pattern: /^[0-9]+$/ })}
                 fullWidth
                 inputProps={{ maxLength: 7 }}
                 type="number"
@@ -53,7 +69,7 @@ const NovaSolicitacao = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 label="CPF"
-                {...register("cpf", { required: true, pattern: /^[0-9]+$/ })}
+                {...register('cpf', { required: true, pattern: /^[0-9]+$/ })}
                 fullWidth
                 inputProps={{ maxLength: 11 }}
                 type="number"
@@ -64,7 +80,7 @@ const NovaSolicitacao = () => {
               <TextField
                 label="Data de Nascimento"
                 type="date"
-                {...register("dataNascimento", { required: true })}
+                {...register('dataNascimento', { required: true })}
                 fullWidth
                 InputLabelProps={{
                   shrink: true,
@@ -76,7 +92,7 @@ const NovaSolicitacao = () => {
                 <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
                 <Select
                   id="estadoCivil"
-                  {...register("estadoCivil", { required: true })}
+                  {...register('estadoCivil', { required: true })}
                 >
                   <MenuItem value="solteiro">Solteiro</MenuItem>
                   <MenuItem value="casado">Casado</MenuItem>
