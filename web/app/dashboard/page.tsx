@@ -8,6 +8,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../public/logoUnitins.png";
 import { CardProgram } from "../components/CardPrograma/Card";
+import { ButtonLinkPage } from "../components/ButtonLinkPage/ButtonLinkPage";
 
 const DashboardPage: React.FC = () => {
   // Dados dos cards
@@ -66,6 +67,9 @@ const DashboardPage: React.FC = () => {
           <span className="font-bold">Perfil</span>
         </header>
         {/* Conteúdo principal */}
+
+        <ButtonLinkPage title="Nova solicitação +" link="/novaSolicitacao"/>
+
         <div className="flex flex-wrap">
           <CardProgram/>
           <CardProgram/>
