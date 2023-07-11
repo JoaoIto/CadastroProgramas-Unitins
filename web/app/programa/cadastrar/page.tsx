@@ -23,7 +23,7 @@ const NovaSolicitacao = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const response = await fetch('localhost:3333/solicitacao', {
+      const response = await fetch('http://localhost:3333/programa/cadastrar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ const NovaSolicitacao = () => {
       if (response.ok) {
         console.log('Dados enviados com sucesso');
       } else {
-        console.log('Erro ao enviar os dados');
+        console.log('Erro ao enviar os dados:', response.status);
       }
     } catch (error) {
       console.error(error);
