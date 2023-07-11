@@ -67,17 +67,7 @@ function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="Me lembre"
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              className="mt-3 mb-2 bg-blue-700 text-white"
-            >
-             <Link className='text-white' href='/dashboard'>Entrar</Link>
-            </Button>
-
             <ButtonLinkPage title="Entrar" link="/dashboard"/>
-
               <Grid item xs>
                 <Link href="#" variant="body2">
                   Esqueceu a senha?
