@@ -9,7 +9,7 @@ type Props = {
 const ButtonLinkPage = ({ href, children }: Props) => {
   return (
     <Link href={href} passHref>
-      <Button type="submit" fullWidth variant="contained">
+      <Button className="bg-blue-900" type="submit" fullWidth variant="contained">
         {children}
       </Button>
     </Link>

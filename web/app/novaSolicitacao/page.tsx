@@ -1,92 +1,98 @@
 "use client";
-import React from "react";
-import { Sidebar } from "../components/MenuLateral/sidebar";
-import { useForm, SubmitHandler } from "react-hook-form";
-import TextField from "@mui/material/TextField";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
+import React from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import TextField from '@mui/material/TextField';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import { Sidebar } from '../components/MenuLateral/sidebar';
 
-interface FormData {
+type FormData = {
   nomeCompleto: string;
-  estadoCivil: string;
+  rg: number;
+  cpf: number;
   dataNascimento: string;
-  telefone: string;
-  rg: string;
-  orgaoEmissor: string;
-  cpf: string;
-  email: string;
-  profissao: string;
-  endereco: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-  vinculoUnitins: string;
-}
+  estadoCivil: string;
+};
 
 const NovaSolicitacao = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
+  const { register, handleSubmit } = useForm<FormData>();
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     console.log(data);
   };
 
   return (
-    <div className="h-screen w-screen flex">
+    <div className="flex h-screen">
       <Sidebar />
-      <div className="w-3/4 flex flex-col p-6 item-center text-center">
-        <h1 className="text-3xl font-bold text-center justify-center">
-          Nova Solicitação:
-        </h1>
+      <div className="flex-grow p-8">
+        <h1 className="text-3xl font-bold mb-4 text-center">Nova Solicitação</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Nome Completo"
+                {...register("nomeCompleto", { required: true })}
+                fullWidth
+                type="text"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="RG"
+                {...register("rg", { required: true, pattern: /^[0-9]+$/ })}
+                fullWidth
+                inputProps={{ maxLength: 7 }}
+                type="number"
+                inputMode="numeric"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="CPF"
+                {...register("cpf", { required: true, pattern: /^[0-9]+$/ })}
+                fullWidth
+                inputProps={{ maxLength: 11 }}
+                type="number"
+                inputMode="numeric"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Data de Nascimento"
+                type="date"
+                {...register("dataNascimento", { required: true })}
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
+                <Select
+                  id="estadoCivil"
+                  {...register("estadoCivil", { required: true })}
+                >
+                  <MenuItem value="solteiro">Solteiro</MenuItem>
+                  <MenuItem value="casado">Casado</MenuItem>
+                  <MenuItem value="viuvo">Viúvo</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-4">
-            <TextField
-              label="Nome Completo"
-              {...register("nomeCompleto", {
-                required: true,
-                pattern: /^[a-zA-Z\s]*$/,
-              })}
-              variant="outlined"
-              fullWidth
-              error={!!errors.nomeCompleto}
-              helperText={errors.nomeCompleto ? "Campo obrigatório" : ""}
-            />
-          </div>
-
-          <div className="mb-4">
-            <FormControl fullWidth>
-              <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
-              <Select
-                id="estadoCivil"
-                {...register("estadoCivil", { required: true })}
-              >
-                <MenuItem value="solteiro">Solteiro</MenuItem>
-                <MenuItem value="casado">Casado</MenuItem>
-                <MenuItem value="viuvo">Viúvo</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
-
-          <div className="mb-4">
-            <TextField
-              label=""
-              type="date"
-              {...register("dataNascimento", { required: true })}
-              variant="outlined"
-              fullWidth
-              error={!!errors.dataNascimento}
-              helperText={errors.dataNascimento ? "Campo obrigatório" : ""}
-            />
-          </div>
-          <div className="mb-4">
-            <Button type="submit" variant="contained" color="primary">
+          <div className="mt-4">
+            <Button
+              className="bg-blue-900"
+              type="submit"
+              variant="contained"
+              color="primary"
+            >
               Enviar
             </Button>
           </div>
