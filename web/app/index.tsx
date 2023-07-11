@@ -13,6 +13,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ButtonLinkPage } from './components/ButtonLinkPage/ButtonLinkPage';
 
 function SignIn() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,6 +75,8 @@ function SignIn() {
             >
              <Link className='text-white' href='/dashboard'>Entrar</Link>
             </Button>
+
+            <ButtonLinkPage title="Entrar" link="/dashboard"/>
 
               <Grid item xs>
                 <Link href="#" variant="body2">
