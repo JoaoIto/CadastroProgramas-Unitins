@@ -1,7 +1,6 @@
 "use client"
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -13,7 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ButtonLinkPage } from './components/ButtonLinkPage/ButtonLinkPage';
+import ButtonLinkPage from './components/ButtonLinkPage/ButtonLinkPage';
 
 function SignIn() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -67,7 +66,7 @@ function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="Me lembre"
             />
-            <ButtonLinkPage title="Entrar" link="/dashboard"/>
+            <ButtonLinkPage href="/dashboard">Entra</ButtonLinkPage>
               <Grid item xs>
                 <Link href="#" variant="body2">
                   Esqueceu a senha?
