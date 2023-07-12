@@ -16,4 +16,8 @@ export class ProgramaRepository {
     async findAll(): Promise<Programa[]> {
         return this.programa.find().exec();
     }
+
+    async delete(): Promise<Programa[]> {
+        return this.programa.find().exec();
+    }
 }
