@@ -9,6 +9,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../public/logoUnitins.png";
 import { CardProgram } from "../components/CardPrograma/Card";
 import ButtonLinkPage from "../components/ButtonLinkPage/ButtonLinkPage"
+import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 interface Programa {
   _id: string;
@@ -19,29 +20,24 @@ interface Programa {
   estadoCivil: string;
 }
 const DashboardPage = () => {
-
   const [programas, setProgramas] = useState<Programa[]>([]);
 
   useEffect(() => {
-    // Função assíncrona para buscar os programas do banco de dados
     const fetchProgramas = async () => {
       try {
-        const response = await fetch('http://localhost:3333/programa/listar');
-        if (response.ok) {
-          const data = await response.json();
+        const data = await ApiUtils.get<Programa[]>("http://localhost:3333/programa/listar");
+        if (data) {
           setProgramas(data);
-        } else {
-          console.log('Erro ao buscar os programas:', response.status);
         }
       } catch (error) {
-        console.error('Erro ao buscar os programas:', error);
+        console.error("Erro ao buscar os programas:", error);
       }
     };
 
     fetchProgramas();
-  }, []); // O array vazio [] como segundo argumento faz com que o efeito só seja executado uma vez, no momento em que o componente é montado
+  }, []);
 
-  return (
+return (
     <div className="flex h-screen">
     <aside className="w-1/6 bg-blue-900 text-white flex flex-col items-center">
       {/* Logo */}

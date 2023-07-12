@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
+import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 const programa = z.object({
   nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -44,23 +45,7 @@ const NovaSolicitacao = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    fetch('http://localhost:3333/programa/cadastrar', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-        .then((response) => {
-          if (response.ok) {
-            console.log('Dados enviados com sucesso');
-          } else {
-            console.log('Erro ao enviar os dados:', response.status);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
   };
 
   return (

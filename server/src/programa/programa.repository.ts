@@ -6,7 +6,7 @@ import {InjectModel} from "@nestjs/mongoose";
 
 @Injectable()
 export class ProgramaRepository {
-    constructor(@InjectModel(Programa.name) private programa: Model<Programa>) {}
+    constructor(@InjectModel(Programa.name) private readonly programa: Model<Programa>) {}
 
     async create(createCatDto: CreateProgramaDto): Promise<Programa> {
         const programaCriado = new this.programa(createCatDto);
@@ -14,10 +14,6 @@ export class ProgramaRepository {
     }
 
     async findAll(): Promise<Programa[]> {
-        return this.programa.find().exec();
-    }
-
-    async delete(): Promise<Programa[]> {
         return this.programa.find().exec();
     }
 }
