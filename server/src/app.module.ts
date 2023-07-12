@@ -7,10 +7,6 @@ import {ProgramaModule} from "./programa/programa.module";
   imports: [
       ProgramaModule,
     MongooseModule.forRoot('mongodb://127.0.0.1:27017/softwarehub'),
-    // //MongooseModule.forRootAsync({
-    //   useFactory: databaseConfig,
-    // // }),
-    // MongooseModule.forFeature([{ name: 'Joao', schema: JoaoSchema }]),
   ],
   controllers: [],
   providers: []
