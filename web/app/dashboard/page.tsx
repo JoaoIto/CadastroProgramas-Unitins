@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Image from "next/image";
 import SearchIcon from "@mui/icons-material/Search";
 import HomeIcon from "@mui/icons-material/Home";
@@ -10,21 +10,37 @@ import UnitinsLogo from "../../public/logoUnitins.png";
 import { CardProgram } from "../components/CardPrograma/Card";
 import ButtonLinkPage from "../components/ButtonLinkPage/ButtonLinkPage"
 
-const DashboardPage: React.FC = () => {
-  // Dados dos cards
-  const cardsData = [
-    {
-      title: 'Título do Card 1',
-      description: 'Descrição do Card 1. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      date: '01/01/2022',
-    },
-    {
-      title: 'Título do Card 2',
-      description: 'Descrição do Card 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      date: '02/01/2022',
-    },
-    // Adicione mais dados dos cards aqui...
-  ];
+interface Programa {
+  _id: string;
+  nomeCompleto: string;
+  rg: string;
+  cpf: string;
+  dataNascimento: string;
+  estadoCivil: string;
+}
+const DashboardPage = () => {
+
+  const [programas, setProgramas] = useState<Programa[]>([]);
+
+  useEffect(() => {
+    // Função assíncrona para buscar os programas do banco de dados
+    const fetchProgramas = async () => {
+      try {
+        const response = await fetch('http://localhost:3333/programa/listar');
+        if (response.ok) {
+          const data = await response.json();
+          setProgramas(data);
+        } else {
+          console.log('Erro ao buscar os programas:', response.status);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar os programas:', error);
+      }
+    };
+
+    fetchProgramas();
+  }, []); // O array vazio [] como segundo argumento faz com que o efeito só seja executado uma vez, no momento em que o componente é montado
+
   return (
     <div className="flex h-screen">
     <aside className="w-1/6 bg-blue-900 text-white flex flex-col items-center">
@@ -71,12 +87,9 @@ const DashboardPage: React.FC = () => {
         <ButtonLinkPage href="/novaSolicitacao">Nova solicitação +</ButtonLinkPage>
 
         <div className="flex flex-wrap">
-          <CardProgram/>
-          <CardProgram/>
-          <CardProgram/>
-          <CardProgram/>
-          <CardProgram/>
-          <CardProgram/>
+          {programas.map((programa) => (
+              <CardProgram key={programa._id} programa={programa} />
+          ))}
         </div>
       </main>
     </div>

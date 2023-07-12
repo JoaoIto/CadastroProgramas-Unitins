@@ -4,23 +4,42 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
-export const CardProgram = () => {
+interface CardProgramProps {
+  programa: Programa;
+}
+
+interface Programa {
+  _id: string;
+  nomeCompleto: string;
+  rg: string;
+  cpf: string;
+  dataNascimento: string;
+  estadoCivil: string;
+}
+
+export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
   return (
-    <Card className='w-2/5 m-8'>
-      <CardContent className='p-4'>
-        <Typography variant="h5" component="div">
-          Título do Card
-        </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          Descrição do Card em até 4 linhas
-        </Typography>
-        <Typography variant="body2">
-          Data de Publicação: 01/01/2022
-        </Typography>
-        <Button className="bg-indigo-900" variant="contained" size="small">
-          Visualizar
-        </Button>
-      </CardContent>
-    </Card>
+      <Card className='w-2/5 m-8'>
+        <CardContent className='p-4'>
+          <Typography variant="h5" component="div">
+            {programa.nomeCompleto}
+          </Typography>
+          <Typography sx={{ mb: 1.5 }} color="text.secondary">
+            RG: {programa.rg}
+          </Typography>
+          <Typography variant="body2">
+            CPF: {programa.cpf}
+          </Typography>
+          <Typography variant="body2">
+            Data de Nascimento: {programa.dataNascimento}
+          </Typography>
+          <Typography variant="body2">
+            Estado Civil: {programa.estadoCivil}
+          </Typography>
+          <Button className="bg-indigo-900" variant="contained" size="small">
+            Visualizar
+          </Button>
+        </CardContent>
+      </Card>
   );
 };

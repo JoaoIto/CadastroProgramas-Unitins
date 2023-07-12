@@ -9,7 +9,7 @@ export class ProgramaService {
         @InjectModel('Programa') private readonly programaModel: Model<Programa>,
     ) {}
 
-    async enviarDados(formData: any): Promise<Programa> {
+    async enviarDados(formData: object): Promise<Programa> {
         const novoPrograma = new this.programaModel(formData);
         return novoPrograma.save();
     }
