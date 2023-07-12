@@ -14,6 +14,10 @@ export class ProgramaService {
     async listar(): Promise<Programa[]> {
         return this.programaRepository.findAll();
     }
+
+    async consultar(uuid): Promise<Programa> {
+        return this.programaRepository.findById(uuid);
+    }
 }
 
 export default ProgramaService;

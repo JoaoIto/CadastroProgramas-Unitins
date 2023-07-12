@@ -25,7 +25,7 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchProgramas = async () => {
       try {
-        const data = await ApiUtils.get<Programa[]>("http://localhost:3333/programa/listar");
+        const data = await ApiUtils.get<Programa[]>("http://localhost:3333/programa");
         if (data) {
           setProgramas(data);
         }

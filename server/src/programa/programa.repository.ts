@@ -16,4 +16,8 @@ export class ProgramaRepository {
     async findAll(): Promise<Programa[]> {
         return this.programa.find().exec();
     }
+
+    async findById(uuid): Promise<Programa> {
+        return this.programa.findById(uuid).exec();
+    }
 }
