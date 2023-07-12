@@ -1,6 +1,6 @@
 import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate} from 'class-validator';
 
-export class CreateJoaoDto {
+export class CreateProgramaDto {
     @IsString()
     @IsNotEmpty({ message: 'O nome não pode estar vazio!' })
     nome: string;

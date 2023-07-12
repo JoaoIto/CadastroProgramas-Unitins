@@ -1,10 +1,10 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 
-export type JoaoDocument = Joao & Document;
+export type ProgramaDocument = Programa & Document;
 
 @Schema({collection: 'programa'})
-export class Joao {
+export class Programa {
     @Prop({ required: true })
     nomeCompleto: string;
 
@@ -21,4 +21,4 @@ export class Joao {
     estadoCivil: string;
 }
 
-export const JoaoSchema = SchemaFactory.createForClass(Joao);
+export const ProgramaSchema = SchemaFactory.createForClass(Programa);
