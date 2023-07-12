@@ -48,48 +48,74 @@ export class ProgramaService {
 ```
 
 ---
+# ProgramaController
 
-## ProgramaController
 
-## Resposta de Sucesso
+````tsx
+import { Controller, Post, Body, Get } from '@nestjs/common';
 
-Ao chamar a rota `/cadastrar` usando o método POST, a API retornará uma mensagem de sucesso com o seguinte formato:
+@Controller('/programa')
+export class ProgramaController {
+  private formData: any = null;
 
+  @Post('/cadastrar')
+  create(@Body() formData: any) {
+    this.formData = formData;
+    console.log(formData);
+    return { message: 'Dados recebidos com sucesso!' };
+  }
+
+  @Get('/listar')
+  getDados() {
+    return this.formData;
+  }
+}
+
+````
+## Endpoints
+
+### `POST /programa/cadastrar`
+
+Este endpoint é usado para cadastrar um novo programa. Recebe um objeto contendo os dados do formulário a serem cadastrados.
+
+Exemplo de requisição:
 ```
-{ "message": "Dados recebidos com sucesso!" }
-```
+POST /programa/cadastrar
 
-## Listagem de Programas
-
-Para obter a lista de programas cadastrados, você pode chamar a rota `/listar` usando o método GET. A API retornará os dados do formulário enviados anteriormente. Exemplo de resposta:
-
-```
-{ "nomeCompleto": "João Silva", "rg": 1234567, "cpf": 12345678910, "dataNascimento": "1990-01-01", "estadoCivil": "solteiro" }
-```
-
-## Corpo da Resposta
-
-O corpo da resposta contém os dados enviados no formulário. Os campos incluem:
-
-- `nomeCompleto`: Nome completo do solicitante.
-- `rg`: Número do RG.
-- `cpf`: Número do CPF.
-- `dataNascimento`: Data de nascimento no formato AAAA-MM-DD.
-- `estadoCivil`: Estado civil do solicitante.
-
-## Serviço de Programas
-
-O serviço de programas possui os seguintes métodos:
-
-### Enviar Dados
-
-O método `enviarDados` é responsável por receber e processar os dados do formulário.
-
-```typescript
-async enviarDados(formData: any) {
-  console.log(formData);
-  // Realize as operações necessárias com os dados recebidos
+{
+  "nomeCompleto": "João Silva",
+  "rg": 1234567,
+  "cpf": 12345678910,
+  "dataNascimento": "1990-01-01",
+  "estadoCivil": "solteiro"
 }
 ```
 
-Espero que essa tradução em Markdown seja útil para você!
+Exemplo de resposta:
+```
+{
+  "message": "Dados recebidos com sucesso!"
+}
+```
+
+### `GET /programa/listar`
+
+Este endpoint é usado para obter a lista de programas cadastrados. Retorna os dados do formulário enviado anteriormente.
+
+Exemplo de requisição:
+```
+GET /programa/listar
+```
+
+Exemplo de resposta:
+```
+{
+  "nomeCompleto": "João Silva",
+  "rg": 1234567,
+  "cpf": 12345678910,
+  "dataNascimento": "1990-01-01",
+  "estadoCivil": "solteiro"
+}
+```
+
+---
