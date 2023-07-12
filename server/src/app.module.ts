@@ -1,10 +1,19 @@
 import { Module } from '@nestjs/common';
-import {ProgramaModule} from "./programa/programa.module";
-import {AppController} from "./app.controller";
-import {AppService} from "./app.service";
-
+// @ts-ignore
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import databaseConfig from './config/database.config';
+import {Joao, JoaoSchema} from './programa/joao.model';
+import {JoaoModule} from "./programa/joao.module";
 @Module({
-  imports: [ProgramaModule],
+  imports: [
+      JoaoModule,
+    MongooseModule.forRoot('mongodb://127.0.0.1:27017/softwarehub'),
+    // //MongooseModule.forRootAsync({
+    //   useFactory: databaseConfig,
+    // // }),
+    // MongooseModule.forFeature([{ name: 'Joao', schema: JoaoSchema }]),
+  ],
   controllers: [],
   providers: []
 })
