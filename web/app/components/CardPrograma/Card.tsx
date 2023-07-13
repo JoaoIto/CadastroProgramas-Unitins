@@ -3,7 +3,8 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-
+import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
+import ApiUtils from "@/app/Utils/Api/apiMethods";
 interface CardProgramProps {
   programa: Programa;
 }
@@ -18,6 +19,13 @@ interface Programa {
 }
 
 export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
+
+  const onSubmit = async (data: FormData, uuid: string) => {
+    await ApiUtils.get(`http://localhost:3333/programa/${uuid}`);
+    // Realize qualquer ação necessária após a atualização
+  };
+
+
   return (
       <Card className='w-2/5 m-8'>
         <CardContent className='p-4'>
@@ -36,9 +44,10 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
           <Typography variant="body2">
             Estado Civil: {programa.estadoCivil}
           </Typography>
-          <Button className="bg-indigo-900" variant="contained" size="small">
+          <Button className="bg-indigo-900 m-10" variant="contained" size="small">
             Visualizar
           </Button>
+          <ButtonLinkPage onClick={() => onSubmit(data, _id)} href="/programa/editar">Editar</ButtonLinkPage>
         </CardContent>
       </Card>
   );

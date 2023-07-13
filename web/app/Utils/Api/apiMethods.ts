@@ -35,6 +35,23 @@ class ApiUtils {
         return undefined;
     }
 
+    static async getByUuid<T>(endpoint: string, uuid: string): Promise<T | undefined> {
+        try {
+            const response = await fetch(`${endpoint}/${uuid}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                return data as T;
+            } else {
+                console.log('Erro ao buscar os dados:', response.status);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+        }
+        return undefined;
+    }
+
+
     static async put(endpoint: string, data: object): Promise<void> {
         try {
             const response = await fetch(endpoint, {
