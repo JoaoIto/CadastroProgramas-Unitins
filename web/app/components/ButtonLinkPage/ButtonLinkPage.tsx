@@ -1,11 +1,10 @@
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button } from '@material-ui/core';
 
 type Props = {
     href: string;
     children: React.ReactNode;
-    uuid: string; // Remova a opção de ser opcional
+    uuid?: string; // Remova a opção de ser opcional
 };
 
 const ButtonLinkPage = ({ href, children, uuid }: Props) => {

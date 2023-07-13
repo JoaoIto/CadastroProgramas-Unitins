@@ -1,26 +1,27 @@
-"use client"
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import ButtonLinkPage from './components/ButtonLinkPage/ButtonLinkPage';
+"use client";
+import * as React from "react";
+import Avatar from "@mui/material/Avatar";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import ButtonLinkPage from "./components/ButtonLinkPage/ButtonLinkPage";
+import { Button } from "@mui/material";
 
 function SignIn() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
-      cpf: data.get('cpf'),
-      senha: data.get('senha'),
+      cpf: data.get("cpf"),
+      senha: data.get("senha"),
     });
   };
 
@@ -42,7 +43,7 @@ function SignIn() {
             className="mt-1 w-full"
           >
             <TextField
-              className='font-bold'
+              className="font-bold"
               margin="normal"
               required
               fullWidth
@@ -66,12 +67,12 @@ function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="Me lembre"
             />
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Esqueceu a senha?
-                </Link>
-                ButtonLinkPage
-              </Grid>
+            <Grid item xs>
+              <Link href="#" variant="body2">
+                Esqueceu a senha?
+              </Link>
+              <ButtonLinkPage href="/dashboard">Entrar</ButtonLinkPage>
+            </Grid>
           </Box>
         </Box>
       </Container>
