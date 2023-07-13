@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@material-ui/core';
 
 type Props = {
-    href: string;
+    href?: string;
     children: React.ReactNode;
     uuid?: string; // Remova a opção de ser opcional
 };
