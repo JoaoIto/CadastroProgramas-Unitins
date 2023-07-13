@@ -1,5 +1,6 @@
 "use client"
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,52 +12,68 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
-import ApiUtils from "@/app/Utils/Api/apiMethods";
+import { useRouter, useSearchParams } from 'next/navigation';
+import ApiUtils from '@/app/Utils/Api/apiMethods';
 
-const programa = z.object({
+const programaSchema = z.object({
     nomeCompleto: z.string().nonempty('Campo obrigatório'),
-    rg: z
-        .string()
-        .refine(value => /^\d+$/.test(value), {
-            message: 'Somente números',
-            path: ['rg'],
-        })
-        .refine(value => value.length >= 7, {
-            message: 'Mínimo de 7 dígitos',
-            path: ['rg'],
-        }),
-    cpf: z
-        .string()
-        .refine(value => /^\d+$/.test(value), {
-            message: 'Somente números',
-            path: ['cpf'],
-        })
-        .refine(value => value.length >= 11, {
-            message: 'Mínimo de 11 dígitos',
-            path: ['cpf'],
-        }),
+    rg: z.string().refine(value => /^\d+$/.test(value), {
+        message: 'Somente números',
+        path: ['rg'],
+    }).refine(value => value.length >= 7, {
+        message: 'Mínimo de 7 dígitos',
+        path: ['rg'],
+    }),
+    cpf: z.string().refine(value => /^\d+$/.test(value), {
+        message: 'Somente números',
+        path: ['cpf'],
+    }).refine(value => value.length >= 11, {
+        message: 'Mínimo de 11 dígitos',
+        path: ['cpf'],
+    }),
     dataNascimento: z.string().nonempty('Campo obrigatório'),
     estadoCivil: z.string().nonempty('Campo obrigatório'),
 });
 
-type FormData = z.infer<typeof programa>;
+type Programa = z.infer<typeof programaSchema>;
 
-const NovaSolicitacao = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-        resolver: zodResolver(programa),
+const EditarSolicitacao = () => {
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm<Programa>({
+        resolver: zodResolver(programaSchema),
     });
-    const [uuid, setUuid] = useState<string>('');
+    const { get } = useSearchParams();
+    const uuid = get('uuid');
+    const [programaData, setProgramaData] = useState<Programa | null>(null);
 
-    const onSubmit = async (data: FormData) => {
-        await ApiUtils.get(`http://localhost:3333/programa/${uuid}`);
-        // Realize qualquer ação necessária após a atualização
+    useEffect(() => {
+        if (uuid) {
+            fetchProgramaData(uuid);
+        }
+    }, [uuid]);
+
+    const fetchProgramaData = async (uuid: string) => {
+        try {
+            const programData = await ApiUtils.getByUuid<Programa>('http://localhost:3333/programa', uuid);
+            setProgramaData(programData || null);
+            if (programData) {
+                Object.entries(programData).forEach(([key, value]) => {
+                    setValue(key as keyof Programa, value);
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+        }
+    };
+
+    const onSubmit = async (data: Programa) => {
+        // Realize qualquer ação necessária para enviar os dados atualizados
     };
 
     return (
         <div className="flex h-screen">
             <Sidebar />
             <div className="flex-grow p-8">
-                <h1 className="text-3xl font-bold mb-4 text-center">Nova Solicitação</h1>
+                <h1 className="text-3xl font-bold mb-4 text-center">Editar Programa</h1>
                 <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
@@ -130,4 +147,4 @@ const NovaSolicitacao = () => {
     );
 };
 
-export default NovaSolicitacao;
+export default EditarSolicitacao;

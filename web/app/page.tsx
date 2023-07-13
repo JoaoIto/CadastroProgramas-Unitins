@@ -1,9 +1,10 @@
-import SignIn from "./index";
+import SignIn from ".";
+
 
 export default function Home() {
   return (
     <>
-    <SignIn/>
+      <SignIn />
     </>
   )
 }

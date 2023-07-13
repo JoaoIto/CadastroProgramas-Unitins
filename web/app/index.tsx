@@ -66,11 +66,11 @@ function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="Me lembre"
             />
-            <ButtonLinkPage href="/dashboard">Entra</ButtonLinkPage>
               <Grid item xs>
                 <Link href="#" variant="body2">
                   Esqueceu a senha?
                 </Link>
+                ButtonLinkPage
               </Grid>
           </Box>
         </Box>

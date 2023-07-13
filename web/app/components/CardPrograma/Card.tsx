@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
-import ApiUtils from "@/app/Utils/Api/apiMethods";
+import {useRouter} from "next/navigation";
 interface CardProgramProps {
   programa: Programa;
 }
@@ -19,10 +19,10 @@ interface Programa {
 }
 
 export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
+  const router = useRouter();
 
-  const onSubmit = async (data: FormData, uuid: string) => {
-    await ApiUtils.get(`http://localhost:3333/programa/${uuid}`);
-    // Realize qualquer ação necessária após a atualização
+  const handleEditClick = (uuid: string) => {
+    router.push(`/programa/editar?uuid=${uuid}`)
   };
 
 
@@ -47,7 +47,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
           <Button className="bg-indigo-900 m-10" variant="contained" size="small">
             Visualizar
           </Button>
-          <ButtonLinkPage onClick={() => onSubmit(data, _id)} href="/programa/editar">Editar</ButtonLinkPage>
+          <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
         </CardContent>
       </Card>
   );
