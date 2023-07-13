@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,7 @@ import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
+import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
 
 const programaSchema = z.object({
     nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -66,8 +67,13 @@ const EditarSolicitacao = () => {
     };
 
     const onSubmit = async (data: Programa) => {
-        // Realize qualquer ação necessária para enviar os dados atualizados
-    };
+    try {
+      await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
+      // Realizar qualquer ação necessária após a atualização dos dados
+    } catch (error) {
+      console.error('Erro ao atualizar os dados:', error);
+    }
+  };
 
     return (
         <div className="flex h-screen">
@@ -132,14 +138,7 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <Button
-                            className="bg-blue-900"
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                        >
-                            Enviar
-                        </Button>
+                        <ButtonLinkPage href="/dashboard">Editar</ButtonLinkPage>
                     </div>
                 </form>
             </div>

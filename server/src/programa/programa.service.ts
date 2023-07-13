@@ -1,7 +1,8 @@
 import {Body, Injectable} from '@nestjs/common';
 import { ProgramaRepository } from './programa.repository';
-import {CreateProgramaDto} from "./dto/createjoao.dto";
+import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {Programa} from "./programa.model";
+import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 
 @Injectable()
 export class ProgramaService {
@@ -18,6 +19,12 @@ export class ProgramaService {
     async consultar(uuid): Promise<Programa> {
         return this.programaRepository.findById(uuid);
     }
+
+    async atualizar(uuid: string, updateData: AtualizarProgramaDto): Promise<Programa> {
+        // Lógica para atualizar um programa pelo UUID
+        return this.programaRepository.update(uuid, updateData);
+    }
+
 }
 
 export default ProgramaService;

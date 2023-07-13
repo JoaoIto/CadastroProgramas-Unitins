@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Get,Param } from '@nestjs/common';
-import {ProgramaRepository} from "./programa.repository";
-import {CreateProgramaDto} from "./dto/createjoao.dto";
+import {Controller, Post, Body, Get, Param, Put} from '@nestjs/common';
+import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {ProgramaService} from "./programa.service";
+import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 
 @Controller('/programa')
 export class ProgramaController {
@@ -10,13 +10,13 @@ export class ProgramaController {
 
   @Post('/cadastrar')
 
-  criar(@Body() formData: CreateProgramaDto) {
+  create(@Body() formData: CreateProgramaDto) {
     this.programaService.criar(formData);
     return [{ status: 'Criado uma nova requisição!' }, { formData }];
   }
 
   @Get()
-  listar() {
+  getDados() {
     return this.programaService.listar();
   }
 
@@ -25,5 +25,8 @@ export class ProgramaController {
     return this.programaService.consultar(params.uuid);
   }
 
-
+  @Put('/:uuid')
+  atualizar(@Param('uuid') uuid: string, @Body() updateData: AtualizarProgramaDto) {
+    return this.programaService.atualizar(uuid, updateData);
+  }
 }

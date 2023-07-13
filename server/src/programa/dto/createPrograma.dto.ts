@@ -3,7 +3,7 @@ import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate} fro
 export class CreateProgramaDto {
     @IsString()
     @IsNotEmpty({ message: 'O nome não pode estar vazio!' })
-    nome: string;
+    nomeCompleto: string;
 
     @IsString({
         message:
@@ -25,7 +25,7 @@ export class CreateProgramaDto {
     @IsNotEmpty({
         message: 'A data não pode estar vazia!',
     })
-    dataDeNascimento: Date;
+    dataNascimento: Date;
 
     @IsString({ message: "Não é compatível"})
     @IsNotEmpty({
