@@ -1,4 +1,4 @@
-import {Controller, Post, Body, Get, Param, Put} from '@nestjs/common';
+import {Controller, Post, Body, Get, Param, Put, Delete} from '@nestjs/common';
 import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {ProgramaService} from "./programa.service";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
@@ -28,5 +28,10 @@ export class ProgramaController {
   @Put('/:uuid')
   atualizar(@Param('uuid') uuid: string, @Body() updateData: AtualizarProgramaDto) {
     return this.programaService.atualizar(uuid, updateData);
+  }
+
+  @Delete('/:uuid')
+  deletar(@Param('uuid') uuid: string) {
+    return this.programaService.deletar(uuid);
   }
 }

@@ -4,7 +4,7 @@ import { Button } from '@material-ui/core';
 type Props = {
     href?: string;
     children: React.ReactNode;
-    uuid?: string; // Remova a opção de ser opcional
+    uuid?: string;
 };
 
 const ButtonLinkPage = ({ href, children, uuid }: Props) => {

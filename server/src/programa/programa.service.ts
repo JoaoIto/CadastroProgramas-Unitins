@@ -25,6 +25,10 @@ export class ProgramaService {
         return this.programaRepository.update(uuid, updateData);
     }
 
+    async deletar(uuid: string): Promise<Programa> {
+        // Lógica para atualizar um programa pelo UUID
+        return this.programaRepository.delete(uuid);
+    }
 }
 
 export default ProgramaService;

@@ -48,7 +48,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
             Visualizar
           </Button>
           <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
-          <ButtonLinkPage uuid={programa._id}>Deletar</ButtonLinkPage>
+          <ButtonLinkPage uuid={programa._id} href="/dashboard">Deletar</ButtonLinkPage>
         </CardContent>
       </Card>
   );

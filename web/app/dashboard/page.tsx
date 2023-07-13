@@ -35,9 +35,6 @@ const DashboardPage = () => {
     try {
       // Chame a API para deletar o programa com o UUID fornecido
       await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
-      // Realize qualquer ação necessária após a exclusão do programa
-      // por exemplo, atualizar a lista de programas exibidos
-      // fetchProgramas();
     } catch (error) {
       console.error('Erro ao deletar o programa:', error);
     }

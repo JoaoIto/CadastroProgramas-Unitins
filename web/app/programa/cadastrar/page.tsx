@@ -115,8 +115,7 @@ const NovaSolicitacao = () => {
                   className="bg-blue-900"
                   type="submit"
                   variant="contained"
-                  color="primary"
-              >
+                  color="primary">
                 Enviar
               </Button>
             </div>

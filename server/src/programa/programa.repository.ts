@@ -34,4 +34,11 @@ export class ProgramaRepository {
         console.log(`O programa foi atualizado! Programa atualizado ${uuid}: ${programaAtualizado}`)
         return programaAtualizado;
     }
+
+    async delete(uuid: string): Promise<Programa | null> {
+        const programaApagar = await this.programa.findByIdAndDelete(uuid);
+        console.log(`O programa foi deletado! Programa deletado ${uuid}: ${programaApagar}`);
+        return programaApagar;
+    }
+
 }
