@@ -5,12 +5,18 @@ type Props = {
     href?: string;
     children: React.ReactNode;
     uuid?: string;
+    onClick?: () => void;
 };
 
-const ButtonLinkPage = ({ href, children, uuid }: Props) => {
+const ButtonLinkPage = ({ href, children, uuid, onClick }: Props) => {
+    const handleClick = () => {
+        if (onClick) {
+            onClick();
+        }
+    };
     return (
         <Link href={`${href}?uuid=${uuid}`} passHref>
-            <Button className="bg-blue-900" type="submit" fullWidth variant="contained">
+            <Button className="bg-blue-900" type="submit" fullWidth variant="contained"  onClick={handleClick}>
                 {children}
             </Button>
         </Link>

@@ -7,9 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import UnitinsLogo from '../../public/logoUnitins.png';
-import {useRouter, useSearchParams} from 'next/navigation';
 import { CardProgram } from '../components/CardPrograma/Card';
-import Button from '@mui/material/Button';
 import ButtonLinkPage from '../components/ButtonLinkPage/ButtonLinkPage';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
 
@@ -23,25 +21,6 @@ interface Programa {
 }
 
 const DashboardPage = () => {
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-  const router = useRouter();
-  // @ts-ignore
-  const { uuid } = useSearchParams();
-  const handleDeleteClick = (uuid: string) => {
-    setShowDeleteAlert(true);
-  };
-
-  const handleConfirmDelete = async (uuid: string) => {
-    try {
-      // Chame a API para deletar o programa com o UUID fornecido
-      await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
-    } catch (error) {
-      console.error('Erro ao deletar o programa:', error);
-    }
-    setShowDeleteAlert(false);
-  };
-
-
   const [programas, setProgramas] = useState<Programa[]>([]);
 
   useEffect(() => {
@@ -101,32 +80,7 @@ const DashboardPage = () => {
             <span className="font-bold">Perfil</span>
           </header>
           {/* Conteúdo principal */}
-          <ButtonLinkPage uuid={uuid} href="/programa/cadastrar">Nova solicitação +</ButtonLinkPage>
-          {showDeleteAlert && (
-              <div className="fixed top-0 left-0 w-full h-screen flex justify-center items-center bg-black bg-opacity-50">
-                <div className="bg-white p-4 rounded">
-                  <p>Tem certeza que deseja deletar?</p>
-                  <div className="flex justify-end mt-4">
-                    <Button
-                        className="bg-red-900 mr-2"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleConfirmDelete(uuid)}
-                    >
-                      Confirmar
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setShowDeleteAlert(false)}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-          )}
-
+          <ButtonLinkPage href="/programa/cadastrar">Nova solicitação +</ButtonLinkPage>
           <div className="flex flex-wrap">
             {programas.map((programa) => (
                 <CardProgram key={programa._id} programa={programa} />
