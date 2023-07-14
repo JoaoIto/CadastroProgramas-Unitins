@@ -1,5 +1,6 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -43,7 +44,7 @@ const EditarSolicitacao = () => {
     });
     const { get } = useSearchParams();
     const uuid = get('uuid');
-    const [programaData, setProgramaData] = useState<Programa | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         if (uuid) {
@@ -54,11 +55,12 @@ const EditarSolicitacao = () => {
     const fetchProgramaData = async (uuid: string) => {
         try {
             const programData = await ApiUtils.getByUuid<Programa>('http://localhost:3333/programa', uuid);
-            setProgramaData(programData || null);
             if (programData) {
                 Object.entries(programData).forEach(([key, value]) => {
                     setValue(key as keyof Programa, value);
                 });
+            } else {
+                console.error('Programa não encontrado');
             }
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -66,13 +68,18 @@ const EditarSolicitacao = () => {
     };
 
     const onSubmit = async (data: Programa) => {
-    try {
-      await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
-      // Realizar qualquer ação necessária após a atualização dos dados
-    } catch (error) {
-      console.error('Erro ao atualizar os dados:', error);
-    }
-  };
+        try {
+            if (uuid) {
+                await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
+                // Redirecionar para a página de dashboard após a atualização
+                router.push('/dashboard');
+            } else {
+                console.error('UUID não encontrado');
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar os dados:', error);
+        }
+    };
 
     return (
         <div className="flex h-screen">
@@ -137,7 +144,7 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <ButtonLinkPage href="/dashboard">Editar</ButtonLinkPage>
+                        <Button type="submit" variant="contained" color="primary">Editar</Button>
                     </div>
                 </form>
             </div>
