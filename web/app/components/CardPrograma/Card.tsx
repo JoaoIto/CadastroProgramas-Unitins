@@ -30,10 +30,10 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
     try {
       // Chame a API para deletar o programa com o UUID fornecido
       await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
-      console.log("UUID de programa deletado!")
-      // Atualize a lista de programas removendo o programa deletado
-      setProgramas(programas.filter((programa) => programa._id !== uuid));
-      router.push('/dashboard');
+      const updatedData = await ApiUtils.getByUuid(`http://localhost:3333/programa`, uuid);
+      if (!updatedData) {
+        window.open('/dashboard', '_self');
+      }
     } catch (error) {
       console.error('Erro ao deletar o programa:', error);
     }

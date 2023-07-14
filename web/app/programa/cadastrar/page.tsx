@@ -44,9 +44,14 @@ const NovaSolicitacao = () => {
     resolver: zodResolver(programa),
   });
 
-  const onSubmit = (data: FormData) => {
-    ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
-  };
+  const onSubmit = async (data: FormData) => {
+  try {
+    await ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
+    window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
+  } catch (error) {
+    console.error('Erro ao cadastrar o programa:', error);
+  }
+};
 
   return (
       <div className="flex h-screen">
