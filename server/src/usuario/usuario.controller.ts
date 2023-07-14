@@ -9,4 +9,9 @@ import {UsuarioService} from "./usuario.service";
     getDados(){
         return this.usuarioService.listar()
     }
+
+    @Get('/:uuid')
+    consultar(@Param() params: any) {
+        return this.usuarioService.consultar(params.uuid);
+    }
 }
