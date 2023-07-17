@@ -16,7 +16,7 @@ const ButtonLinkPage = ({ href, children, uuid, onClick }: Props) => {
     };
     return (
         <Link href={`${href}?uuid=${uuid}`} passHref>
-            <Button className="bg-blue-900" type="submit" fullWidth variant="contained"  onClick={handleClick}>
+            <Button className="bg-blue-900" type="submit" fullWidth variant="contained" color="primary" onClick={handleClick}>
                 {children}
             </Button>
         </Link>

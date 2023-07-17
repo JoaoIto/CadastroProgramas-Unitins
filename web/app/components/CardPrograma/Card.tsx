@@ -57,12 +57,14 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
           <Typography variant="body2">
             Estado Civil: {programa.estadoCivil}
           </Typography>
+          <div className="flex gap-2">
           <Button className="bg-indigo-900 m-10" variant="contained" size="small">
             Visualizar
           </Button>
           <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
           <ButtonLinkPage onClick={() => handleConfirmDelete(uuid)} uuid={programa._id}>Deletar</ButtonLinkPage>
-        </CardContent>
+          </div>
+          </CardContent>
       </Card>
   );
 };
