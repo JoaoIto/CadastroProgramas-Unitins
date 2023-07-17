@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 function Perfil(){
 
     const { get } = useSearchParams();
-    const uuid = get('uuid');
+    const id = get('id');
     const router = useRouter();
 
     return(

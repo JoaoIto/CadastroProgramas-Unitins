@@ -23,8 +23,9 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
   const router = useRouter();
   const [programas, setProgramas] = useState<Programa[]>([]);
 
-  const searchParams = useSearchParams();
+  const {get} = useSearchParams();
   const uuid = programa._id || '';
+  const id = get('id');
 
   const handleConfirmDelete = async (uuid: string) => {
     try {
@@ -61,7 +62,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
           <Button className="bg-indigo-900 m-10" variant="contained" size="small">
             Visualizar
           </Button>
-          <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
+          <ButtonLinkPage href="/programa/editar" uuid={programa._id} id={id}>Editar</ButtonLinkPage>
           <ButtonLinkPage onClick={() => handleConfirmDelete(uuid)} uuid={programa._id}>Deletar</ButtonLinkPage>
           </div>
           </CardContent>
