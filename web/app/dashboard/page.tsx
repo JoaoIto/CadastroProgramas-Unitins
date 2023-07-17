@@ -1,17 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import SearchIcon from '@mui/icons-material/Search';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import UnitinsLogo from '../../public/logoUnitins.png';
 import { CardProgram } from '../components/CardPrograma/Card';
 import ButtonLinkPage from '../components/ButtonLinkPage/ButtonLinkPage';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
 import {Sidebar} from "@/app/components/MenuLateral/sidebar";
 import {Cabecalho} from "@/app/components/HeaderSearch/cabecalho";
+import {useSearchParams} from "next/navigation";
 
 interface Programa {
   _id: string;
@@ -24,6 +18,9 @@ interface Programa {
 
 const DashboardPage = () => {
   const [programas, setProgramas] = useState<Programa[]>([]);
+  const { get } = useSearchParams();
+  const uuid = get('uuid');
+  const id = get('id');
 
   useEffect(() => {
     const fetchProgramas = async () => {
@@ -44,7 +41,7 @@ const DashboardPage = () => {
       <div className="flex h-screen">
         <Sidebar />
         <div className="flex flex-col w-full">
-          <Cabecalho />
+          <Cabecalho id={id}/>
           <main className="p-4">
             <ButtonLinkPage href="/programa/cadastrar">Nova solicitação +</ButtonLinkPage>
             <div className="w-full flex">

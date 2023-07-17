@@ -1,9 +1,15 @@
 "use client"
+import React from "react";
 import {Sidebar} from "@/app/components/MenuLateral/sidebar";
 import {Cabecalho} from "@/app/components/HeaderSearch/cabecalho";
-import React from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function Perfil(){
+
+    const { get } = useSearchParams();
+    const uuid = get('uuid');
+    const router = useRouter();
+
     return(
         <div className="flex h-screen">
             <Sidebar />
