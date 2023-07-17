@@ -9,7 +9,7 @@ import UnitinsLogo from "../../../public/logoUnitins.png";
 
 export const Sidebar = () => {
     return(
-        <aside className="w-1/6 bg-blue-900 text-white flex flex-col items-center">
+        <aside className="w-1/6 h-screen bg-blue-900 text-white flex flex-col items-center">
       {/* Logo */}
       <Image src={UnitinsLogo} alt="Unitins Logo" className="h-52 w-full" />
       {/* Conteúdo da barra lateral */}
