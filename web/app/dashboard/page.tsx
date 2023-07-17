@@ -43,7 +43,7 @@ const DashboardPage = () => {
         <div className="flex flex-col w-full">
           <Cabecalho id={id}/>
           <main className="p-4">
-            <ButtonLinkPage href="/programa/cadastrar">Nova solicitação +</ButtonLinkPage>
+            <ButtonLinkPage id={id} href={`/programa/cadastrar?`}>Nova solicitação +</ButtonLinkPage>
             <div className="w-full flex">
               {programas.map((programa) => (
                   <CardProgram key={programa._id} programa={programa} />

@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import ApiUtils from "@/app/Utils/Api/apiMethods";
+import {useSearchParams} from "next/navigation";
 
 const programa = z.object({
   nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -52,6 +53,9 @@ const NovaSolicitacao = () => {
     console.error('Erro ao cadastrar o programa:', error);
   }
 };
+
+  const { get } = useSearchParams();
+  const id = get('id');
 
   return (
       <div className="flex h-screen">
