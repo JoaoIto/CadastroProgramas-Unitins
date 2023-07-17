@@ -41,9 +41,9 @@ const DashboardPage = () => {
       <div className="flex h-screen">
         <Sidebar />
         <div className="flex flex-col w-full">
-          <Cabecalho id={id}/>
+          <Cabecalho/>
           <main className="p-4">
-            <ButtonLinkPage id={id} href={`/programa/cadastrar?`}>Nova solicitação +</ButtonLinkPage>
+            <ButtonLinkPage href={`/programa/cadastrar?`}>Nova solicitação +</ButtonLinkPage>
             <div className="w-full flex">
               {programas.map((programa) => (
                   <CardProgram key={programa._id} programa={programa} />

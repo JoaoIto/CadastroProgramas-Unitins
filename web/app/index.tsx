@@ -1,25 +1,24 @@
 "use client";
 
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import Avatar from '@mui/material/Avatar';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import ButtonLinkPage from '@/app/components/ButtonLinkPage/ButtonLinkPage';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import ApiUtils from '@/app/Utils/Api/apiMethods';
-import { useRouter } from 'next/navigation';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import Avatar from "@mui/material/Avatar";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 interface Usuario {
   _id: string;
@@ -30,10 +29,12 @@ interface Usuario {
 }
 
 const usuarioSchema = z.object({
-  cpf: z.string().refine((value) => /^\d+$/.test(value), {
-    message: 'Somente números',
-  }),
-  senha: z.string().min(4, 'Mínimo de 4 caracteres'),
+  cpf: z
+      .string()
+      .refine((value) => /^\d+$/.test(value), {
+        message: "Somente números",
+      }),
+  senha: z.string().min(4, "Mínimo de 4 caracteres"),
 });
 
 function SignIn() {
@@ -47,19 +48,17 @@ function SignIn() {
     resolver: zodResolver(usuarioSchema),
   });
 
-  const router = useRouter();
-
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const usuariosData = await ApiUtils.get<Usuario[]>(
-            'http://localhost:3333/usuario'
+            "http://localhost:3333/usuario"
         );
         if (usuariosData) {
           setUsuarios(usuariosData);
         }
       } catch (error) {
-        console.error('Erro ao obter os usuários:', error);
+        console.error("Erro ao obter os usuários:", error);
       }
     };
 
@@ -72,13 +71,13 @@ function SignIn() {
     );
 
     if (usuarioEncontrado) {
-      console.log('Usuário autenticado! Acesso permitido.');
-      setIsAutenticado(true);
-      const url = `/dashboard?uuid=${usuarioEncontrado._id}`;
-      router.push(url);
+      console.log("Usuário autenticado! Acesso permitido.");
+      setIsAutenticado(true)
+      sessionStorage.setItem("perfilId", usuarioEncontrado._id);
+      window.open("/dashboard", "_self");
     } else {
-      console.log('Usuário não autenticado! Acesso negado.');
-      setIsAutenticado(false);
+      console.log("Usuário não autenticado! Acesso negado.");
+      setIsAutenticado(false)
     }
   };
 
@@ -90,11 +89,7 @@ function SignIn() {
             <Avatar className="m-1 bg-secondary-main">
               <LockOutlinedIcon />
             </Avatar>
-            <Typography
-                component="h1"
-                variant="h5"
-                className="mt-4 text-center"
-            >
+            <Typography component="h1" variant="h5" className="mt-4 text-center">
               Software Hub - Unitins
             </Typography>
             <Box
@@ -112,7 +107,7 @@ function SignIn() {
                   label={<label className="font-bold">CPF</label>}
                   autoComplete="cpf"
                   autoFocus
-                  {...register('cpf')}
+                  {...register("cpf")}
                   error={!!errors.cpf}
                   helperText={errors.cpf?.message}
               />
@@ -124,7 +119,7 @@ function SignIn() {
                   type="password"
                   id="senha"
                   autoComplete="current-senha"
-                  {...register('senha')}
+                  {...register("senha")}
                   error={!!errors.senha}
                   helperText={errors.senha?.message}
               />
@@ -136,18 +131,14 @@ function SignIn() {
                 <Link href="#" variant="body2">
                   Esqueceu a senha?
                 </Link>
-                {!isAutenticado && (
+                <Button className="bg-blue-900" type="submit" variant="contained" color="primary">
+                  Entrar
+                </Button>
+                {isAutenticado === false && (
                     <Typography color="error" align="center">
                       Usuário não autenticado! Acesso negado.
                     </Typography>
                 )}
-                <ButtonLinkPage
-                    href="dashboard"
-                    uuid={null}
-                    id={usuarios.length > 0 ? usuarios[0]._id : null}
-                >
-                  Entrar
-                </ButtonLinkPage>
               </Grid>
             </Box>
           </Box>

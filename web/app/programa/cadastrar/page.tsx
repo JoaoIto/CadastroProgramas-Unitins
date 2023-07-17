@@ -8,11 +8,10 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
+import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import ApiUtils from "@/app/Utils/Api/apiMethods";
-import {useSearchParams} from "next/navigation";
 
 const programa = z.object({
   nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -36,7 +35,7 @@ const programa = z.object({
 
 type FormData = z.infer<typeof programa>;
 
-const NovaSolicitacao = () => {
+function NovaSolicitacao(){
   const {
     register,
     handleSubmit,
@@ -53,9 +52,6 @@ const NovaSolicitacao = () => {
     console.error('Erro ao cadastrar o programa:', error);
   }
 };
-
-  const { get } = useSearchParams();
-  const id = get('id');
 
   return (
       <div className="flex h-screen">
@@ -120,18 +116,10 @@ const NovaSolicitacao = () => {
             </Grid>
 
             <div className="mt-4">
-              <Button
-                  className="bg-blue-900"
-                  type="submit"
-                  variant="contained"
-                  color="primary">
-                Enviar
-              </Button>
+              <ButtonLinkPage href='/dashboard'>Enviar</ButtonLinkPage>
             </div>
           </form>
         </div>
       </div>
   );
 };
-
-export default NovaSolicitacao;

@@ -9,7 +9,6 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -144,7 +143,7 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <Button type="submit" variant="contained" color="primary">Editar</Button>
+                        <ButtonLinkPage href='/dashboard'>Editar</ButtonLinkPage>
                     </div>
                 </form>
             </div>

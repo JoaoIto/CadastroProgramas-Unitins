@@ -3,11 +3,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
 
-type Props = {
-    id?: string | undefined | null;
-}
-
-export const Cabecalho = ({ id }: Props) => {
+export function Cabecalho(){
 
     return (
         <>
@@ -27,7 +23,7 @@ export const Cabecalho = ({ id }: Props) => {
         <AccountCircleIcon className="h-12 w-12 m-2" />
 
         <span className="font-bold text-2xl">
-            <ButtonLinkPage href={`/perfil/?${id}`} id={id}>
+            <ButtonLinkPage href='/perfil'>
                 Perfil
             </ButtonLinkPage></span>
       </header>

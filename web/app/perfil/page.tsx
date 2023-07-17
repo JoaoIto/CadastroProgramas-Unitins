@@ -1,40 +1,41 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
-import { Sidebar } from '@/app/components/MenuLateral/sidebar';
-import { Cabecalho } from '@/app/components/HeaderSearch/cabecalho';
-import { useRouter, useSearchParams } from 'next/navigation';
-import ApiUtils from '@/app/Utils/Api/apiMethods';
+import { Sidebar } from "@/app/components/MenuLateral/sidebar";
+import { Cabecalho } from "@/app/components/HeaderSearch/cabecalho";
+import React, { useEffect, useState } from "react";
+import ApiUtils from "@/app/Utils/Api/apiMethods";
 
-interface Usuario {
+interface Perfil {
     _id: string;
-    nome: string;
-    perfil: string;
     cpf: string;
+    perfil: string;
+    nome: string;
 }
 
-const Perfil = () => {
-    const { get } = useSearchParams();
-    const id = get('id');
-    const router = useRouter();
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
+function Perfil() {
+    const [perfil, setPerfil] = useState<Perfil | null>(null);
 
     useEffect(() => {
-        const fetchUsuario = async () => {
-            if (id) {
+        const perfilId = sessionStorage.getItem("perfilId");
+
+        if (perfilId) {
+            const fetchPerfil = async () => {
                 try {
-                    const data = await ApiUtils.getByUuid<Usuario>('http://localhost:3333/usuario', id);
-                    if (data) {
-                        setUsuario(data);
+                    const perfilData = await ApiUtils.getByUuid<Perfil>(
+                        `http://localhost:3333/usuario`,
+                        perfilId
+                    );
+                    if (perfilData) {
+                        setPerfil(perfilData);
                     }
                 } catch (error) {
-                    console.error('Erro ao buscar o usuário:', error);
+                    console.error("Erro ao obter o perfil:", error);
                 }
-            }
-        };
+            };
 
-        fetchUsuario();
-    }, [id]);
+            fetchPerfil();
+        }
+    }, []);
 
     return (
         <div className="flex h-screen">
@@ -43,18 +44,17 @@ const Perfil = () => {
                 <Cabecalho />
                 <main className="p-4">
                     <h2>Perfil</h2>
-                    {usuario && (
+                    {perfil && (
                         <div>
-                            <p>Nome: {usuario.nome}</p>
-                            <p>CPF: {usuario.cpf}</p>
-                            <p>Perfil: {usuario.perfil}</p>
-                            {/* Adicione outros campos do usuário aqui */}
+                            <p>CPF: {perfil.cpf}</p>
+                            <p>Tipo de Perfil: {perfil.perfil}</p>
+                            <p>Nome: {perfil.nome}</p>
                         </div>
                     )}
                 </main>
             </div>
         </div>
     );
-};
+}
 
 export default Perfil;
