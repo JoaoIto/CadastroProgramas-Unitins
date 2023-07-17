@@ -7,6 +7,9 @@ export type UsuarioDocument = Usuario & Document;
 export class Usuario{
     @Prop({required: true})
     nome: string
+
+    @Prop({required: true})
+    cpf: string
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
