@@ -1,3 +1,5 @@
+import {Programa} from "@/app/dashboard/page";
+
 class ApiUtils {
     static async post(endpoint: string, data: object): Promise<void> {
         try {
