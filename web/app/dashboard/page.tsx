@@ -1,5 +1,4 @@
 "use client"
-
 import React, { useState, useEffect } from 'react';
 import { CardProgram } from '../components/CardPrograma/Card';
 import ButtonLinkPage from '../components/ButtonLinkPage/ButtonLinkPage';
@@ -18,6 +17,13 @@ export interface Programa {
   estadoCivil: string;
   alunosId: string[];
 }
+
+export interface UsuarioPrograma {
+  _id: string;
+  usuarioId: string;
+  programaId: string;
+}
+
 
 const DashboardPage = () => {
   const [programas, setProgramas] = useState<Programa[]>([]);
@@ -50,14 +56,24 @@ const DashboardPage = () => {
           // Se for administrador, retorna todos os programas
           const data = await ApiUtils.get<Programa[]>('http://localhost:3333/programa');
           return data || [];
-        } else if (perfilData.programas) {
-          // Se não for administrador, busca os programas do usuário
-          const programasUsuario = await Promise.all(
-              perfilData.programas.map((programaId) =>
-                  ApiUtils.getByUuid<Programa>("http://localhost:3333/programa", programaId._id)
-              )
-          );
-          return programasUsuario.filter((programa) => programa !== null) as Programa[];
+        } else {
+          // Se não for administrador, busca os programas do usuário na tabela usuario-programa
+          const programasUsuario = await ApiUtils.get<UsuarioPrograma[]>(`http://localhost:3333/usuario-programa/${perfilData._id}/programas`);
+
+          // Verifica se programasUsuario tem valor antes de fazer o mapeamento
+          if (programasUsuario) {
+            const programaIds = programasUsuario.map((programa) => programa.programaId);
+
+            // Busca os detalhes completos dos programas usando os IDs
+            const programasCompletos = await Promise.all(
+                programaIds.map(async (programaId) => {
+                  const programaCompleto = await ApiUtils.getByUuid<Programa>('http://localhost:3333/programa', programaId);
+                  return programaCompleto || null;
+                })
+            );
+
+            return programasCompletos.filter((programa) => programa !== null) as Programa[];
+          }
         }
       }
       return [];
@@ -77,11 +93,22 @@ const DashboardPage = () => {
     fetchData();
   }, [perfilId]);
 
+  const hasPermission = (programa: Programa, userId: string): boolean => {
+    // Verifica se o usuário é administrador ou se o programa pertence a ele
+    return isOwner || programa.alunosId.includes(userId);
+  };
+
   useEffect(() => {
     const checkIsOwner = async () => {
       const perfilData = await fetchPerfil();
       if (perfilData) {
         setIsOwner(perfilData.perfil === 'administrador');
+
+        if (!isOwner) {
+          setIsOwner(
+              programas.some((programa) => programa.alunosId.includes(userId))
+          );
+        }
       }
     };
 

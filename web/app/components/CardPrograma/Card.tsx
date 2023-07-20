@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -10,7 +10,7 @@ import Perfil from "@/app/perfil/page";
 interface CardProgramProps {
   programa: Programa;
   userId: string;
-  isOwner: boolean; // Adicionando o atributo isOwner para verificar se o usuário é dono do card ou administrador
+  isOwner: boolean;
 }
 
 interface Programa {
@@ -20,16 +20,13 @@ interface Programa {
   cpf: string;
   dataNascimento: string;
   estadoCivil: string;
-  alunosId: string[];
 }
 
-export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId }) => {
+export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOwner }) => {
   const [perfil, setPerfil] = useState<string>('');
-  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   const handleConfirmDelete = async (uuid: string) => {
     try {
-      // Chame a API para deletar o programa com o UUID fornecido
       await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
       const updatedData = await ApiUtils.getByUuid<Perfil>(`http://localhost:3333/programa`, uuid);
       if (!updatedData) {
@@ -47,11 +44,6 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId }) =>
 
         if (perfilData) {
           setPerfil(perfilData.perfil);
-
-          // Verifica se o perfil é "administrador" ou se o usuário é o dono do programa
-          setIsOwner(
-              perfilData.perfil === 'administrador' || programa.alunosId === userId
-          );
         }
       } catch (error) {
         console.error('Erro ao obter o perfil:', error);
@@ -59,7 +51,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId }) =>
     };
 
     fetchPerfil();
-  }, [userId, programa.alunosId]);
+  }, [userId]);
 
   return (
       <Card className="w-2/5 m-8">

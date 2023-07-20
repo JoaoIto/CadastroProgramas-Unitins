@@ -11,12 +11,15 @@ export class UsuarioProgramaService {
         @InjectModel(UsuarioPrograma.name) private usuarioProgramaModel: Model<UsuarioPrograma>,
     ) {}
 
-    async listar(): Promise<UsuarioPrograma[]>{
+    listar(): Promise<UsuarioPrograma[]> {
         return this.usuarioProgramaRepository.findAll();
     }
 
-    async create(UsuarioPrograma: UsuarioPrograma): Promise<UsuarioPrograma> {
-        const usuarioPrograma = new this.usuarioProgramaModel(UsuarioPrograma);
-        return usuarioPrograma.save();
+    create(usuarioPrograma: UsuarioPrograma): Promise<UsuarioPrograma> {
+        return this.usuarioProgramaRepository.create(usuarioPrograma);
+    }
+
+    async getProgramasPorUsuario(usuarioId: string): Promise<UsuarioPrograma[]> {
+        return this.usuarioProgramaRepository.find(usuarioId);
     }
 }

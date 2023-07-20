@@ -44,9 +44,17 @@ function NovaSolicitacao(){
     resolver: zodResolver(programa),
   });
 
+  const usuarioId = sessionStorage.getItem("perfilId");
   const onSubmit = async (data: FormData) => {
   try {
-    await ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
+    const programaCriado = await ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
+    const programaId = programaCriado._id;
+
+    const usarioProgramaData = {
+      usuarioId: usuarioId,
+      programaId: programaId,
+    }
+    await ApiUtils.post('http://localhost:3333/usuario-programa/cadastrar', usarioProgramaData);
     window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
   } catch (error) {
     console.error('Erro ao cadastrar o programa:', error);

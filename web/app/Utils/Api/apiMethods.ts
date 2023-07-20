@@ -1,7 +1,7 @@
 import {Programa} from "@/app/dashboard/page";
 
 class ApiUtils {
-    static async post(endpoint: string, data: object): Promise<void> {
+    static async post(endpoint: string, data: object): Promise<any> {
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -12,7 +12,11 @@ class ApiUtils {
             });
 
             if (response.ok) {
-                console.log('Dados enviados com sucesso');
+                const result = await response.json();
+                console.log('Dados enviados com sucesso:', result);
+
+                // Retornar o objeto criado no backend
+                return result;
             } else {
                 console.log('Erro ao enviar os dados:', response.status);
             }
@@ -20,6 +24,7 @@ class ApiUtils {
             console.error(error);
         }
     }
+
 
     static async get<T>(endpoint: string): Promise<T | undefined> {
         try {
