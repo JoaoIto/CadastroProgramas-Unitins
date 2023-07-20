@@ -2,6 +2,7 @@ import {Controller, Post, Body, Get, Param, Put, Delete} from '@nestjs/common';
 import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {ProgramaService} from "./programa.service";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
+import {Programa} from "./programa.model";
 
 @Controller('/programa')
 export class ProgramaController {
@@ -10,8 +11,12 @@ export class ProgramaController {
 
   @Post('/cadastrar')
 
-  create(@Body() formData: CreateProgramaDto) {
-    this.programaService.criar(formData);
+  create(@Body() formData: CreateProgramaDto, userId: string) {
+    let programaData = new Programa();
+    programaData.cpf = formData.cpf;
+
+
+    this.programaService.criar(programaData, userId);
     return [{ status: 'Criado uma nova requisição!' }, { formData }];
   }
 

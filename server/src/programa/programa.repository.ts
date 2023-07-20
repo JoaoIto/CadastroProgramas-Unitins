@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import {Programa} from "./programa.model";
-import {CreateProgramaDto} from "./dto/createPrograma.dto";
-import {Model} from "mongoose";
+import {Model, Types} from "mongoose";
 import {InjectModel} from "@nestjs/mongoose";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 
 @Injectable()
 export class ProgramaRepository {
-    constructor(@InjectModel(Programa.name) private readonly programa: Model<Programa>) {}
+    constructor(
+        @InjectModel(Programa.name) private readonly programa: Model<Programa>
+    ) {}
 
-    async create(createCatDto: CreateProgramaDto): Promise<Programa> {
-        const programaCriado = new this.programa(createCatDto);
+    async create(programaData: Partial<Programa>): Promise<Programa> {
+        const programaCriado = new this.programa(programaData);
         return programaCriado.save();
     }
+
 
     async findAll(): Promise<Programa[]> {
         return this.programa.find().exec();

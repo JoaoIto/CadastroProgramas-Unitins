@@ -1,15 +1,28 @@
-import {Body, Injectable} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import { ProgramaRepository } from './programa.repository';
-import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {Programa} from "./programa.model";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
+import {UsuarioProgramaService} from "../usuario-programa/usuario-programa.service";
+import {UsuarioService} from "../usuario/usuario.service";
 
 @Injectable()
 export class ProgramaService {
-    constructor(private programaRepository: ProgramaRepository) {}
+    constructor(
+        private programaRepository: ProgramaRepository,
+        private usuarioService: UsuarioService,
+        private usuarioProgramaService: UsuarioProgramaService,
+    ) {}
 
-    async criar(@Body() formData: CreateProgramaDto) {
-        await this.programaRepository.create(formData);
+    async criar(programaModel: Programa, userId: string): Promise<Programa> {
+        const programaCriado = await this.programaRepository.create(programaModel);
+        const usuario  = await this.usuarioService.consultar(userId);
+
+        const usuarioPrograma = await this.usuarioProgramaService.create({
+            programaId: programaCriado._id,
+            usuarioId: usuario._id,
+        });
+
+        return programaCriado;
     }
 
     async listar(): Promise<Programa[]> {

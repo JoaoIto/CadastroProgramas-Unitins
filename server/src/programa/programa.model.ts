@@ -1,10 +1,14 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import {Document, ObjectId, SchemaTypes} from 'mongoose';
 
 export type ProgramaDocument = Programa & Document;
 
-@Schema({collection: 'programa'})
+@Schema({ collection: 'programa' })
 export class Programa {
+
+    @Prop({type: SchemaTypes.ObjectId, required: true})
+    _id: ObjectId
+
     @Prop({ required: true })
     nomeCompleto: string;
 
