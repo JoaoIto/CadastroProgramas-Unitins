@@ -1,11 +1,11 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { CardProgram } from '../components/CardPrograma/Card';
+import React, {useEffect, useState} from 'react';
+import {CardProgram} from '../components/CardPrograma/Card';
 import ButtonLinkPage from '../components/ButtonLinkPage/ButtonLinkPage';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
-import { Sidebar } from '@/app/components/MenuLateral/sidebar';
-import { Cabecalho } from '@/app/components/HeaderSearch/cabecalho';
-import { useSearchParams } from 'next/navigation';
+import {Sidebar} from '@/app/components/MenuLateral/sidebar';
+import {Cabecalho} from '@/app/components/HeaderSearch/cabecalho';
+import {useSearchParams} from 'next/navigation';
 import Perfil from "@/app/perfil/page";
 
 export interface Programa {
@@ -30,7 +30,8 @@ const DashboardPage = () => {
   const { get } = useSearchParams();
   const uuid = get('uuid');
 
-  const perfilId = sessionStorage.getItem("perfilId");
+  const perfilId = typeof window !== "undefined" ? window.sessionStorage.getItem('perfilId') : '';
+  console.log(`PerfilId é: ${perfilId}`)
   const [userId, setUserId] = useState<string>('');
   const [isOwner, setIsOwner] = useState<boolean>(false);
 

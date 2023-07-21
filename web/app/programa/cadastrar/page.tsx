@@ -1,8 +1,8 @@
 "use client"
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {z} from 'zod';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
@@ -10,7 +10,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
 import Grid from '@mui/material/Grid';
-import { Sidebar } from '../../components/MenuLateral/sidebar';
+import {Sidebar} from '../../components/MenuLateral/sidebar';
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 const programa = z.object({
@@ -130,4 +130,6 @@ function NovaSolicitacao(){
         </div>
       </div>
   );
-};
+}
+
+export default NovaSolicitacao;
