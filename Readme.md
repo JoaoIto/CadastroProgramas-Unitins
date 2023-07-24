@@ -62,6 +62,7 @@ Siga os passos abaixo para configurar o projeto em seu ambiente local:
 4. Instale as dependências do projeto:
    ```
    npm install
+   npm install @nestjs/common @nestjs/passport mongoose
    ```
 
 ## Configuração do Banco de Dados
@@ -82,7 +83,7 @@ Agora que você tem todas as dependências instaladas e o banco de dados configu
 
 1. Navegue até o diretório do front-end (caso ainda não tenha feito isso):
    ```
-   cd CadastroProgramas-Unitins/frontend
+   cd CadastroProgramas-Unitins/web
    ```
 
 2. Inicie o servidor de desenvolvimento:
