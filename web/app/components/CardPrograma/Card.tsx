@@ -73,14 +73,14 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
               Visualizar
             </Button>
             {isOwner && hasPermission && (
-                <>
+                <div className="flex items-center gap-2">
                   <ButtonLinkPage href="/programa/editar" uuid={programa._id}>
                     Editar
                   </ButtonLinkPage>
-                  <ButtonLinkPage onClick={() => handleConfirmDelete(programa._id)} uuid={programa._id}>
+                  <button onClick={() => handleConfirmDelete(programa._id)}>
                     Deletar
-                  </ButtonLinkPage>
-                </>
+                  </button>
+                </div>
             )}
           </div>
         </CardContent>

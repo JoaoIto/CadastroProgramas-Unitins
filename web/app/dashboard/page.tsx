@@ -1,8 +1,4 @@
 "use client"
-<<<<<<< HEAD
-
-=======
->>>>>>> f4d74d53adb20433b52bbe2e8c68989794a6028d
 import React, {useEffect, useState} from 'react';
 import {CardProgram} from '../components/CardPrograma/Card';
 import ButtonLinkPage from '../components/ButtonLinkPage/ButtonLinkPage';
@@ -118,7 +114,7 @@ const DashboardPage = () => {
           <Cabecalho />
           <main className="p-4">
             <ButtonLinkPage href={`/programa/cadastrar`}>Nova solicitação +</ButtonLinkPage>
-            <div className="w-full flex">
+            <div className="w-full flex flex-wrap">
               {programas.map((programa) => (
                   <CardProgram
                       key={programa._id}

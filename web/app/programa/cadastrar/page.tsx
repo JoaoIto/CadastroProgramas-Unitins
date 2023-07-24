@@ -1,14 +1,8 @@
 "use client"
 import React from 'react';
-<<<<<<< HEAD
-import {SubmitHandler, useForm} from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-=======
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
->>>>>>> f4d74d53adb20433b52bbe2e8c68989794a6028d
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
@@ -51,25 +45,19 @@ function NovaSolicitacao(){
   });
 
   const usuarioId = sessionStorage.getItem("perfilId");
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    console.log('Data:', data);
+  const onSubmit = async (data: FormData) => {
     try {
       const programaCriado = await ApiUtils.post('http://localhost:3333/programa/cadastrar', data);
-      console.log(programaCriado);
 
       const usarioProgramaData = {
-        usuarioId: usuarioId,
-      };
-
+        usuarioId: usuarioId
+      }
       await ApiUtils.post('http://localhost:3333/usuario-programa/cadastrar', usarioProgramaData);
-
-      window.open('/dashboard', '_self');
+      window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
     } catch (error) {
-      console.log('Data:', data);
       console.error('Erro ao cadastrar o programa:', error);
     }
   };
-
 
   return (
       <div className="flex h-screen">
@@ -134,18 +122,12 @@ function NovaSolicitacao(){
             </Grid>
 
             <div className="mt-4">
-              <ButtonLinkPage>Enviar</ButtonLinkPage>
+              <button type="submit"> Enviar </button>
             </div>
           </form>
         </div>
       </div>
   );
-<<<<<<< HEAD
-};
-
-export default NovaSolicitacao;
-=======
 }
 
 export default NovaSolicitacao;
->>>>>>> f4d74d53adb20433b52bbe2e8c68989794a6028d

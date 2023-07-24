@@ -21,6 +21,8 @@ export class UsuarioProgramaRepository {
         const usuarioProgramaCriado = new this.usuarioProgramaModel(usuarioProgramaData);
         return usuarioProgramaCriado.save();
     }
+    async delete(programaId: string): Promise<UsuarioPrograma> {
+        return this.usuarioProgramaModel.findOneAndRemove({ programaId }).exec();
+    }
 
-    // Outros métodos do repositório (atualizar, deletar, etc.)
 }

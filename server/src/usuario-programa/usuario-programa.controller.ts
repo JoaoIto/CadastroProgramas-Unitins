@@ -1,4 +1,4 @@
-import {Controller, Post, Body, Get, Param} from '@nestjs/common';
+import {Controller, Post, Body, Get, Param, Delete} from '@nestjs/common';
 import { UsuarioProgramaService } from './usuario-programa.service';
 import { CreateUsuarioProgramaDto } from './dto/createUsuario-Programa.dto';
 import {UsuarioPrograma} from "./usuario-programa.model";
@@ -24,5 +24,10 @@ export class UsuarioProgramaController {
     @Get(':usuarioId/programas')
     async getProgramasPorUsuario(@Param('usuarioId') usuarioId: string) {
         return this.usuarioProgramaService.getProgramasPorUsuario(usuarioId);
+    }
+
+    @Delete(':programaId')
+    async delete(@Param('programaId') programaId: string): Promise<UsuarioPrograma> {
+        return this.usuarioProgramaService.delete(programaId);
     }
 }

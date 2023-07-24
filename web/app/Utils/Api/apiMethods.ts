@@ -2,11 +2,14 @@ import {Programa} from "@/app/dashboard/page";
 
 class ApiUtils {
     static async post(endpoint: string, data: object): Promise<void> {
+        console.log( window.sessionStorage.getItem('perfilId'));
+
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'usuario-id': window.sessionStorage.getItem('perfilId') || ''
                 },
                 body: JSON.stringify(data),
             });

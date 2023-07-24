@@ -22,4 +22,8 @@ export class UsuarioProgramaService {
     async getProgramasPorUsuario(usuarioId: string): Promise<UsuarioPrograma[]> {
         return this.usuarioProgramaRepository.find(usuarioId);
     }
+
+    async delete(programaId: string): Promise<UsuarioPrograma> {
+        return this.usuarioProgramaRepository.delete(programaId);
+    }
 }

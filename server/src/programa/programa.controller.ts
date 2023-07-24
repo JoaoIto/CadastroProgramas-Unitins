@@ -1,4 +1,4 @@
-import {Controller, Post, Body, Get, Param, Put, Delete} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Headers} from '@nestjs/common';
 import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {ProgramaService} from "./programa.service";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
@@ -10,16 +10,17 @@ export class ProgramaController {
   constructor(private programaService: ProgramaService) {}
 
   @Post('/cadastrar')
-
-  create(@Body() formData: CreateProgramaDto, userId: string) {
+  create(@Body() formData: CreateProgramaDto, @Headers() headers: Record<string, string>) {
+    let usuarioId = headers["usuario-id"];
     let programaData = new Programa();
+
     programaData.nomeCompleto = formData.nomeCompleto;
     programaData.rg = formData.rg;
     programaData.cpf = formData.cpf;
     programaData.dataNascimento = formData.dataNascimento;
     programaData.estadoCivil = formData.estadoCivil;
 
-    this.programaService.criar(programaData, userId);
+    this.programaService.criar(programaData, usuarioId);
     return [{ status: 'Criado uma nova requisição!' }, { formData }];
   }
 

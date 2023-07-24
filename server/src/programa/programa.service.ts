@@ -39,7 +39,7 @@ export class ProgramaService {
     }
 
     async deletar(uuid: string): Promise<Programa> {
-        // Lógica para atualizar um programa pelo UUID
+        this.usuarioProgramaService.delete(uuid)
         return this.programaRepository.delete(uuid);
     }
 }

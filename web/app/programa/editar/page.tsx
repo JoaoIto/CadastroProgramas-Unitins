@@ -70,7 +70,7 @@ const EditarSolicitacao = () => {
         try {
             if (uuid) {
                 await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
-                router.push('/dashboard');
+                window.open('/dashboard', '_self');
             } else {
                 console.error('UUID não encontrado');
             }
@@ -142,7 +142,7 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <ButtonLinkPage>Editar</ButtonLinkPage>
+                        <button type="submit">Editar</button>
                     </div>
                 </form>
             </div>
