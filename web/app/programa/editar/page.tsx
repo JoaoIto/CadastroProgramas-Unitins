@@ -70,7 +70,6 @@ const EditarSolicitacao = () => {
         try {
             if (uuid) {
                 await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
-                // Redirecionar para a página de dashboard após a atualização
                 router.push('/dashboard');
             } else {
                 console.error('UUID não encontrado');
@@ -143,7 +142,7 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <ButtonLinkPage href='/dashboard'>Editar</ButtonLinkPage>
+                        <ButtonLinkPage>Editar</ButtonLinkPage>
                     </div>
                 </form>
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -11,6 +11,7 @@ interface CardProgramProps {
   programa: Programa;
   userId: string;
   isOwner: boolean;
+  hasPermission?: boolean;
 }
 
 interface Programa {
@@ -22,7 +23,7 @@ interface Programa {
   estadoCivil: string;
 }
 
-export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOwner }) => {
+export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOwner, hasPermission }) => {
   const [perfil, setPerfil] = useState<string>('');
 
   const handleConfirmDelete = async (uuid: string) => {
@@ -71,7 +72,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
             <Button className="bg-indigo-900 m-10" variant="contained" size="small">
               Visualizar
             </Button>
-            {isOwner && (
+            {isOwner && hasPermission && (
                 <>
                   <ButtonLinkPage href="/programa/editar" uuid={programa._id}>
                     Editar

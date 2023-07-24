@@ -21,7 +21,7 @@ export class CreateProgramaDto {
     })
     cpf: string;
 
-    @IsDate({ message: "A data não tem tamanho compatível"})
+    @IsString({ message: "A data não tem tamanho compatível"})
     @IsNotEmpty({
         message: 'A data não pode estar vazia!',
     })
@@ -31,5 +31,5 @@ export class CreateProgramaDto {
     @IsNotEmpty({
         message: 'Este campo não pode estar vazio!',
     })
-    estadoCivil: String;
+    estadoCivil: string;
 }

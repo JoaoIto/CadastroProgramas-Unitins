@@ -1,7 +1,7 @@
 import {Programa} from "@/app/dashboard/page";
 
 class ApiUtils {
-    static async post(endpoint: string, data: object): Promise<any> {
+    static async post(endpoint: string, data: object): Promise<void> {
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',

@@ -1,7 +1,6 @@
-import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate} from 'class-validator';
-import {ObjectId} from "mongoose";
+import mongoose from "mongoose";
 
 export class CreateUsuarioProgramaDto {
-    usuarioId: ObjectId; // ID do usuário
-    programaId: ObjectId; // ID do programa
+    usuarioId: mongoose.Types.ObjectId; // ID do usuário
+    programaId: mongoose.Types.ObjectId; // ID do programa
 }

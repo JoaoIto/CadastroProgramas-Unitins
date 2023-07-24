@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {Programa} from "./programa.model";
-import {Model, Types} from "mongoose";
+import mongoose, {Model} from "mongoose";
 import {InjectModel} from "@nestjs/mongoose";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 
@@ -12,6 +12,8 @@ export class ProgramaRepository {
 
     async create(programaData: Partial<Programa>): Promise<Programa> {
         const programaCriado = new this.programa(programaData);
+        programaCriado._id = new mongoose.Types.ObjectId();
+        console.log(programaCriado._id)
         return programaCriado.save();
     }
 
@@ -26,7 +28,7 @@ export class ProgramaRepository {
 
     async update(
         uuid: string,
-        updateData: AtualizarProgramaDto,
+        updateData: Programa,
     ): Promise<Programa | null> {
         const programaAtualizado = await this.programa.findByIdAndUpdate(
             uuid,

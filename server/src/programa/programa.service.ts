@@ -4,6 +4,7 @@ import {Programa} from "./programa.model";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 import {UsuarioProgramaService} from "../usuario-programa/usuario-programa.service";
 import {UsuarioService} from "../usuario/usuario.service";
+import mongoose from "mongoose";
 
 @Injectable()
 export class ProgramaService {
@@ -16,11 +17,11 @@ export class ProgramaService {
     async criar(programaModel: Programa, userId: string): Promise<Programa> {
         const programaCriado = await this.programaRepository.create(programaModel);
         const usuario  = await this.usuarioService.consultar(userId);
-
         const usuarioPrograma = await this.usuarioProgramaService.create({
             programaId: programaCriado._id,
             usuarioId: usuario._id,
         });
+        console.log('4');
 
         return programaCriado;
     }
@@ -33,8 +34,7 @@ export class ProgramaService {
         return this.programaRepository.findById(uuid);
     }
 
-    async atualizar(uuid: string, updateData: AtualizarProgramaDto): Promise<Programa> {
-        // Lógica para atualizar um programa pelo UUID
+    async atualizar(uuid: string, updateData: Programa): Promise<Programa> {
         return this.programaRepository.update(uuid, updateData);
     }
 

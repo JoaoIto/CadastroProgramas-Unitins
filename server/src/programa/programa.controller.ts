@@ -13,8 +13,11 @@ export class ProgramaController {
 
   create(@Body() formData: CreateProgramaDto, userId: string) {
     let programaData = new Programa();
+    programaData.nomeCompleto = formData.nomeCompleto;
+    programaData.rg = formData.rg;
     programaData.cpf = formData.cpf;
-
+    programaData.dataNascimento = formData.dataNascimento;
+    programaData.estadoCivil = formData.estadoCivil;
 
     this.programaService.criar(programaData, userId);
     return [{ status: 'Criado uma nova requisição!' }, { formData }];
@@ -32,7 +35,14 @@ export class ProgramaController {
 
   @Put('/:uuid')
   atualizar(@Param('uuid') uuid: string, @Body() updateData: AtualizarProgramaDto) {
-    return this.programaService.atualizar(uuid, updateData);
+    let programaEditado = new Programa();
+    programaEditado.nomeCompleto = updateData.nomeCompleto;
+    programaEditado.rg = updateData.rg;
+    programaEditado.cpf = updateData.cpf;
+    programaEditado.dataNascimento = updateData.dataNascimento;
+    programaEditado.estadoCivil = updateData.estadoCivil;
+
+    return this.programaService.atualizar(uuid, programaEditado);
   }
 
   @Delete('/:uuid')
