@@ -43,6 +43,7 @@ Siga os passos abaixo para configurar o projeto em seu ambiente local:
 3. Instale as dependências do projeto:
    ```
    npm install
+   npm install @mui/material @emotion/react @emotion/styled
    ```
 
 ### Backend
