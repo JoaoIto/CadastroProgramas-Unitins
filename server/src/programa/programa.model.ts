@@ -1,5 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, {Document, ObjectId, SchemaTypes} from 'mongoose';
+import {ProgramaStatus} from "./programa-status.enum";
 
 export type ProgramaDocument = Programa & Document;
 
@@ -23,6 +24,9 @@ export class Programa {
 
     @Prop({ required: true })
     estadoCivil: string;
+
+    @Prop({type: String, required: true, enum: ProgramaStatus, default: ProgramaStatus.RASCUNHO })
+    status: ProgramaStatus;
 }
 
 export const ProgramaSchema = SchemaFactory.createForClass(Programa);

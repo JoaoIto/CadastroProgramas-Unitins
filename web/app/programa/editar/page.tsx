@@ -13,7 +13,6 @@ import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
-import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
 
 const programaSchema = z.object({
     nomeCompleto: z.string().nonempty('Campo obrigatório'),

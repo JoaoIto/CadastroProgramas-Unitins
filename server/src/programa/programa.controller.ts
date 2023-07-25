@@ -1,8 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, Headers} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Headers, Param, Post, Put} from '@nestjs/common';
 import {CreateProgramaDto} from "./dto/createPrograma.dto";
 import {ProgramaService} from "./programa.service";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
 import {Programa} from "./programa.model";
+import {ProgramaStatus} from "./programa-status.enum";
 
 @Controller('/programa')
 export class ProgramaController {
@@ -19,6 +20,7 @@ export class ProgramaController {
     programaData.cpf = formData.cpf;
     programaData.dataNascimento = formData.dataNascimento;
     programaData.estadoCivil = formData.estadoCivil;
+    programaData.status = ProgramaStatus.RASCUNHO;
 
     this.programaService.criar(programaData, usuarioId);
     return [{ status: 'Criado uma nova requisição!' }, { formData }];
@@ -31,7 +33,11 @@ export class ProgramaController {
 
   @Get('/:uuid')
   consultar(@Param() params: any) {
-    return this.programaService.consultar(params.uuid);
+    let programaPromise = this.programaService.consultar(params.uuid);
+    programaPromise.then(value => {
+      console.log(value);
+    });
+    return programaPromise;
   }
 
   @Put('/:uuid')

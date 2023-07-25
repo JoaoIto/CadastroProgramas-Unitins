@@ -4,6 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import ButtonLinkPage from '@/app/components/ButtonLinkPage/ButtonLinkPage';
+import {ProgramaStatus} from "@/app/enum/programa-status.enum";
 import ApiUtils from '@/app/Utils/Api/apiMethods';
 import Perfil from "@/app/perfil/page";
 
@@ -21,6 +22,7 @@ interface Programa {
   cpf: string;
   dataNascimento: string;
   estadoCivil: string;
+  status?: string;
 }
 
 export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOwner, hasPermission }) => {
@@ -35,6 +37,20 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
       }
     } catch (error) {
       console.error('Erro ao deletar o programa:', error);
+    }
+  };
+
+  const handleCancel = async (uuid: string, data: Programa) => {
+    try {
+      if (uuid) {
+        data.status = ProgramaStatus.CANCELADO;
+        await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
+        window.open('/dashboard', '_self');
+      } else {
+        console.error('UUID não encontrado');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar os dados:', error);
     }
   };
 
@@ -68,18 +84,21 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
             Data de Nascimento: {programa.dataNascimento}
           </Typography>
           <Typography variant="body2">Estado Civil: {programa.estadoCivil}</Typography>
+          <Typography variant="body2">Status: {programa.status}</Typography>
           <div className="flex gap-2">
             <Button className="bg-indigo-900 m-10" variant="contained" size="small">
               Visualizar
             </Button>
-            {isOwner && hasPermission && (
-                <div className="flex items-center gap-2">
-                  <ButtonLinkPage href="/programa/editar" uuid={programa._id}>
-                    Editar
-                  </ButtonLinkPage>
-                  <button onClick={() => handleConfirmDelete(programa._id)}>
-                    Deletar
-                  </button>
+            {hasPermission && hasPermission && programa.status === 'RASCUNHO' && (
+                <div>
+                  <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
+                  <button onClick={() => handleConfirmDelete(programa._id)}>Deletar</button>
+                </div>
+            )}
+
+            {hasPermission && hasPermission && programa.status === 'ENVIADO' && (
+                <div>
+                  <button onClick={() => handleCancel}>Cancelar</button>
                 </div>
             )}
           </div>
