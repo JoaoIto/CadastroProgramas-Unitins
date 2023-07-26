@@ -1,18 +1,18 @@
 "use client"
-import React, {useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
-import Grid from '@mui/material/Grid';
-import {Sidebar} from '../../components/MenuLateral/sidebar';
-import ApiUtils from "@/app/Utils/Api/apiMethods";
-import {ProgramaStatus} from "@/app/enum/programa-status.enum";
+import { Sidebar } from '../../components/MenuLateral/sidebar';
+import ApiUtils from '@/app/Utils/Api/apiMethods';
+import { ProgramaStatus } from '@/app/enum/programa-status.enum';
+import Grid from "@mui/material/Grid";
 
 const programa = z.object({
   nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -32,12 +32,15 @@ const programa = z.object({
   }),
   dataNascimento: z.string().nonempty('Campo obrigatório'),
   estadoCivil: z.string().nonempty('Campo obrigatório'),
-  arquivo: z.any(),
+  status: z.string(),
+  nomeArquivo: z.any(),
 });
 
 type FormData = z.infer<typeof programa>;
 
-function NovaSolicitacao(){
+// ... (importações e código anterior)
+
+function NovaSolicitacao() {
   const {
     register,
     handleSubmit,
@@ -46,60 +49,48 @@ function NovaSolicitacao(){
     resolver: zodResolver(programa),
   });
 
-  const [status, setStatus] = useState<ProgramaStatus>(ProgramaStatus.RASCUNHO);
-  const usuarioId = sessionStorage.getItem("perfilId");
-  const [file, setFile] = useState<FileList | null>(null);
+  const usuarioId = sessionStorage.getItem('perfilId');
+  let fileName: string | undefined = undefined;
+  let status = ProgramaStatus.RASCUNHO;
+
+  console.log("Render")
+  // Função para enviar o arquivo para /programa/uploads
+  async function enviarArquivo(arquivo: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', arquivo);
+      const response = await ApiUtils.post('http://localhost:3333/programa/uploads', formData);
+      return response;
+    } catch (error) {
+      console.error('Erro ao enviar o arquivo:', error);
+      throw error;
+    }
+  }
 
   const onSubmit = async (data: FormData) => {
     try {
+      if (fileName) {
+        const response = await enviarArquivo(data.nomeArquivo[0]);
+      }
+      data.nomeArquivo = data.nomeArquivo[0].name;
+      console.log(data);
+      // Enviar o formulário para /programa/cadastrar
       const programaCriado = await ApiUtils.post('http://localhost:3333/programa/cadastrar', {
         ...data,
-        status, // Aqui enviamos o status junto com os dados do programa
+        status,
       });
-
-      const usarioProgramaData = {
-        usuarioId: usuarioId,
-      };
-      await ApiUtils.post('http://localhost:3333/usuario-programa/cadastrar', usarioProgramaData);
-      window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
+      // window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
     } catch (error) {
       console.error('Erro ao cadastrar o programa:', error);
     }
   };
-
-  const handleSave = () => {
-    handleSubmit((data) => handleFormSubmit(data, ProgramaStatus.RASCUNHO))();
-  };
-
-  // Wrapper function for the Send button
-  const handleSend = () => {
-    if (!file) {
-      console.error('Por favor, selecione um arquivo.');
-      return;
-    }
-
-    // Chama a função que envia o formulário
-    await handleSubmit((data) => handleFormSubmit(data, ProgramaStatus.ENVIADO))();
-  };
-
-  const handleFormSubmit = async (data: FormData, status: ProgramaStatus) => {
-    setStatus(status);
-
-    // Verifica se há um arquivo selecionado
-    if (data.arquivo) {
-      setFile(data.arquivo);
-    }
-
-    await onSubmit(data);
-  };
-
 
   return (
       <div className="flex h-screen">
         <Sidebar />
         <div className="flex-grow p-8">
           <h1 className="text-3xl font-bold mb-4 text-center">Nova Solicitação</h1>
-          <form className="max-w-md mx-auto">
+          <form className="max-w-md mx-auto" onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -158,14 +149,25 @@ function NovaSolicitacao(){
                 <input
                     type="file"
                     accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                    {...register('arquivo')}
+                    {...register('nomeArquivo')}
+                    onChange={(event) => {
+                      if (event.target.files && event.target.files.length > 0) {
+                        fileName = event.target.files[0].name;
+                      }
+                    }}
                 />
               </Grid>
             </Grid>
 
             <div className="mt-4">
-              <button type="submit" onClick={handleSave}> Salvar </button>
-              <button type="submit" onClick={handleSend} disabled={!file}> Enviar </button>
+              <button type="submit" onClick={() => (console.log('click'), status = ProgramaStatus.RASCUNHO)}>
+                Salvar
+              </button>
+              <button type="submit" onClick={() => (status = ProgramaStatus.RASCUNHO)}>
+                Enviar
+              </button>
+
+              <input type="hidden" {...register('status')} value={status} />
             </div>
           </form>
         </div>

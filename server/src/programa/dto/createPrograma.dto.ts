@@ -1,4 +1,5 @@
-import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate} from 'class-validator';
+import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate, IsOptional} from 'class-validator';
+import {ProgramaStatus} from "../programa-status.enum";
 
 export class CreateProgramaDto {
     @IsString()
@@ -32,4 +33,15 @@ export class CreateProgramaDto {
         message: 'Este campo não pode estar vazio!',
     })
     estadoCivil: string;
+
+    @IsNotEmpty({
+        message: 'Este campo não pode estar vazio!'
+    })
+
+    @IsNotEmpty({
+        message: 'Este campo não pode estar vazio!'
+    })
+    status: ProgramaStatus
+
+    nomeArquivo: string;
 }

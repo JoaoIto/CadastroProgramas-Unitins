@@ -21,7 +21,6 @@ export class ProgramaService {
             programaId: programaCriado._id,
             usuarioId: usuario._id,
         });
-        console.log('4');
 
         return programaCriado;
     }
