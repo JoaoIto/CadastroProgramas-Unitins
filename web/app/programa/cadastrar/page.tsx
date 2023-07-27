@@ -1,17 +1,17 @@
 "use client"
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React, {useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {z} from 'zod';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { Sidebar } from '../../components/MenuLateral/sidebar';
+import {Sidebar} from '../../components/MenuLateral/sidebar';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
-import { ProgramaStatus } from '@/app/enum/programa-status.enum';
+import {ProgramaStatus} from '@/app/enum/programa-status.enum';
 import Grid from "@mui/material/Grid";
 
 const programa = z.object({
@@ -38,8 +38,6 @@ const programa = z.object({
 
 type FormData = z.infer<typeof programa>;
 
-// ... (importações e código anterior)
-
 function NovaSolicitacao() {
   const {
     register,
@@ -51,7 +49,7 @@ function NovaSolicitacao() {
 
   const usuarioId = sessionStorage.getItem('perfilId');
   let fileName: string | undefined = undefined;
-  let status = ProgramaStatus.RASCUNHO;
+  const [status, setStatus] = useState<ProgramaStatus>(ProgramaStatus.RASCUNHO);
 
   console.log("Render")
   // Função para enviar o arquivo para /programa/uploads
@@ -77,7 +75,7 @@ function NovaSolicitacao() {
       // Enviar o formulário para /programa/cadastrar
       const programaCriado = await ApiUtils.post('http://localhost:3333/programa/cadastrar', {
         ...data,
-        status,
+        status: status,
       });
       // window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
     } catch (error) {
@@ -85,94 +83,99 @@ function NovaSolicitacao() {
     }
   };
 
-  return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-grow p-8">
-          <h1 className="text-3xl font-bold mb-4 text-center">Nova Solicitação</h1>
-          <form className="max-w-md mx-auto" onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                    label="Nome Completo"
-                    {...register('nomeCompleto')}
-                    fullWidth
-                    type="text"
-                    error={!!errors.nomeCompleto}
-                    helperText={errors.nomeCompleto?.message || ' '}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                    label="RG"
-                    {...register('rg')}
-                    fullWidth
-                    type="text"
-                    error={!!errors.rg}
-                    helperText={errors.rg?.message || ' '}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                    label="CPF"
-                    {...register('cpf')}
-                    fullWidth
-                    type="text"
-                    error={!!errors.cpf}
-                    helperText={errors.cpf?.message || ' '}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                    label="Data de Nascimento"
-                    type="date"
-                    {...register('dataNascimento')}
-                    fullWidth
-                    error={!!errors.dataNascimento}
-                    helperText={errors.dataNascimento?.message || ' '}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth error={!!errors.estadoCivil}>
-                  <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
-                  <Select id="estadoCivil" {...register('estadoCivil')}>
-                    <MenuItem value="solteiro">Solteiro</MenuItem>
-                    <MenuItem value="casado">Casado</MenuItem>
-                    <MenuItem value="viuvo">Viúvo</MenuItem>
-                  </Select>
-                  {errors.estadoCivil && (
-                      <span className="text-red-500">{errors.estadoCivil.message}</span>
-                  )}
-                </FormControl>
-              </Grid>
-              <Grid>
-                <input
-                    type="file"
-                    accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                    {...register('nomeArquivo')}
-                    onChange={(event) => {
-                      if (event.target.files && event.target.files.length > 0) {
-                        fileName = event.target.files[0].name;
-                      }
-                    }}
-                />
-              </Grid>
-            </Grid>
+  const handleSave = () => {
+    console.log("Salvar clickado!")
+    setStatus(ProgramaStatus.RASCUNHO); // Altera o status para RASCUNHO antes de chamar a função de submissão
+    handleSubmit(onSubmit); // Chama a função de submissão passando os dados do formulário
+  };
+  const handleSend = () => {
+    console.log("Enviar clickado!")
+    setStatus(ProgramaStatus.ENVIADO); // Altera o status para ENVIADO antes de chamar a função de submissão
+    handleSubmit(onSubmit); // Chama a função de submissão passando os dados do formulário
+  };
 
-            <div className="mt-4">
-              <button type="submit" onClick={() => (console.log('click'), status = ProgramaStatus.RASCUNHO)}>
-                Salvar
-              </button>
-              <button type="submit" onClick={() => (status = ProgramaStatus.RASCUNHO)}>
-                Enviar
-              </button>
+  return <div className="flex h-screen">
+    <Sidebar />
+    <div className="flex-grow p-8">
+      <h1 className="text-3xl font-bold mb-4 text-center">Nova Solicitação</h1>
+      <form className="max-w-md mx-auto" onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <TextField
+                label="Nome Completo"
+                {...register('nomeCompleto')}
+                fullWidth
+                type="text"
+                error={!!errors.nomeCompleto}
+                helperText={errors.nomeCompleto?.message || ' '}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+                label="RG"
+                {...register('rg')}
+                fullWidth
+                type="text"
+                error={!!errors.rg}
+                helperText={errors.rg?.message || ' '}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+                label="CPF"
+                {...register('cpf')}
+                fullWidth
+                type="text"
+                error={!!errors.cpf}
+                helperText={errors.cpf?.message || ' '}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+                label="Data de Nascimento"
+                type="date"
+                {...register('dataNascimento')}
+                fullWidth
+                error={!!errors.dataNascimento}
+                helperText={errors.dataNascimento?.message || ' '}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth error={!!errors.estadoCivil}>
+              <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
+              <Select id="estadoCivil" {...register('estadoCivil')}>
+                <MenuItem value="solteiro">Solteiro</MenuItem>
+                <MenuItem value="casado">Casado</MenuItem>
+                <MenuItem value="viuvo">Viúvo</MenuItem>
+              </Select>
+              {errors.estadoCivil && <span className="text-red-500">{errors.estadoCivil.message}</span>}
+            </FormControl>
+          </Grid>
+          <Grid>
+            <input
+                type="file"
+                accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
+                {...register('nomeArquivo')}
+                onChange={(event) => {
+                  if (event.target.files && event.target.files.length > 0) {
+                    fileName = event.target.files[0].name;
+                  }
+                }}
+            />
+          </Grid>
+        </Grid>
 
-              <input type="hidden" {...register('status')} value={status} />
-            </div>
-          </form>
+        <div className="mt-4">
+          <button type="submit" onClick={handleSave}>
+            Salvar
+          </button>
+          <button type="submit" onClick={handleSend}>
+            Enviar
+          </button>
         </div>
-      </div>
-  );
+      </form>
+    </div>
+  </div>;
 }
 
 export default NovaSolicitacao;

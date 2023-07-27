@@ -1,4 +1,3 @@
-
 import React from "react";
 import Image from "next/image";
 import HomeIcon from "@mui/icons-material/Home";
@@ -6,6 +5,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../../public/logoUnitins.png";
+import ButtonLinkPage from "../ButtonLinkPage/ButtonLinkPage"
 
 export const Sidebar = () => {
     return(
@@ -15,8 +15,7 @@ export const Sidebar = () => {
       {/* Conteúdo da barra lateral */}
       <ul className="mt-8">
         <li className="flex items-center space-x-2 p-2">
-          <HomeIcon />
-          <span className="font-bold text-xl">Inicial</span>
+          <ButtonLinkPage href="/dashboard"><HomeIcon /> Inicial</ButtonLinkPage>
         </li>
         <li className="flex items-center space-x-2 p-2">
           <NotificationsIcon />
@@ -27,8 +26,7 @@ export const Sidebar = () => {
           <span className="font-bold text-xl">Configurações</span>
         </li>
         <li className="flex items-center space-x-2 p-2">
-          <AccountCircleIcon />
-          <span className="font-bold text-xl">Perfil</span>
+          <ButtonLinkPage href="/perfil"> <AccountCircleIcon /> Perfil</ButtonLinkPage>
         </li>
       </ul>
     </aside>
