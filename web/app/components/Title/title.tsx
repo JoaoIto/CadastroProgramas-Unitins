@@ -12,7 +12,7 @@ const openSans = Open_Sans({
 
 const Title: React.FC<TitleProps> = ({ children }) => {
   return (
-    <h1 className="text-4xl font-bold text-gray-800 font-openSans shadow-md">{children}</h1>
+    <h1 className="max-w[50px] text-4xl font-bold m-6 text-gray-800 font-openSans shadow-blue-100">{children}</h1>
   );
 };
 

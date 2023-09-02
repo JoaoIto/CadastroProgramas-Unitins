@@ -71,7 +71,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
   }, [userId]);
 
   return (
-      <Card className="w-2/5 m-8">
+      <Card className="w-2/5 m-8 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl">
         <CardContent className="p-4">
           <Typography variant="h5" component="div">
             {programa.nomeCompleto}

@@ -7,6 +7,7 @@ import { Sidebar } from "@/app/components/MenuLateral/sidebar";
 import { Cabecalho } from "@/app/components/HeaderSearch/cabecalho";
 import { useSearchParams } from "next/navigation";
 import Perfil from "@/app/perfil/page";
+import Title from "../components/Title/title";
 
 export interface Programa {
   _id: string;
@@ -130,11 +131,12 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex w-screen">
       <Sidebar />
       <div className="flex flex-col">
         <Cabecalho />
           <div className="w-full bg-sky-200">
+            <Title>Dashboard</Title>
             <div className="flex self-end p-4">
             <ButtonLinkPage href={`/programa/cadastrar`}>
               Nova solicitação +
