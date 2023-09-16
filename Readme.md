@@ -1,6 +1,6 @@
 # ***Sistema de Cadastros***
 
-- ### **Projeto dedicado a inciação científica do PIBIC, Universidade Estadual do Tocantins juntamente com o Ministério da Ciência e Tecnologia. Um sistema web de cadastro de projetos para programas de computadores...**
+- ### **Projeto dedicado a inciação científica do PIBITI, Universidade Estadual do Tocantins juntamente com o Ministério da Ciência e Tecnologia. Um sistema web de cadastro de projetos para programas de computadores...**
 
 <img src=".github\img/printInicial.png"/>
 
