@@ -4,14 +4,13 @@ import { Sidebar } from "@/app/components/MenuLateral/sidebar";
 import { Cabecalho } from "@/app/components/HeaderSearch/cabecalho";
 import React, { useEffect, useState } from "react";
 import ApiUtils from "@/app/Utils/Api/apiMethods";
-import {Programa} from "@/app/dashboard/page";
+import Title from "@/app/components/Title/title";
 
 interface Perfil {
     _id: string;
     cpf: string;
     perfil: string;
     nome: string;
-    programas: Programa[];
 }
 
 function Perfil() {
@@ -23,10 +22,12 @@ function Perfil() {
         if (perfilId) {
             const fetchPerfil = async () => {
                 try {
-                    const perfilData = await ApiUtils.getByUuid<Perfil>(`http://localhost:3333/usuario`, perfilId);
+                    const perfilData = await ApiUtils.getByUuid<Perfil>(
+                        `http://localhost:3333/usuario`,
+                        perfilId
+                    );
                     if (perfilData) {
                         setPerfil(perfilData);
-                        console.log(perfilData)
                     }
                 } catch (error) {
                     console.error("Erro ao obter o perfil:", error);
@@ -38,28 +39,17 @@ function Perfil() {
     }, []);
 
     return (
-        <div className="flex h-screen">
+        <div className="bg-sky-200 flex h-screen">
             <Sidebar />
             <div className="flex flex-col w-full">
                 <Cabecalho />
                 <main className="p-4">
-                    <h2>Perfil</h2>
+                    <Title>Perfil</Title>
                     {perfil && (
-                        <div>
+                        <div className="bg-white p-2 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl">
                             <p>CPF: {perfil.cpf}</p>
                             <p>Tipo de Perfil: {perfil.perfil}</p>
                             <p>Nome: {perfil.nome}</p>
-                            {/* Exibindo os programas */}
-                            <p>Programas:</p>
-                            {perfil.programas.map((programa) => (
-                                <div key={programa._id}>
-                                    <p>Nome Completo: {programa.nomeCompleto}</p>
-                                    <p>RG: {programa.rg}</p>
-                                    <p>CPF: {programa.cpf}</p>
-                                    <p>Data de Nascimento: {programa.dataNascimento}</p>
-                                    <p>Estado Civil: {programa.estadoCivil}</p>
-                                </div>
-                            ))}
                         </div>
                     )}
                 </main>

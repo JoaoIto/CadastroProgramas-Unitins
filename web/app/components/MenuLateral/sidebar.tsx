@@ -9,7 +9,7 @@ export const Sidebar = () => {
     const isSmallScreen = window.innerWidth < 870;
 
     return (
-        <aside className={`w-full w-[300px] bg-blue-900 text-white flex flex-col items-center border-r-8 border-b-8 border-slate-700`}>
+        <aside className={`w-full w-[300px] bg-blue-900 text-white flex flex-col items-center border-r-4 border-b-4 border-slate-700`}>
             {/* Logo */}
             {!isSmallScreen && <Image src={UnitinsLogo} alt="Unitins Logo" className="h-56 w-full"/>}
             {/* Conteúdo da barra lateral */}
