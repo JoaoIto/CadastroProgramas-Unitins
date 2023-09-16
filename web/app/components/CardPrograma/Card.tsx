@@ -30,6 +30,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
 
   const handleConfirmDelete = async (uuid: string) => {
     try {
+      window.alert("O programa selecionado será deletado!")
       await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
       const updatedData = await ApiUtils.getByUuid<Perfil>(`http://localhost:3333/programa`, uuid);
       if (!updatedData) {
@@ -92,7 +93,11 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOw
             {hasPermission && hasPermission && programa.status === 'RASCUNHO' && (
                 <div>
                   <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
-                  <button onClick={() => handleConfirmDelete(programa._id)}>Deletar</button>
+                  <button className="text-white bg-red-800 p-2 rounded font-Inter"
+                          color="primary"
+                          onClick={() => handleConfirmDelete(programa._id)}>
+                    Deletar
+                  </button>
                 </div>
             )}
 

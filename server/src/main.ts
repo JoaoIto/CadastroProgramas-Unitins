@@ -5,5 +5,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cors());
   await app.listen(3333);
+  console.log('Conexão estabelecida');
 }
 bootstrap();
