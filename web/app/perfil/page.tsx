@@ -11,6 +11,7 @@ interface Perfil {
     cpf: string;
     perfil: string;
     nome: string;
+    rg: string;
 }
 
 function Perfil() {
@@ -47,9 +48,11 @@ function Perfil() {
                     <Title>Perfil</Title>
                     {perfil && (
                         <div className="bg-white p-2 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl">
+                            <h2 className="font-medium text-2xl my-4">Informações do usuário: </h2>
                             <p>CPF: {perfil.cpf}</p>
+                            <p>RG: {perfil.rg}</p>
                             <p>Tipo de Perfil: {perfil.perfil}</p>
-                            <p>Nome: {perfil.nome}</p>
+                            <p>Nome completo: {perfil.nome}</p>
                         </div>
                     )}
                 </main>
