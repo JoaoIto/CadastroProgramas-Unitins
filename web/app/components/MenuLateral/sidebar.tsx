@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import HomeIcon from "@mui/icons-material/Home";
+import ListIcon from '@mui/icons-material/List';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../../public/logoUnitins.png";
 import ButtonLinkPage from "../ButtonLinkPage/ButtonLinkPage";
@@ -23,7 +24,7 @@ export const Sidebar = () => {
                 </li>
                 <li className="flex items-center space-x-2 p-2">
                     <ButtonLinkPage href="/programa/listar">
-                        <AccountCircleIcon className="h-10 w-10" />
+                        <ListIcon className="h-10 w-10" />
                         {!isSmallScreen && <h3 className="font-medium text-lg p-4">Programas</h3>}
                     </ButtonLinkPage>
                 </li>
@@ -33,7 +34,6 @@ export const Sidebar = () => {
                         {!isSmallScreen && <h3 className="font-medium text-lg p-4">Perfil</h3>}
                     </ButtonLinkPage>
                 </li>
-                {/* O restante do conteúdo da barra lateral aqui */}
             </ul>
         </aside>
     );
