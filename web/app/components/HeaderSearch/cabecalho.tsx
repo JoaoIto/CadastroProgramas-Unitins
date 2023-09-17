@@ -17,7 +17,7 @@ export function Cabecalho() {
                 {/* Cabeçalho */}
                 <header className={`flex justify-between items-start bg-white h-56 w-full ${isSmallScreen ? 'flex-col' : 'flex'}`}>
                     {isSmallScreen ? (
-                        <div  className={`flex h-full items-center justify-center space-x-2 m-4`}>
+                        <div  className={`flex h-full items-center flex-col justify-center space-x-2 m-4`}>
                             <TextField
                                 type="text"
                                 placeholder="Pesquisar"
