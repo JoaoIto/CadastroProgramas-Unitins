@@ -87,7 +87,9 @@ const EditarSolicitacao = () => {
             <div className="flex-grow bg-sky-200 p-8">
                 <Title>Editar Solicitação</Title>
                 <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
-                    <Grid container spacing={2}>
+                    <Grid
+                        className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+                        container spacing={2}>
                         <Grid item xs={12} md={6}>
                             <TextField
                                 label="Nome Completo"
@@ -144,7 +146,9 @@ const EditarSolicitacao = () => {
                     </Grid>
 
                     <div className="mt-4">
-                        <button type="submit">Editar</button>
+                        <button
+                            className="bg-blue-700 border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                            type="submit">Editar</button>
                     </div>
                 </form>
             </div>
