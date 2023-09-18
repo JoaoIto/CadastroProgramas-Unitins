@@ -11,7 +11,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
 import Title from "@/app/components/Title/title";
 
@@ -43,7 +43,6 @@ const EditarSolicitacao = () => {
     });
     const { get } = useSearchParams();
     const uuid = get('uuid');
-    const router = useRouter();
 
     useEffect(() => {
         if (uuid) {
@@ -86,7 +85,7 @@ const EditarSolicitacao = () => {
             <Sidebar />
             <div className="flex-grow bg-sky-200 p-8">
                 <Title>Editar Solicitação</Title>
-                <form className="mx-auto" onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
+                <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
                     <Grid
                         style={{ maxWidth: isSmallScreen ? '400px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
                         className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
