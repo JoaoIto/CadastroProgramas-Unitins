@@ -13,9 +13,9 @@ const isSmallScreen = window.innerWidth < 870;
 export function Cabecalho() {
     return (
         <>
-            <div className="w-full h-56 bg-gray-100 flex items-center justify-between border-b-8 border-slate-700">
+            <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly border-b-8 border-slate-700">
                 {/* Cabeçalho */}
-                <header className={`flex justify-between items-start bg-white h-56 w-full ${isSmallScreen ? 'flex-col' : 'flex'}`}>
+                <header className={`flex justify-evenly items-center bg-white h-56 w-full ${isSmallScreen ? 'flex-col' : 'flex'}`}>
                     {isSmallScreen ? (
                         <div  className={`flex h-full items-center flex-col justify-center space-x-2 m-4`}>
                             <TextField
@@ -40,15 +40,14 @@ export function Cabecalho() {
                             </FormControl>
                         </div>
                     ) : (
-                        <div className="flex items-center space-x-2 w-1/2">
+                        <div className="flex items-center justify-evenly space-x-2 w-1/2">
                             <TextField
                                 type="text"
                                 placeholder="Pesquisar"
-                                className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
+                                className="w-[350px] border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
                                 InputProps={{
                                     startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
                                 }}
-                                style={{ maxWidth: '220px' }}
                             />
                             <FormControl className="flex">
                                 <FormLabel id="demo-radio-buttons-group-label">Filtrar por: </FormLabel>
@@ -61,14 +60,6 @@ export function Cabecalho() {
                                     <FormControlLabel value="male" control={<Radio />} label="Título" />
                                 </RadioGroup>
                             </FormControl>
-                        </div>
-                    )}
-
-                    {!isSmallScreen && (
-                        <div className="font-bold text-3xl">
-                            <ButtonLinkPage href="/perfil">
-                                <AccountCircleIcon className="h-10 w-10" /> Perfil
-                            </ButtonLinkPage>
                         </div>
                     )}
                 </header>
