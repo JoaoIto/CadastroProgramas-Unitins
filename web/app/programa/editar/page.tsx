@@ -13,6 +13,7 @@ import Grid from '@mui/material/Grid';
 import { Sidebar } from '../../components/MenuLateral/sidebar';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ApiUtils from '@/app/Utils/Api/apiMethods';
+import Title from "@/app/components/Title/title";
 
 const programaSchema = z.object({
     nomeCompleto: z.string().nonempty('Campo obrigatório'),
@@ -78,11 +79,13 @@ const EditarSolicitacao = () => {
         }
     };
 
+    const isSmallScreen = window.innerWidth < 870;
+
     return (
         <div className="flex h-screen">
             <Sidebar />
-            <div className="flex-grow p-8">
-                <h1 className="text-3xl font-bold mb-4 text-center">Editar Programa</h1>
+            <div className="flex-grow bg-sky-200 p-8">
+                <Title>Editar Solicitação</Title>
                 <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto">
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
