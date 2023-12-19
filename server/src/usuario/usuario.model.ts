@@ -16,6 +16,9 @@ export class Usuario {
 
     @Prop({ required: true })
     cpf: string;
+
+    // @Prop({ required: true })
+    // senha: string;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
