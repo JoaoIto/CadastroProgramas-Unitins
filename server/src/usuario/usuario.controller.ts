@@ -1,5 +1,6 @@
 import {Controller, Post, Body, Get, Param, Put, Delete} from '@nestjs/common';
 import {UsuarioService} from "./usuario.service";
+// import { HashService } from "../hash/hash.service";
 
 @Controller('/usuario')
     export class UsuarioController{
