@@ -37,9 +37,8 @@ export class ProgramaService {
         return this.programaRepository.update(uuid, updateData);
     }
 
-    async deletar(uuid: string): Promise<Programa> {
+    async deletar(uuid: string): Promise<void> {
         this.usuarioProgramaService.delete(uuid)
-        return this.programaRepository.delete(uuid);
     }
 }
 
