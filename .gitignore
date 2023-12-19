@@ -1,2 +1,6 @@
 ./web/node_modules
 ./server/node_modules
+/.idea
+./web/.idea
+./server/.idea
+./server/dist
