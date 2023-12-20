@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Headers, Param, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Logger,
+  Param,
+  Post,
+  Put,
+  UploadedFile,
+  UseInterceptors
+} from "@nestjs/common";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProgramaDto } from "./dto/createPrograma.dto";
 import { ProgramaService } from "./programa.service";
@@ -7,15 +19,29 @@ import { Programa } from "./programa.model";
 import { ProgramaStatus } from "./programa-status.enum";
 import * as path from "path";
 import * as fs from "fs";
+import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty } from "@nestjs/swagger";
 
 @Controller('/programa')
 export class ProgramaController {
+  private readonly logger = new Logger(ProgramaController.name);
   private formData: object = null;
   constructor(private programaService: ProgramaService) {}
 
   @Post('/uploads')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary', // Indica que é um arquivo binário
+        },
+      },
+    },
+  })
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: Express.Multer.File, @Body('nomeArquivo') nomeArquivo: string) {
     // Gerar um novo nome para o arquivo usando Date.now()
     const timestamp = Date.now().toString();
     const originalName = file.originalname;
@@ -39,6 +65,8 @@ export class ProgramaController {
   }
 
   @Post('/cadastrar')
+  @ApiBody({ type: CreateProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
+  @ApiCreatedResponse({ description: 'Operação bem-sucedida', type: CreateProgramaDto })
   async create(@Body() formData: CreateProgramaDto, @Headers() headers: Record<string, string>) {
     const usuarioId = headers["usuario-id"];
     const programaData = new Programa();
@@ -58,12 +86,14 @@ export class ProgramaController {
 
   @Get()
   getDados() {
+    this.logger.log('Fazendo a busca dos dados de todos os programas')
     return this.programaService.listar();
   }
 
   @Get('/:uuid')
-  consultar(@Param() params: any) {
-    let programaPromise = this.programaService.consultar(params.uuid);
+  consultar(@Param("uuid") uuid: string) {
+    this.logger.log('Fazendo a busca dos dados do programa com o uuid: ' + uuid);
+    let programaPromise = this.programaService.consultar(uuid);
     programaPromise.then(value => {
       console.log(value);
     });
