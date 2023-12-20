@@ -1,5 +1,7 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, Logger } from "@nestjs/common";
 import {UsuarioService} from "./usuario.service";
+import { ApiTags } from "@nestjs/swagger";
+@ApiTags('usuario')
 @Controller('/usuario')
     export class UsuarioController{
     private readonly logger = new Logger(UsuarioController.name);

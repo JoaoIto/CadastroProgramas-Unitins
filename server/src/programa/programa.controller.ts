@@ -19,8 +19,9 @@ import { Programa } from "./programa.model";
 import { ProgramaStatus } from "./programa-status.enum";
 import * as path from "path";
 import * as fs from "fs";
-import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
 
+@ApiTags('programa')
 @Controller('/programa')
 export class ProgramaController {
   private readonly logger = new Logger(ProgramaController.name);

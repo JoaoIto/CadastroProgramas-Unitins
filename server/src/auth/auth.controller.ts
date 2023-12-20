@@ -4,7 +4,16 @@ import { Usuario } from '../usuario/usuario.model';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDTO } from 'src/usuario/dto/login.dto';
 
-import { ApiBody, ApiResponse, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiResponse,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiProperty,
+  ApiTags
+} from "@nestjs/swagger";
+@ApiTags('auth')
 @Controller('/auth')
 export class AuthController {
   constructor(
