@@ -1,36 +1,24 @@
-import { Body, Controller, Injectable, Post } from '@nestjs/common';
-import { HashService } from '../hash/hash.service';
-import { Usuario } from '../usuario/usuario.model';
-import { JwtService } from '@nestjs/jwt';
+import { Body, Controller, Post } from '@nestjs/common';
 import { LoginDTO } from 'src/usuario/dto/login.dto';
-
 import {
   ApiBody,
   ApiResponse,
-  ApiConsumes,
-  ApiCreatedResponse,
   ApiOperation,
-  ApiProperty,
   ApiTags
 } from "@nestjs/swagger";
+import { AuthService } from './auth.service';
+
 @ApiTags('auth')
 @Controller('/auth')
 export class AuthController {
-  constructor(
-    private readonly hashService: HashService,
-    private readonly jwtService: JwtService,
-  ) {}
-  
+  constructor(private readonly authService: AuthService) {}
+
   @Post('/login')
   @ApiOperation({ summary: 'Gera token de autenticação para o usuário' })
   @ApiBody({ type: LoginDTO, description: 'Credenciais do usuário para login' })
   @ApiResponse({ status: 200, description: 'Token gerado com sucesso' })
-  generateToken(@Body() usuario: LoginDTO): string {
-    const payload = {
-      cpf: usuario.cpf,
-      senha: usuario.senha,
-    };
-
-    return this.jwtService.sign(payload);
+  async generateToken(@Body() loginDTO: LoginDTO): Promise<{ access_token: string }> {
+    const token = await this.authService.signIn(loginDTO);
+    return token;
   }
 }
