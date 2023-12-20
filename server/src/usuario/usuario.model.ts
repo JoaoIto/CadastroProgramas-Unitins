@@ -13,8 +13,8 @@ export class Usuario {
 
     @Prop({ required: true }) private _cpf: string;
 
-    // @Prop({ required: true })
-    // senha: string;
+    @Prop({ required: true })
+    senha: string;
 
 
     get id(): mongoose.Types.ObjectId {
