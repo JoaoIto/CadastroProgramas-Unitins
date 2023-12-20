@@ -45,6 +45,7 @@ export class ProgramaController {
     // Gerar um novo nome para o arquivo usando Date.now()
     const timestamp = Date.now().toString();
     const originalName = file.originalname;
+    this.logger.log('Fazendo upload de arquivo: ' + originalName);
     const fileExt = path.extname(originalName);
     const newFileName = `${timestamp}${fileExt}`;
 
@@ -68,6 +69,7 @@ export class ProgramaController {
   @ApiBody({ type: CreateProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
   @ApiCreatedResponse({ description: 'Operação bem-sucedida', type: CreateProgramaDto })
   async create(@Body() formData: CreateProgramaDto, @Headers() headers: Record<string, string>) {
+    this.logger.log('Fazendo cadastro de programa: ' + formData);
     const usuarioId = headers["usuario-id"];
     const programaData = new Programa();
 
@@ -101,6 +103,8 @@ export class ProgramaController {
   }
 
   @Put('/:uuid')
+  @ApiBody({ type: AtualizarProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
+  @ApiCreatedResponse({ description: 'Operação bem-sucedida', type: AtualizarProgramaDto })
   atualizar(@Param('uuid') uuid: string, @Body() updateData: AtualizarProgramaDto) {
     let programaEditado = new Programa();
     programaEditado.nomeCompleto = updateData.nomeCompleto;
