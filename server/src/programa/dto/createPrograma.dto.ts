@@ -1,14 +1,18 @@
-import {IsString, IsEmail, MinLength, IsNotEmpty, MaxLength, Length, IsDate, IsOptional} from 'class-validator';
-import {ProgramaStatus} from "../programa-status.enum";
+import { IsString, IsNotEmpty, Length, IsDateString, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { ProgramaStatus } from "../programa-status.enum";
+import { Prop } from "@nestjs/mongoose";
 
 export class CreateProgramaDto {
+    @ApiProperty ({ type: String, example: 'Pedrinho Joao Silva'})
     @IsString()
     @IsNotEmpty({ message: 'O nome não pode estar vazio!' })
     nomeCompleto: string;
 
+    @ApiProperty ({ type: String, example: '1111111'})
     @IsString({
         message:
-            'O RG não é válido...',
+          'O RG não é válido...',
     })
     @Length(7, 7, { message: 'O RG não é compatível com o tamanho!' })
     @IsNotEmpty({
@@ -16,32 +20,32 @@ export class CreateProgramaDto {
     })
     rg: string;
 
+    @ApiProperty ({ type: String, example: '000.111.222-33'})
     @Length(11, 11, { message: 'O CPF não é compatível com o tamanho!' })
     @IsNotEmpty({
         message: 'O CPF não pode estar vazio!',
     })
     cpf: string;
 
-    @IsString({ message: "A data não tem tamanho compatível"})
+    @ApiProperty({ type: Date, example: '2000-01-01' }) // Adicionando exemplo e tipo para o Swagger
+    @IsDateString()
     @IsNotEmpty({
         message: 'A data não pode estar vazia!',
     })
     dataNascimento: Date;
 
-    @IsString({ message: "Não é compatível"})
+    @ApiProperty ({ type: String, example: 'solteiro/casado'})
+    @IsString({ message: "Não é compatível" })
     @IsNotEmpty({
         message: 'Este campo não pode estar vazio!',
     })
     estadoCivil: string;
 
-    @IsNotEmpty({
-        message: 'Este campo não pode estar vazio!'
-    })
+    @ApiProperty ({ type: String, example: 'RASCUNHO'})
+    @Prop({ type: () => String, enum: ProgramaStatus, default: ProgramaStatus.RASCUNHO })
+    status: ProgramaStatus;
 
-    @IsNotEmpty({
-        message: 'Este campo não pode estar vazio!'
-    })
-    status: ProgramaStatus
 
+    @ApiProperty({ type: 'string', format: 'binary' })
     nomeArquivo: string;
 }
