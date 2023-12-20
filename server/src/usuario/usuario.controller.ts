@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, Logger } from "@nestjs/common";
 import {UsuarioService} from "./usuario.service";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { LoginDTO } from "./dto/login.dto";
 @ApiTags('usuario')
 @Controller('/usuario')
     export class UsuarioController{
@@ -27,4 +28,11 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
         this.logger.log('Fazendo a busca dos dados do usuario com o cpf: ' + cpf)
         return this.usuarioService.consultarByCpf(cpf);
     }
+    @ApiOperation({ summary: 'Faz a busca dos dados do usuario pelo login dele (cpf e senha)' })
+    @Post('/login')
+    login(@Body() loginDTO: LoginDTO) {
+        this.logger.log(`Fazendo a busca dos dados do usuario com o login: ${loginDTO.cpf} e senha: ${loginDTO.senha}`)
+        return this.usuarioService.login(loginDTO);
+    }
+
 }

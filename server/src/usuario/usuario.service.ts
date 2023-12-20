@@ -17,4 +17,8 @@ export class UsuarioService{
     async consultarByCpf(cpf): Promise<Usuario> {
         return this.usuarioRepository.findByCpf(cpf);
     }
+
+    async login(login): Promise<Usuario> {
+        return this.usuarioRepository.findByLogin(login);
+    }
 }
