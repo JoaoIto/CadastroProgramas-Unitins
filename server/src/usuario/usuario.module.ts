@@ -4,12 +4,13 @@ import {UsuarioService} from "./usuario.service";
 import {UsuarioRepository} from "./usuario.repository";
 import {MongooseModule} from "@nestjs/mongoose";
 import {Usuario, UsuarioSchema} from "./usuario.model";
+import { HashService } from "../hash/hash.service";
 
 @Module({
     imports:[MongooseModule.forFeature([{name: 'Usuario', schema: UsuarioSchema}])],
     controllers: [UsuarioController],
-    providers: [UsuarioService, UsuarioRepository],
-    exports: [UsuarioService]
+    providers: [UsuarioService, UsuarioRepository, HashService],
+    exports: [UsuarioService, HashService]
 })
 
 export class UsuarioModule{}
