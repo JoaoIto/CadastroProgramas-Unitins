@@ -16,7 +16,6 @@ import { CreateProgramaDto } from "./dto/createPrograma.dto";
 import { ProgramaService } from "./programa.service";
 import { AtualizarProgramaDto } from "./dto/atualizarPrograma.dto";
 import { Programa } from "./programa.model";
-import { ProgramaStatus } from "./programa-status.enum";
 import * as path from "path";
 import * as fs from "fs";
 import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
