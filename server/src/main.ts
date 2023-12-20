@@ -11,8 +11,6 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Software_Hub-API')
     .setDescription('The Software_Hub-API description')
-    .setVersion('1.0')
-    .addTag('Unitins-PI')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
