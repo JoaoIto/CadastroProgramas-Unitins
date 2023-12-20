@@ -10,7 +10,7 @@ import { HashService } from "../hash/hash.service";
     imports:[MongooseModule.forFeature([{name: 'Usuario', schema: UsuarioSchema}])],
     controllers: [UsuarioController],
     providers: [UsuarioService, UsuarioRepository, HashService],
-    exports: [UsuarioService, HashService]
+    exports: [UsuarioService, HashService, UsuarioRepository]
 })
 
 export class UsuarioModule{}
