@@ -19,7 +19,7 @@ export class ProgramaService {
         const usuario  = await this.usuarioService.consultar(userId);
         const usuarioPrograma = await this.usuarioProgramaService.create({
             programaId: programaCriado._id,
-            usuarioId: usuario.id,
+            usuarioId: usuario._id,
         });
 
         return programaCriado;
