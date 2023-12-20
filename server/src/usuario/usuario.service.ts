@@ -13,4 +13,8 @@ export class UsuarioService{
     async consultar(uuid): Promise<Usuario> {
         return this.usuarioRepository.findById(uuid);
     }
+
+    async consultarByCpf(cpf): Promise<Usuario> {
+        return this.usuarioRepository.findByCpf(cpf);
+    }
 }

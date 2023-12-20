@@ -1,7 +1,5 @@
 import {Controller, Post, Body, Get, Param, Put, Delete} from '@nestjs/common';
 import {UsuarioService} from "./usuario.service";
-// import { HashService } from "../hash/hash.service";
-
 @Controller('/usuario')
     export class UsuarioController{
 
@@ -12,7 +10,12 @@ import {UsuarioService} from "./usuario.service";
     }
 
     @Get('/:uuid')
-    consultar(@Param() params: any) {
-        return this.usuarioService.consultar(params.uuid);
+    consultar(@Param("uuid") uuid: string) {
+        return this.usuarioService.consultar(uuid);
+    }
+
+    @Get('/cpf/:cpf')
+    consultarByCpf(@Param("cpf") cpf: string) {
+        return this.usuarioService.consultarByCpf(cpf);
     }
 }
