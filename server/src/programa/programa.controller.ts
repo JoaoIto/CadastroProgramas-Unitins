@@ -8,7 +8,7 @@ import {
   Param,
   Post,
   Put,
-  UploadedFile,
+  UploadedFile, UseGuards,
   UseInterceptors
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -18,10 +18,21 @@ import { AtualizarProgramaDto } from "./dto/atualizarPrograma.dto";
 import { Programa } from "./programa.model";
 import * as path from "path";
 import * as fs from "fs";
-import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiProperty,
+  ApiTags
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @ApiTags("programa")
 @Controller("/programa")
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class ProgramaController {
   private readonly logger = new Logger(ProgramaController.name);
   private formData: object = null;
@@ -30,6 +41,7 @@ export class ProgramaController {
   }
 
   @Post("/uploads")
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Fazendo upload de um arquivo' })
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -44,6 +56,7 @@ export class ProgramaController {
     }
   })
   @UseInterceptors(FileInterceptor("file"))
+  @ApiBearerAuth()
   uploadFile(@UploadedFile() file: Express.Multer.File, @Body("nomeArquivo") nomeArquivo: string) {
     // Gerar um novo nome para o arquivo usando Date.now()
     const timestamp = Date.now().toString();
@@ -69,6 +82,7 @@ export class ProgramaController {
   }
 
   @Post("/cadastrar")
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Cadastra um novo programa a partir do DTO' })
   @ApiBody({ type: CreateProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
   @ApiCreatedResponse({ description: "Operação bem-sucedida", type: CreateProgramaDto })
@@ -91,6 +105,7 @@ export class ProgramaController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Fazendo a busca dos dados de todos os programas' })
   getDados() {
     this.logger.log("Fazendo a busca dos dados de todos os programas");
@@ -98,6 +113,7 @@ export class ProgramaController {
   }
 
   @Get("/:uuid")
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Consultando programa pelo uuid dele' })
   consultar(@Param("uuid") uuid: string) {
     this.logger.log("Fazendo a busca dos dados do programa com o uuid: " + uuid);
@@ -109,6 +125,7 @@ export class ProgramaController {
   }
 
   @Put("/:uuid")
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizando programa pelo uuid dele' })
   @ApiBody({ type: AtualizarProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
   @ApiCreatedResponse({ description: "Operação bem-sucedida", type: AtualizarProgramaDto })
@@ -124,6 +141,7 @@ export class ProgramaController {
   }
 
   @Delete("/:uuid")
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Deletando programa pelo uuid dele' })
   deletar(@Param("uuid") uuid: string) {
     return this.programaService.deletar(uuid);
