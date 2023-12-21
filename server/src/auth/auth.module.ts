@@ -6,17 +6,22 @@ import { UsuarioService } from "../usuario/usuario.service";
 import { UsuarioRepository } from "../usuario/usuario.repository";
 import { UsuarioModule } from "../usuario/usuario.module";
 import { AuthService } from "./auth.service";
+import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from "./jwt.strategy";
+import { LocalStrategy } from "./local.strategy";
+import { jwtConstants } from "./constans";
 
 @Module({
     imports: [
         JwtModule.register({
-            secret: 'software_hub-unitins', // Substitua com a sua chave secreta
-            signOptions: { expiresIn: '1h' }, // Configurações adicionais, se necessário
+            secret: jwtConstants.secret,
+            signOptions: { expiresIn: '24h' },
           }),
-      UsuarioModule
+      UsuarioModule,
+      PassportModule,
     ],
     controllers: [AuthController],
-    providers: [AuthService, HashService, JwtService]
+    providers: [AuthService, HashService, JwtService, LocalStrategy]
 })
 
 export class AuthModule { }
