@@ -1,11 +1,14 @@
-import {Controller, Post, Body, Get, Param, Delete} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, UseGuards } from "@nestjs/common";
 import { UsuarioProgramaService } from './usuario-programa.service';
 import { CreateUsuarioProgramaDto } from './dto/createUsuario-Programa.dto';
 import {UsuarioPrograma} from "./usuario-programa.model";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @ApiTags('usuario-programa')
 @Controller('usuario-programa')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class UsuarioProgramaController {
     constructor(private readonly usuarioProgramaService: UsuarioProgramaService) {}
 
