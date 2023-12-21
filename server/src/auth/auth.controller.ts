@@ -13,12 +13,13 @@ import { JwtStrategy } from "./jwt.strategy";
 import { Usuario } from "../usuario/usuario.model";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { RolesGuard } from "../roles/roles.guard";
+import { UsuarioService } from "../usuario/usuario.service";
 
 @ApiTags('auth')
 @Controller('/auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService, private readonly usuarioService: UsuarioService) {}
 
   @Post('/login')
   @UseGuards(JwtStrategy)
@@ -37,6 +38,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Retorna o usuário logado' })
   @ApiResponse({ status: 200 })
   async returnLogUser(@Req() req): Promise<Usuario> {
+    this.logger.log("Retornando o usuario logado")
+    this.logger.log(req.user)
+    const cpf =  req.user.cpf;
+    const usuario = await this.usuarioService.consultarByCpf(cpf);
+    this.logger.log(`Usuario retornado: ${usuario}`);
+    return usuario;
+  }
+
+  @Get('/log-user/payload')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Retorna o payload do usuário logado' })
+  @ApiResponse({ status: 200 })
+  async returnPayloadLogUser(@Req() req): Promise<Usuario> {
     this.logger.log("Retornando o payload de usuario logado")
     this.logger.log(req.user)
     return req.user;
