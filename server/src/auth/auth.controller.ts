@@ -37,6 +37,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Retorna o usuário logado' })
   @ApiResponse({ status: 200 })
   async returnLogUser(@Req() req): Promise<Usuario> {
+    this.logger.log("Retornando o payload de usuario logado")
+    this.logger.log(req.user)
     return req.user;
   }
 }
