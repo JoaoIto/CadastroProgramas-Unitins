@@ -133,6 +133,14 @@ export class ProgramaController {
     return this.programaService.consultarByStatus(status);
   }
 
+  @Get("/status/aprovados")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consultando programas aprovados' })
+  consultarByAprovados() {
+    this.logger.log("Fazendo a busca dos dados do programa com o status aprovado");
+    return this.programaService.consultarByAprovados(ProgramaStatus.APROVADO);
+  }
+
   @Put("/:uuid")
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizando programa pelo uuid dele' })

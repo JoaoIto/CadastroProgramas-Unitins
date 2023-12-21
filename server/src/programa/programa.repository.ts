@@ -30,7 +30,7 @@ export class ProgramaRepository {
     }
 
     async findByStatus(status: ProgramaStatus): Promise<Programa[]> {
-        const programa = await this.programa.find({ status: ProgramaStatus[status] }).exec();
+        const programa = await this.programa.find({ status: 'APROVADO' }).exec();
         this.logger.log('programa retornado: ' + programa);
         return programa;
     }
