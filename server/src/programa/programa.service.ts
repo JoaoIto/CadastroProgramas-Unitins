@@ -33,6 +33,10 @@ export class ProgramaService {
         return this.programaRepository.findById(uuid);
     }
 
+    async consultarByStatus(status): Promise<Programa[]> {
+        return this.programaRepository.findByStatus(status);
+    }
+
     async atualizar(uuid: string, updateData: Programa): Promise<Programa> {
         return this.programaRepository.update(uuid, updateData);
     }

@@ -3,6 +3,7 @@ import {Programa} from "./programa.model";
 import mongoose, {Model} from "mongoose";
 import {InjectModel} from "@nestjs/mongoose";
 import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
+import { ProgramaStatus } from "./programa-status.enum";
 
 @Injectable()
 export class ProgramaRepository {
@@ -18,7 +19,6 @@ export class ProgramaRepository {
         return programaCriado.save();
     }
 
-
     async findAll(): Promise<Programa[]> {
         return this.programa.find().exec();
     }
@@ -28,6 +28,13 @@ export class ProgramaRepository {
         this.logger.log('programa retornado: ' + programa);
         return programa;
     }
+
+    async findByStatus(status: ProgramaStatus): Promise<Programa[]> {
+        const programa = await this.programa.find({ status: ProgramaStatus[status] }).exec();
+        this.logger.log('programa retornado: ' + programa);
+        return programa;
+    }
+
 
     async update(
         uuid: string,

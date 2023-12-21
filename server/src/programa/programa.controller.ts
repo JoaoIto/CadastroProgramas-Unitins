@@ -28,6 +28,7 @@ import {
   ApiTags
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { ProgramaStatus } from "./programa-status.enum";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -122,6 +123,14 @@ export class ProgramaController {
       console.log(value);
     });
     return programaPromise;
+  }
+
+  @Get("/status/:status")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consultando programa pelo status dele' })
+  consultarByStatus(@Param("status") status: ProgramaStatus) {
+    this.logger.log("Fazendo a busca dos dados do programa com o status: " + status);
+    return this.programaService.consultarByStatus(status);
   }
 
   @Put("/:uuid")
