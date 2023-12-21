@@ -1,12 +1,15 @@
-import { Body, Controller, Logger, Post } from "@nestjs/common";
+import { Body, Controller, Logger, Post, UseGuards } from "@nestjs/common";
 import { LoginDTO } from 'src/usuario/dto/login.dto';
 import {
   ApiBody,
   ApiResponse,
   ApiOperation,
-  ApiTags
+  ApiTags, ApiBearerAuth
 } from "@nestjs/swagger";
 import { AuthService } from './auth.service';
+import { LocalAuthGuard } from "./local-auth-guard";
+import { AuthGuard } from "@nestjs/passport";
+import { JwtStrategy } from "./jwt.strategy";
 
 @ApiTags('auth')
 @Controller('/auth')
@@ -15,6 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
+  @UseGuards(JwtStrategy)
   @ApiOperation({ summary: 'Gera token de autenticação para o usuário' })
   @ApiBody({ type: LoginDTO, description: 'Credenciais do usuário para login' })
   @ApiResponse({ status: 200, description: 'Token gerado com sucesso' })
