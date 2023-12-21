@@ -10,7 +10,12 @@ async function bootstrap() {
   app.use(cors());
   const config = new DocumentBuilder()
     .setTitle('Software_Hub-API')
-    .setDescription('The Software_Hub-API description')
+    .setDescription(`The Software_Hub-API será uma API de entrega para o
+      software da software-hun Unitins, Universidade Estadual do Tocantins,
+      onde será um sistema de documentos, para oficialização de propriedade intelectual
+      no software de computadores! Projeto dedicado a inciação científica do PIBITI, 
+      juntamente com o Ministério da Ciência e Tecnologia.
+      Desenvolvido pelo aluno: João Victor Póvoa França. github.com/JoaoIto`)
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
