@@ -5,6 +5,7 @@ import {Usuario} from "./usuario.model";
 import { find } from "rxjs";
 import { LoginDTO } from "./dto/login.dto";
 import { HashService } from "../hash/hash.service";
+import { Role } from "../roles/roles.enum";
 
 @Injectable()
 export class UsuarioRepository {
