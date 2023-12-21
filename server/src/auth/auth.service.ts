@@ -16,7 +16,7 @@ export class AuthService {
 
     if (usuario) {
       this.logger.log("Usuario com credenciais encontrado! Gerando token...")
-      const payload = { cpf: usuario.cpf, senha: usuario.senha };
+      const payload = { cpf: usuario.cpf, senha: usuario.senha, perfil: usuario.perfil };
       const access_token = await this.jwtService.signAsync(payload, {
         secret: 'software_hub-unitins',
         expiresIn: '1h',
