@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "../roles/roles.enum";
 
 export type UsuarioDocument = Usuario & Document;
 
@@ -11,7 +12,7 @@ export class Usuario {
      _id: mongoose.Types.ObjectId;
 
     @Prop({ required: true })
-     perfil: string;
+     perfil: Role;
 
     @Prop({ required: true })
      nome: string;
