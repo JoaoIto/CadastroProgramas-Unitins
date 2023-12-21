@@ -1,10 +1,9 @@
-import {Injectable} from '@nestjs/common';
-import { ProgramaRepository } from './programa.repository';
-import {Programa} from "./programa.model";
-import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
-import {UsuarioProgramaService} from "../usuario-programa/usuario-programa.service";
-import {UsuarioService} from "../usuario/usuario.service";
-import mongoose from "mongoose";
+import { Injectable } from "@nestjs/common";
+import { ProgramaRepository } from "./programa.repository";
+import { Programa } from "./programa.model";
+import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
+import { UsuarioService } from "../usuario/usuario.service";
+import { ProgramaStatus } from "./programa-status.enum";
 
 @Injectable()
 export class ProgramaService {
@@ -35,6 +34,10 @@ export class ProgramaService {
 
     async consultarByStatus(status): Promise<Programa[]> {
         return this.programaRepository.findByStatus(status);
+    }
+
+    async consultarByAprovados(status): Promise<Programa[]> {
+        return this.programaRepository.findByStatus(ProgramaStatus.APROVADO);
     }
 
     async atualizar(uuid: string, updateData: Programa): Promise<Programa> {
