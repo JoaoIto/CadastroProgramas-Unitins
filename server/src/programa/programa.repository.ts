@@ -29,6 +29,25 @@ export class ProgramaRepository {
         return programa;
     }
 
+    async findByIds(programaUuids: string[]): Promise<Programa[]> {
+        const programas = [];
+
+        for (const uuid of programaUuids) {
+            const programa = await this.programa.findById(uuid).exec();
+
+            if (programa) {
+                programas.push(programa);
+                this.logger.log('Programa retornado para UUID ' + uuid + ': ' + programa);
+            } else {
+                this.logger.log('Nenhum programa encontrado para UUID ' + uuid);
+            }
+        }
+
+        return programas;
+    }
+
+
+
     async findByStatus(status: ProgramaStatus): Promise<Programa[]> {
         const programa = await this.programa.find({ status: 'APROVADO' }).exec();
         this.logger.log('programa retornado: ' + programa);

@@ -1,12 +1,15 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ProgramaRepository } from "./programa.repository";
 import { Programa } from "./programa.model";
 import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
 import { UsuarioService } from "../usuario/usuario.service";
 import { ProgramaStatus } from "./programa-status.enum";
+import { UsuarioPrograma } from "../usuario-programa/usuario-programa.model";
 
 @Injectable()
 export class ProgramaService {
+
+    private readonly logger = new Logger(ProgramaService.name);
     constructor(
         private programaRepository: ProgramaRepository,
         private usuarioService: UsuarioService,
@@ -46,6 +49,12 @@ export class ProgramaService {
 
     async deletar(uuid: string): Promise<void> {
         this.usuarioProgramaService.delete(uuid)
+    }
+
+    async getProgramasPorIds(programaIds: string[]) {
+        this.logger.log(`Recebido ${programaIds.length} ids de programas`)
+        this.logger.log("Recido programaIds: " + programaIds)
+        return this.programaRepository.findByIds(programaIds);
     }
 }
 
