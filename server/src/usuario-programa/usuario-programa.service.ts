@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UsuarioPrograma } from './usuario-programa.model';
 import {UsuarioProgramaRepository} from "./usuario-programa.repository";
+import ProgramaService from "../programa/programa.service";
 
 @Injectable()
 export class UsuarioProgramaService {
@@ -19,7 +20,7 @@ export class UsuarioProgramaService {
         return this.usuarioProgramaRepository.create(usuarioPrograma);
     }
 
-    async getProgramasPorUsuario(usuarioId: string): Promise<UsuarioPrograma[]> {
+    async getUsuarioProgramasPorUsuario(usuarioId: string): Promise<UsuarioPrograma[]> {
         return this.usuarioProgramaRepository.find(usuarioId);
     }
 

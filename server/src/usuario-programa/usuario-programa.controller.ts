@@ -31,7 +31,7 @@ export class UsuarioProgramaController {
     @Get(':usuarioId/programas')
     @ApiOperation({ summary: 'Lista todos os dados da tabela usuario/programa a partir do usuarioID' })
     async getProgramasPorUsuario(@Param('usuarioId') usuarioId: string) {
-        return this.usuarioProgramaService.getProgramasPorUsuario(usuarioId);
+        return this.usuarioProgramaService.getUsuarioProgramasPorUsuario(usuarioId);
     }
 
     @Delete(':programaId')
