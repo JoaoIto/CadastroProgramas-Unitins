@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-    font-family: 'Open Sans';
-    src: url('https: //fonts.googleapis.com/css2?family=Open+Sans&display=swap');
-    /* Adicione as variações da fonte, como itálico, negrito, etc., se necessário */
-}
-
 body {
     font-family: 'Open Sans', sans-serif;
 }
