@@ -22,7 +22,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly usuarioService: UsuarioService) {}
 
   @Post('/login')
-  @UseGuards(JwtStrategy)
   @ApiOperation({ summary: 'Gera token de autenticação para o usuário' })
   @ApiBody({ type: LoginDTO, description: 'Credenciais do usuário para login' })
   @ApiResponse({ status: 200, description: 'Token gerado com sucesso' })
