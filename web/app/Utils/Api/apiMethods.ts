@@ -1,7 +1,28 @@
 import {Programa} from "@/app/dashboard/page";
 
 class ApiUtils {
-    static async post(endpoint: string, data: object): Promise<void> {
+
+    static async authenticate(loginUser: ILoginUser): Promise<string | undefined> {
+        const endpoint = 'http://localhost:8080';
+        const loginEndpoint = `${endpoint}/auth/login`;
+
+        try {
+            const response: IResponseToken | undefined = await this.post(loginEndpoint, loginUser);
+
+            // Agora você pode acessar a propriedade access_token diretamente
+            if (response) {
+                const token = response.access_token;
+                return token;
+            }
+
+        } catch (error) {
+            console.error('Erro durante a autenticação:', error);
+            throw error; // Repasse o erro para o chamador
+        }
+    }
+
+
+    static async post<T>(endpoint: string, data: object): Promise<T | undefined> {
         console.log( window.sessionStorage.getItem('perfilId'));
 
         try {
