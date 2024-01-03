@@ -1,12 +1,8 @@
-import type {Metadata} from 'next'
+"use client"
+import '../globals.css'
 import {Inter} from 'next/font/google'
 
 const inter = Inter({subsets: ['latin']})
-
-export const metadata: Metadata = {
-    title: 'Software Hub',
-    description: 'Software hub para programas de computadores da Universidade!',
-}
 
 export default function RootLayout({
                                        children,
