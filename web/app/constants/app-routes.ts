@@ -6,6 +6,6 @@ export const APP_ROUTES = {
         listar: '/programa/listar'
     },
     public: {
-        login: 'auth/login'
+        login: '/auth/login'
     }
 }
