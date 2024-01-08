@@ -42,7 +42,7 @@ export async function postUserLogin(user: ILoginUser): Promise<string> {
     }
 }
 
-export default function LoginPage(){
+export default function LoginPage() {
     const router = useRouter();
     const [isAutenticado, setIsAutenticado] = useState(false);
     const usuarioSchema = z.object({
@@ -66,7 +66,7 @@ export default function LoginPage(){
             // Chama a função postUserLogin e passa os dados do formulário
             const token = await postUserLogin(data);
             tokenService.save(token);
-            router.push('/dashboard');
+            router.push('/');
             setTimeout(() => {
                 // Redireciona para a rota inicial
                 window.location.reload();
