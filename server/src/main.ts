@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { Logger } from "@nestjs/common";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger();
