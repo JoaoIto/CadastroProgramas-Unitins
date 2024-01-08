@@ -7,7 +7,7 @@ import {
   Logger,
   Param,
   Post,
-  Put,
+  Put, Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -25,6 +25,8 @@ import { ProgramaStatus } from "./programa-status.enum";
 import { Roles } from "../roles/roles.decorator";
 import { Role } from "../roles/roles.enum";
 import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
+import { Usuario } from "../usuario/usuario.model";
+import { UsuarioService } from "../usuario/usuario.service";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -34,7 +36,7 @@ export class ProgramaController {
   private readonly logger = new Logger(ProgramaController.name);
   private formData: object = null;
 
-  constructor(private programaService: ProgramaService, private readonly usuarioProgramaService: UsuarioProgramaService) {
+  constructor(private programaService: ProgramaService, private readonly  usuarioService: UsuarioService, private readonly usuarioProgramaService: UsuarioProgramaService) {
   }
 
   @Post("/uploads")
@@ -109,6 +111,32 @@ export class ProgramaController {
     this.logger.log("Fazendo a busca dos dados de todos os programas");
     return this.programaService.listar();
   }
+
+  @Get('/porUsuario')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.User)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Retorna os programas do usuário logado' })
+  async getProgramasByUser(@Req() req): Promise<Programa[]> {
+    try {
+      this.logger.log("Retornando os programas do usuário logado");
+      const usuarioCpf = req.user.cpf;
+      const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
+      this.logger.log("Fazendo a busca dos dados de programas do usuario");
+      const usuarioPrograma = await this.usuarioProgramaService.getUsuarioProgramasPorUsuario(usuario._id.toString());
+      // Extrai os valores de 'programaId' de cada objeto e cria um array com eles
+      const programaIds = usuarioPrograma.map(item => item.programaId.toString());
+
+      // Passa o array de 'programaIds' para o serviço de programas
+      const programas = await this.programaService.getProgramasPorIds(programaIds);
+
+      return programas;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar programas do usuário: ${error.message}`);
+      throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
+    }
+  }
+
   @Get("/porUsuario/:uuid")
   @ApiBearerAuth()
   @Roles(Role.Admin, Role.User)
