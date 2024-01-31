@@ -23,8 +23,8 @@
         cinzaClaro: "#F5F5F5",
         cinzaTraco: "#ADADAD",
         azulEscuro: "#00255B",
-        azulClaroGradient: "#40BAFF",
-        azulEscuroGradient: "#00255B",
+        azulClaroGradient: "#8ed4ff",
+        azulEscuroGradient: "#18428F",
         verdeClaro: "#30D64C",
         vermelho: "#CF0E0E"
       },
