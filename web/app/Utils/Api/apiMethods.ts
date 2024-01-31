@@ -1,8 +1,8 @@
 class ApiUtils {
 
+    private static baseUrl = 'http://localhost:8080';
     static async authenticate(loginUser: ILoginUser): Promise<string | undefined> {
-        const endpoint = 'http://localhost:8080';
-        const loginEndpoint = `${endpoint}/auth/login`;
+        const loginEndpoint = `${(ApiUtils.baseUrl)}/auth/login`;
 
         try {
             const response: IResponseToken | undefined = await this.postLogin(loginEndpoint, loginUser);
@@ -46,16 +46,9 @@ class ApiUtils {
             console.error(error);
         }
     }
-    static async post<T>(endpoint: string, data: object, token: string): Promise<T | undefined> {
+    private static async performRequest<T>(url: string, options: RequestInit): Promise<T | undefined> {
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(data),
-            });
+            const response = await fetch(`${ApiUtils.baseUrl}${url}`, options);
 
             if (response.ok) {
                 const result = await response.json();
@@ -70,84 +63,61 @@ class ApiUtils {
         return undefined;
     }
 
-    // Modifique as outras funções seguindo o mesmo padrão
+    static async post<T>(endpoint: string, data: object, token: string): Promise<T | undefined> {
+        const options: RequestInit = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        };
+
+        return ApiUtils.performRequest<T>(endpoint, options);
+    }
 
     static async get<T>(endpoint: string, token: string): Promise<T | undefined> {
-        try {
-            const response = await fetch(endpoint, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
 
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
-            }
-
-            const data: T = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Erro ao buscar os dados:', error);
-            throw error;
-        }
+        return ApiUtils.performRequest<T>(endpoint, options);
     }
 
     static async getByUuid<T>(endpoint: string, uuid: string, token: string): Promise<T | undefined> {
-        try {
-            const response = await fetch(`${endpoint}/${uuid}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
 
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
-            }
-
-            const data: T = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Erro ao buscar os dados:', error);
-            throw error;
-        }
+        return ApiUtils.performRequest<T>(`${endpoint}/${uuid}`, options);
     }
 
     static async put(endpoint: string, data: object, token: string): Promise<void> {
-        try {
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(data),
-            });
+        const options: RequestInit = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        };
 
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Erro ao atualizar os dados:', error);
-            throw error;
-        }
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 
     static async delete(endpoint: string, token: string): Promise<void> {
-        try {
-            const response = await fetch(endpoint, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
+        const options: RequestInit = {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
 
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Erro ao deletar os dados:', error);
-            throw error;
-        }
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 }
 
