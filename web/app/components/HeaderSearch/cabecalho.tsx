@@ -7,61 +7,28 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import UnitinsLogo from "@/public/logoUnitins.png";
+import Image from "next/image";
+import React from "react";
+import { Button } from "@mui/material";
 
-const isSmallScreen = window.innerWidth < 870;
-
-export function Cabecalho() {
+export function Search() {
     return (
         <>
-            <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly border-b-8 border-slate-700">
+            <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly ">
                 {/* Cabeçalho */}
-                <header className={`flex justify-evenly items-center bg-white h-56 w-full ${isSmallScreen ? 'flex-col' : 'flex'}`}>
-                    {isSmallScreen ? (
-                        <div  className={`flex h-full items-center flex-col justify-center space-x-2 m-4`}>
+                <header className={`flex justify-start sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-56 w-full`}>
+                    <Image src={UnitinsLogo} alt="Unitins Logo" className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-60 w-60 mr-10"/>
                             <TextField
                                 type="text"
-                                placeholder="Pesquisar"
-                                className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
-                                InputProps={{
-                                    startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
-                                }}
-                                style={{ maxWidth: '220px' }}
-                            />
-                            <FormControl className="flex">
-                                <FormLabel id="demo-radio-buttons-group-label">Filtrar por: </FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-radio-buttons-group-label"
-                                    defaultValue="female"
-                                    name="radio-buttons-group"
-                                >
-                                    <FormControlLabel value="female" control={<Radio />} label="Nome" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Título" />
-                                </RadioGroup>
-                            </FormControl>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-evenly space-x-2 w-1/2">
-                            <TextField
-                                type="text"
-                                placeholder="Pesquisar"
-                                className="w-[350px] border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
+                                placeholder="Pesquisar pelo titulo: "
+                                className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-2/4"
                                 InputProps={{
                                     startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
                                 }}
                             />
-                            <FormControl className="flex">
-                                <FormLabel id="demo-radio-buttons-group-label">Filtrar por: </FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-radio-buttons-group-label"
-                                    defaultValue="female"
-                                    name="radio-buttons-group"
-                                >
-                                    <FormControlLabel value="female" control={<Radio />} label="Nome" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Título" />
-                                </RadioGroup>
-                            </FormControl>
-                        </div>
-                    )}
+                            <Button variant="contained" className={`h-12 bg-azulEscuro text-white`}>Pesquisar</Button>
+
                 </header>
                 {/* Conteúdo principal */}
             </div>

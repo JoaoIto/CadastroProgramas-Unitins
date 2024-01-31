@@ -5,6 +5,8 @@ import {usePathname} from 'next/navigation';
 import {Inter} from 'next/font/google';
 import {checkPublicRoute} from '@/app/functions/checkPublicRoute';
 import PrivateRoute from '@/app/Utils/PrivaterRoute/index';
+import {Search} from "@/app/components/HeaderSearch/cabecalho";
+import {Sidebar} from "@/app/components/MenuLateral/sidebar";
 
 const inter = Inter({subsets: ['latin']});
 
@@ -19,7 +21,11 @@ const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
     return (
         <html lang="en">
         <body className={inter.className}>
-        <div className="flex">
+        <div>
+            <Search/>
+        </div>
+        <div className="flex h-screen w-full">
+            <Sidebar/>
             <main className="h-full w-full">
                 {isPublicPage && children}
                 {!isPublicPage && (
