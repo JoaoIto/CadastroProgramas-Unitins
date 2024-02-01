@@ -22,7 +22,7 @@ export default function Programas() {
   <div className="flex h-screen">
       <main className="flex flex-wrap items-center">
           <Title>Programas do usuário: </Title>
-          <div className={`p-4`}>
+          <div className={`mx-4 p-4 border-4 border-cinzaTraco rounded-2xl`}>
               <p>Nome: {usuario?.nome}</p>
               <p>CPF: {usuario?.cpf}</p>
           </div>
