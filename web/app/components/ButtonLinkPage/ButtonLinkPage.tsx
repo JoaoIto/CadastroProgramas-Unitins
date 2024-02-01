@@ -28,20 +28,19 @@ export function ButtonLinkPage({ href, children, uuid, onClick }: ButtonLinkPage
     };
 
     return (
-        <div className={openSans.className}>
-        <Link href={`${href}${uuid ? ('?uuid=' + uuid) : ''}`} passHref>
+        <>
+        <Link className={`flex justify-center`} href={`${href}${uuid ? ('?uuid=' + uuid) : ''}`} passHref>
             <Button
-                className="bg-blue-900 font-Inter"
+                className="bg-azulEscuro font-Inter shadow-none"
                 type="submit"
                 fullWidth
                 variant="contained"
-                color="primary"
                 onClick={handleClick} // Passa a função handleSubmit aqui
             >
                 {children}
             </Button>
         </Link>
-        </div>
+        </>
     );
 }
 
