@@ -126,7 +126,7 @@ export default function LoginPage() {
                             <Link href="#" variant="body2">
                                 Esqueceu a senha?
                             </Link>
-                            <Button className="bg-blue-900" type="submit" variant="contained" color="primary">
+                            <Button className="bg-azulEscuro" type="submit" variant="contained" color="primary">
                                 Entrar
                             </Button>
                             {isAutenticado === false && (
