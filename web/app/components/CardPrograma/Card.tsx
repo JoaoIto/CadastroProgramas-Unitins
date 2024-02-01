@@ -41,20 +41,20 @@ export const CardProgram: React.FC<CardProgramProps> = ({programa}) => {
                 </Typography>
                 <Typography variant="body2">Estado Civil: {programa.estadoCivil}</Typography>
                 <Typography variant="body2">Status: {programa.status}</Typography>
-                <div className="flex gap-2">
-                    <Button className="bg-indigo-900 m-10" variant="contained" size="small">
+                <div className="flex gap-2 items-center">
+                    <Button className="bg-azulEscuroGradient" variant="contained" size="small">
                         Visualizar
                     </Button>
                     <div>
                         <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
-                        <button className="text-white bg-red-800 p-2 rounded font-Inter"
-                                color="primary">
-                                Deletar
-                    </button>
+                    {/*    <button className="text-white bg-red-800 p-2 rounded font-Inter"*/}
+                    {/*            color="primary">*/}
+                    {/*            Deletar*/}
+                    {/*</button>*/}
                 </div>
-                <div>
-                    <button>Cancelar</button>
-                </div>
+                {/*<div>*/}
+                {/*    <button>Cancelar</button>*/}
+                {/*</div>*/}
             </div>
         </CardContent>
 </Card>
