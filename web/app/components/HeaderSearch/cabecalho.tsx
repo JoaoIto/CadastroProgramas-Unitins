@@ -18,7 +18,7 @@ export function Search() {
             <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly ">
                 {/* Cabeçalho */}
                 <header className={`flex justify-start sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-56 w-full`}>
-                    <Image src={UnitinsLogo} alt="Unitins Logo" className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-60 w-60 mr-10"/>
+                    <Image src={UnitinsLogo} alt="Unitins Logo" className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-56 w-56 mr-10 shadow-black shadow-2xl"/>
                             <TextField
                                 type="text"
                                 placeholder="Pesquisar pelo titulo: "
