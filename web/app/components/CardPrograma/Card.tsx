@@ -27,6 +27,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({programa}) => {
 
     return (
         <Card
+            key={programa._id}
             className="w-4/5 m-8 border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl">
             <CardContent className="p-4">
                 <Typography variant="h5" component="div">
@@ -42,7 +43,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({programa}) => {
                 <Typography variant="body2">Estado Civil: {programa.estadoCivil}</Typography>
                 <Typography variant="body2">Status: {programa.status}</Typography>
                 <div className="flex gap-2 items-center">
-                    <Button className="bg-azulEscuroGradient" variant="contained" size="small">
+                    <Button className="bg-azulEscuroGradient" variant="contained">
                         Visualizar
                     </Button>
                     <div>
