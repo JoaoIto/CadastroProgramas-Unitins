@@ -10,9 +10,7 @@ export function Sidebar(){
 
     return (
         <aside
-            className={`w-[300px] h-full bg-azulEscuro text-white flex flex-col items-center shadow-2xl shadow-black`}>
-            {/* Logo */}
-            {/* Conteúdo da barra lateral */}
+            className={`max-w-[300px] bg-azulEscuro text-white flex flex-col items-center shadow-cinzaTraco shadow-lg`}>
             <ul className="flex flex-col items-center gap-10 mt-8 flex-1">
                 <li className="flex items-center space-x-2">
                     <ButtonLinkPage href="/">

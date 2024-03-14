@@ -17,8 +17,8 @@ export function Search() {
         <>
             <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly ">
                 {/* Cabeçalho */}
-                <header className={`flex justify-start sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-56 w-full`}>
-                    <Image src={UnitinsLogo} alt="Unitins Logo" className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-56 w-56 mr-10 shadow-black shadow-2xl"/>
+                <header className={`flex justify-start sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-56 w-full shadow-cinzaTraco shadow-lg`}>
+                    <Image src={UnitinsLogo} alt="Unitins Logo" className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-56 w-56 mr-10"/>
                             <TextField
                                 type="text"
                                 placeholder="Pesquisar pelo titulo: "
@@ -27,7 +27,7 @@ export function Search() {
                                     startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
                                 }}
                             />
-                            <Button variant="contained" className={`h-12 bg-azulEscuro text-white`}>Pesquisar</Button>
+                            <Button variant="contained" className={`h-12 bg-azulEscuroGradient text-white`}>Pesquisar</Button>
 
                 </header>
                 {/* Conteúdo principal */}

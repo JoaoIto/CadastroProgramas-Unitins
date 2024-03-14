@@ -24,7 +24,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
         <div>
             <Search/>
         </div>
-        <div className="flex h-screen w-full">
+        <div className="flex h-full w-full">
             <Sidebar/>
             <main className="h-full w-full">
                 {isPublicPage && children}
