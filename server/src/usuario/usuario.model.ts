@@ -22,6 +22,12 @@ export class Usuario {
 
     @Prop({ required: true })
      senha: string;
+
+    @Prop()
+    matricula: string;
+
+    @Prop()
+    endereco: string;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

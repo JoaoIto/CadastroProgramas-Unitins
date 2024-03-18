@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, Post, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Param, Post, Put, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UsuarioService } from "./usuario.service";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LoginDTO } from "./dto/login.dto";
@@ -15,6 +15,19 @@ import { RolesGuard } from "../roles/roles.guard";
     private readonly logger = new Logger(UsuarioController.name);
 
     constructor (private usuarioService: UsuarioService){}
+
+    @Roles(Role.Admin, Role.User)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Atualiza informações adicionais do usuário' })
+    @Put('/:uuid')
+    async atualizarInformacoesAdicionais(
+      @Param("uuid") uuid: string,
+      @Body() novasInformacoes: any, // Aqui você pode definir um DTO específico se necessário
+    ) {
+        this.logger.log('Atualizando informações adicionais do usuário com o uuid: ' + uuid);
+        return this.usuarioService.atualizarInformacoes(uuid, novasInformacoes);
+    }
     @Get()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiBearerAuth()

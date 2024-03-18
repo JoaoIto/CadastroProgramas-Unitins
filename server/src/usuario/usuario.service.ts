@@ -10,6 +10,10 @@ export class UsuarioService{
     async listar(): Promise<Usuario[]>{
         return this.usuarioRepository.findAll();
     }
+
+    async atualizarInformacoes(uuid: string, updateData: Usuario): Promise<Usuario>{
+        return this.usuarioRepository.update(uuid, updateData)
+    }
     async consultar(uuid): Promise<Usuario> {
         return this.usuarioRepository.findById(uuid);
     }

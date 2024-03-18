@@ -6,6 +6,7 @@ import { find } from "rxjs";
 import { LoginDTO } from "./dto/login.dto";
 import { HashService } from "../hash/hash.service";
 import { Role } from "../roles/roles.enum";
+import { Programa } from "../programa/programa.model";
 
 @Injectable()
 export class UsuarioRepository {
@@ -15,6 +16,19 @@ export class UsuarioRepository {
     }
     async findAll(): Promise<Usuario[]> {
         return this.usuario.find().exec();
+    }
+
+    async update(
+      uuid: string,
+      updateData: Usuario,
+    ): Promise<Usuario | null> {
+        const usuarioAtualizado = await this.usuario.findByIdAndUpdate(
+          uuid,
+          updateData,
+          { new: true },
+        );
+        this.logger.log(`O usuario foi atualizado! Usuario atualizado ${uuid}: ${usuarioAtualizado}`)
+        return usuarioAtualizado;
     }
 
     async findById(uuid): Promise<Usuario> {
