@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsArray, IsDateString, IsBooleanString, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ProgramaStatus } from "../programa-status.enum";
-import { ProgramaFase } from '../programa-fase.enum';
+import { ProgramaStatus } from "../../programa-status.enum";
+import { ProgramaFase } from '../../programa-fase.enum';
 import mongoose, { Schema } from 'mongoose';
 
 export class CreateProgramaInputDto {

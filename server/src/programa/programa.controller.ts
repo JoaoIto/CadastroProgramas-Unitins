@@ -13,9 +13,9 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { CreateProgramaInputDto } from "./dto/createProgramaInput.dto";
+import { CreateProgramaInputDto } from "./dto/create/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
-import { AtualizarProgramaDto } from "./dto/atualizarPrograma.dto";
+import { AtualizarProgramaDto } from "./dto/update/atualizarPrograma.dto";
 import { Programa } from "./programa.model";
 import * as path from "path";
 import * as fs from "fs";

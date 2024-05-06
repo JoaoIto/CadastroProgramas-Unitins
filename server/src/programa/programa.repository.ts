@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import {Programa} from "./programa.model";
 import mongoose, {Model} from "mongoose";
 import {InjectModel} from "@nestjs/mongoose";
-import {AtualizarProgramaDto} from "./dto/atualizarPrograma.dto";
+import {AtualizarProgramaDto} from "./dto/update/atualizarPrograma.dto";
 import { ProgramaStatus } from "./programa-status.enum";
 
 @Injectable()
