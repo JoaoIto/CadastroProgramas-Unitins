@@ -7,7 +7,7 @@ export class CreateUsuarioInputDto {
     @IsNotEmpty({ message: 'O nome não pode estar vazio!' })
     nome: string;
 
-    @ApiProperty({ type: String, example: '123.456.789-00' })
+    @ApiProperty({ type: String, example: '12345678900' })
     @IsString()
     @IsNotEmpty({ message: 'O CPF não pode estar vazio!' })
     cpf: string;

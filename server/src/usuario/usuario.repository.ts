@@ -13,8 +13,12 @@ export class UsuarioRepository {
     }
 
     async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
+        const senhaHash = this.hashService.getHashSenha(usuarioData.senha);
+        usuarioData.senha = senhaHash;
         const usuarioCriado = new this.usuario(usuarioData);
         usuarioCriado._id = new mongoose.Types.ObjectId();
+        this.logger.log('Senha hash: ' + senhaHash)
+        this.logger.log('Usuario criado', usuarioCriado)
         return usuarioCriado.save();
     }
     async findAll(): Promise<Usuario[]> {

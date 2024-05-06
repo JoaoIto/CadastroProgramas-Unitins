@@ -28,9 +28,9 @@ export class HashService {
     return salt;
   }
 
-  async getHashSenha(senha: string): Promise<string> {
+  getHashSenha(senha: string): string {
     this.logger.log('Senha a ser gerada: ' + senha);
-    const hashedSenha = await hashSync(senha, this.salt);
+    const hashedSenha = hashSync(senha, this.salt);
     this.logger.log('Hash da senha gerada: ' + hashedSenha);
     return hashedSenha;
   }
