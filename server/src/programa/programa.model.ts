@@ -1,6 +1,7 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, {Document, ObjectId, SchemaTypes} from 'mongoose';
 import {ProgramaStatus} from "./programa-status.enum";
+import { ProgramaFase } from './programa-fase.enum';
 
 export type ProgramaDocument = Programa & Document;
 
@@ -10,20 +11,41 @@ export class Programa {
     @Prop({type: SchemaTypes.ObjectId})
     _id: mongoose.Types.ObjectId;
 
-    @Prop({ required: true })
-    nomeCompleto: string;
+    @Prop({type: SchemaTypes.ObjectId})
+    usuarioId: mongoose.Types.ObjectId;
 
     @Prop({ required: true })
-    rg: string;
+    titulo: string;
 
     @Prop({ required: true })
-    cpf: string;
+    descricao: string;
 
     @Prop({ required: true })
-    dataNascimento: Date;
+    solucaoProblemaDesc: string;
 
     @Prop({ required: true })
-    estadoCivil: string;
+    linguagens: string[];
+
+    @Prop({default: null})
+    modificacaoTecnologicaDesc: string;
+
+    @Prop({ required: true })
+    descricaoMercado: string;
+
+    @Prop({ required: true })
+    dataCriacaoPrograma: Date;
+
+    @Prop({ required: true, default: new Date() })
+    dataCriacao: Date;
+
+    @Prop({ required: true })
+    vinculoUnitins: boolean;
+
+    @Prop({default: null})
+    vinculoInstitucional: string;
+
+    @Prop({type: String, enum: ProgramaFase })
+    fasePublicacao: ProgramaFase;
 
     @Prop({type: String, required: true, enum: ProgramaStatus, default: ProgramaStatus.RASCUNHO })
     status: ProgramaStatus;

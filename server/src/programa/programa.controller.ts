@@ -13,7 +13,7 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { CreateProgramaDto } from "./dto/createPrograma.dto";
+import { CreateProgramaInputDto } from "./dto/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
 import { AtualizarProgramaDto } from "./dto/atualizarPrograma.dto";
 import { Programa } from "./programa.model";
@@ -39,69 +39,63 @@ export class ProgramaController {
   constructor(private programaService: ProgramaService, private readonly  usuarioService: UsuarioService, private readonly usuarioProgramaService: UsuarioProgramaService) {
   }
 
-  @Post("/uploads")
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Fazendo upload de um arquivo' })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        file: {
-          type: "string",
-          format: "binary" // Indica que é um arquivo binário
-        }
+  @Post('/uploads')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    try {
+      if (!file) {
+        throw new Error('Arquivo não encontrado');
       }
+
+      console.log('Arquivo recebido:', file.originalname);
+
+      const timestamp = Date.now().toString();
+      const fileExt = path.extname(file.originalname);
+      const newFileName = `${timestamp}${fileExt}`;
+
+      const uploadFolderPath = "./uploads";
+      if (!fs.existsSync(uploadFolderPath)) {
+        fs.mkdirSync(uploadFolderPath);
+      }
+
+      const filePath = path.join(uploadFolderPath, newFileName);
+      fs.writeFileSync(filePath, file.buffer);
+
+      return { fileName: file.originalname };
+    } catch (error) {
+      console.error('Erro ao fazer upload do arquivo:', error);
+      throw error;
     }
-  })
-  @UseInterceptors(FileInterceptor("file"))
-  @ApiBearerAuth()
-  uploadFile(@UploadedFile() file: Express.Multer.File, @Body("nomeArquivo") nomeArquivo: string) {
-    // Gerar um novo nome para o arquivo usando Date.now()
-    const timestamp = Date.now().toString();
-    const originalName = file.originalname;
-    this.logger.log("Fazendo upload de arquivo: " + originalName);
-    const fileExt = path.extname(originalName);
-    const newFileName = `${timestamp}${fileExt}`;
-
-    // Caminho da pasta onde os arquivos serão salvos
-    const uploadFolderPath = "./uploads";
-
-    // Criar a pasta 'uploads' caso não exista
-    if (!fs.existsSync(uploadFolderPath)) {
-      fs.mkdirSync(uploadFolderPath);
-    }
-
-    // Mover o arquivo para a pasta de uploads com o novo nome
-    const filePath = path.join(uploadFolderPath, newFileName);
-    fs.writeFileSync(filePath, file.buffer);
-
-    // Retorne o nome do arquivo para o front-end, se necessário
-    return { fileName: originalName };
   }
 
   @Post("/cadastrar")
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cadastra um novo programa a partir do DTO' })
-  @ApiBody({ type: CreateProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
-  @ApiCreatedResponse({ description: "Operação bem-sucedida", type: CreateProgramaDto })
-  async create(@Body() formData: CreateProgramaDto, @Headers() headers: Record<string, string>) {
+  @ApiOperation({ summary: 'Cadastra um novo programa' })
+  @ApiBody({ type: CreateProgramaInputDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
+  @ApiCreatedResponse({ description: "Operação bem-sucedida", type: Programa })
+  async create(@Body() formData: CreateProgramaInputDto, @Headers() headers: Record<string, string>) {
     this.logger.log("Fazendo cadastro de programa: " + formData);
     const usuarioId = headers["usuario-id"];
     const programaData = new Programa();
 
-    programaData.nomeCompleto = formData.nomeCompleto;
-    programaData.rg = formData.rg;
-    programaData.cpf = formData.cpf;
-    programaData.dataNascimento = formData.dataNascimento;
-    programaData.estadoCivil = formData.estadoCivil;
+    programaData.titulo = formData.titulo;
+    programaData.descricao = formData.descricao;
+    programaData.solucaoProblemaDesc = formData.solucaoProblemaDesc;
+    programaData.linguagens = formData.linguagens;
+    programaData.descricaoMercado = formData.descricaoMercado;
+    programaData.dataCriacaoPrograma = formData.dataCriacaoPrograma;
+    programaData.vinculoUnitins = formData.vinculoUnitins;
+    programaData.vinculoInstitucional = formData.vinculoInstitucional;
+    programaData.fasePublicacao = formData.fasePublicacao;
     programaData.status = formData.status;
     programaData.nomeArquivo = formData.nomeArquivo;
+    programaData.usuarioId = formData.usuarioId
 
     // Salva os dados do programa no banco de dados
-    this.programaService.criar(programaData, usuarioId);
-    return [{ status: "Criado uma nova requisição!" }, { formData }];
+    const novoPrograma = await this.programaService.criar(programaData, usuarioId);
+    return novoPrograma;
   }
+
 
   @Get()
   @ApiBearerAuth()
@@ -190,7 +184,7 @@ export class ProgramaController {
     return this.programaService.consultarByAprovados(ProgramaStatus.APROVADO);
   }
 
-  @Put("/:uuid")
+  /* @Put("/:uuid")
   @Roles(Role.Admin, Role.User)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizando programa pelo uuid dele' })
@@ -205,7 +199,7 @@ export class ProgramaController {
     programaEditado.estadoCivil = updateData.estadoCivil;
 
     return this.programaService.atualizar(uuid, programaEditado);
-  }
+  } */
 
   @Delete("/:uuid")
   @Roles(Role.Admin)

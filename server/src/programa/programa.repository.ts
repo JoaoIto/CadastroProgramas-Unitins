@@ -15,6 +15,7 @@ export class ProgramaRepository {
     async create(programaData: Partial<Programa>): Promise<Programa> {
         const programaCriado = new this.programa(programaData);
         programaCriado._id = new mongoose.Types.ObjectId();
+        programaCriado.usuarioId = programaData.usuarioId;
         console.log(programaCriado._id)
         return programaCriado.save();
     }
