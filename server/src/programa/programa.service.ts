@@ -19,10 +19,6 @@ export class ProgramaService {
     async criar(programaModel: Programa, userId: string): Promise<Programa> {
         const programaCriado = await this.programaRepository.create(programaModel);
         const usuario  = await this.usuarioService.consultar(userId);
-        const usuarioPrograma = await this.usuarioProgramaService.create({
-            programaId: programaCriado._id,
-            usuarioId: usuario._id,
-        });
 
         return programaCriado;
     }
