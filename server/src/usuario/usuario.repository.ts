@@ -1,18 +1,21 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {InjectModel} from "@nestjs/mongoose";
-import {Model} from "mongoose";
+import mongoose, {Model} from "mongoose";
 import {Usuario} from "./usuario.model";
-import { find } from "rxjs";
 import { LoginDTO } from "./dto/login.dto";
 import { HashService } from "../hash/hash.service";
-import { Role } from "../roles/roles.enum";
-import { Programa } from "../programa/programa.model";
 
 @Injectable()
 export class UsuarioRepository {
 
     private readonly logger = new Logger(UsuarioRepository.name);
     constructor(@InjectModel(Usuario.name) private readonly usuario: Model<Usuario>, private readonly hashService: HashService) {
+    }
+
+    async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
+        const usuarioCriado = new this.usuario(usuarioData);
+        usuarioCriado._id = new mongoose.Types.ObjectId();
+        return usuarioCriado.save();
     }
     async findAll(): Promise<Usuario[]> {
         return this.usuario.find().exec();

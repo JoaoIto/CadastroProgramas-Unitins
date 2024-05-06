@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Logger, Param, Post, Put, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UsuarioService } from "./usuario.service";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LoginDTO } from "./dto/login.dto";
 import { Role } from "../roles/roles.enum";
 import { Roles } from "../roles/roles.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../roles/roles.guard";
+import { CreateUsuarioInputDto } from "./dto/create/createUsuario.dto";
 
 @ApiTags('usuario')
 @Controller('/usuario')
@@ -15,6 +16,16 @@ import { RolesGuard } from "../roles/roles.guard";
     private readonly logger = new Logger(UsuarioController.name);
 
     constructor (private usuarioService: UsuarioService){}
+
+    @Roles(Role.Admin)
+    @Post('/cadastrar')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Cria um novo usuário' })
+    @ApiCreatedResponse({ description: 'Usuário criado com sucesso.' })
+    criar(@Body() createUsuarioInputDto: CreateUsuarioInputDto) {
+        this.logger.log('Criando um novo usuário.');
+        return this.usuarioService.create(createUsuarioInputDto);
+    }
 
     @Roles(Role.Admin, Role.User)
     @UseGuards(JwtAuthGuard, RolesGuard)
