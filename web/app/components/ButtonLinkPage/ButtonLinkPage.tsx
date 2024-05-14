@@ -31,10 +31,10 @@ export function ButtonLinkPage({ href, children, uuid, onClick }: ButtonLinkPage
         <>
         <Link className={`flex justify-center`} href={`${href}${uuid ? ('?uuid=' + uuid) : ''}`} passHref>
             <Button
-                className="bg-azulEscuro font-Inter shadow-none"
+                className="bg-azulEscuro font-Inter shadow-none text-white"
                 type="submit"
                 fullWidth
-                variant="contained"
+                variant="text"
                 onClick={handleClick} // Passa a função handleSubmit aqui
             >
                 {children}

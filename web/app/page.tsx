@@ -5,6 +5,7 @@ import ButtonLinkPage from "./components/ButtonLinkPage/ButtonLinkPage";
 import Title from "./components/Title/title";
 import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
 import {getProgramasUsuario} from "@/app/service/programa/programaUserLogado";
+import Button from "@mui/material/Button";
 
 export default function DashboardPage (){
     const token = getStorageItem();
@@ -19,9 +20,9 @@ export default function DashboardPage (){
                 <div className="w-full h-full i">
                     <Title>Dashboard</Title>
                     <div className="flex self-end p-4">
-                        <ButtonLinkPage href={`/programa/cadastrar`}>
+                        <Button variant='contained' href={`/programa/cadastrar`}>
                             Nova solicitação +
-                        </ButtonLinkPage>
+                        </Button>
                     </div>
                     <main className="flex flex-wrap items-center justify-center">
                         {programas.map((programa) => (

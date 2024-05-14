@@ -2,13 +2,13 @@
 import './globals.css'
 import React, {ReactNode} from 'react';
 import {usePathname} from 'next/navigation';
-import {Inter} from 'next/font/google';
+import {Open_Sans} from 'next/font/google';
 import {checkPublicRoute} from '@/app/functions/checkPublicRoute';
 import PrivateRoute from '@/app/Utils/PrivaterRoute/index';
 import {Search} from "@/app/components/HeaderSearch/cabecalho";
 import {Sidebar} from "@/app/components/MenuLateral/sidebar";
 
-const inter = Inter({subsets: ['latin']});
+const openSans = Open_Sans({subsets: ['latin']});
 
 interface RootLayoutProps {
     children: ReactNode;
@@ -20,11 +20,11 @@ const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
 
     return (
         <html lang="en">
-        <body className={inter.className}>
+        <body className={openSans.className}>
         <div>
             <Search/>
         </div>
-        <div className="flex h-full w-full">
+        <div className="flex h-screen w-full">
             <Sidebar/>
             <main className="h-full w-full">
                 {isPublicPage && children}

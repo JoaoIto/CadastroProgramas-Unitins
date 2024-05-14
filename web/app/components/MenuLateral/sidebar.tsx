@@ -5,30 +5,31 @@ import ListIcon from '@mui/icons-material/List';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import UnitinsLogo from "../../../public/logoUnitins.png";
 import ButtonLinkPage from "../ButtonLinkPage/ButtonLinkPage";
+import { Button } from "@mui/material";
 
 export function Sidebar(){
 
     return (
         <aside
-            className={`max-w-[300px] bg-azulEscuro text-white flex flex-col items-center shadow-cinzaTraco shadow-lg`}>
+            className={`bg-azulEscuro text-white flex flex-col items-center flex-shrink-0`}>
             <ul className="flex flex-col items-center gap-10 mt-8 flex-1">
                 <li className="flex items-center space-x-2">
-                    <ButtonLinkPage href="/">
+                    <Button variant="text" className="text-white" href="/">
                         <HomeIcon className="h-10 w-10" />
                         <h3 className="sm:hidden font-medium text-lg p-4">Inicial</h3>
-                    </ButtonLinkPage>
+                    </Button>
                 </li>
                 <li className="flex items-center space-x-2">
-                    <ButtonLinkPage href="/programa/listar">
+                    <Button variant="text" className="text-white" href="/programa/listar">
                         <ListIcon className="h-10 w-10" />
                         <h3 className="sm:hidden font-medium text-lg p-4">Programas</h3>
-                    </ButtonLinkPage>
+                    </Button>
                 </li>
                 <li className="flex items-center space-x-2">
-                    <ButtonLinkPage href="/perfil">
+                    <Button variant="text" className="text-white" href="/perfil">
                         <AccountCircleIcon className="h-10 w-10" />
                         <h3 className="sm:hidden font-medium text-lg p-4">Perfil</h3>
-                    </ButtonLinkPage>
+                    </Button>
                 </li>
             </ul>
         </aside>
