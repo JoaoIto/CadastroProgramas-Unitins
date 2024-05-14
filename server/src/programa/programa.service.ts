@@ -5,6 +5,7 @@ import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.ser
 import { UsuarioService } from "../usuario/usuario.service";
 import { ProgramaStatus } from "./programa-status.enum";
 import { UsuarioPrograma } from "../usuario-programa/usuario-programa.model";
+import mongoose from "mongoose";
 
 @Injectable()
 export class ProgramaService {
@@ -16,7 +17,7 @@ export class ProgramaService {
         private usuarioProgramaService: UsuarioProgramaService,
     ) {}
 
-    async criar(programaModel: Programa, userId: string): Promise<Programa> {
+    async criar(programaModel: Programa, userId: mongoose.Types.ObjectId): Promise<Programa> {
         const programaCriado = await this.programaRepository.create(programaModel);
         const usuario  = await this.usuarioService.consultar(userId);
 
@@ -51,6 +52,11 @@ export class ProgramaService {
         this.logger.log(`Recebido ${programaIds.length} ids de programas`)
         this.logger.log("Recido programaIds: " + programaIds)
         return this.programaRepository.findByIds(programaIds);
+    }
+
+    async getProgramasPorUsuarioId(usuarioId: mongoose.Types.ObjectId) {
+        this.logger.log(`Recebido ${usuarioId} id de usuario`)
+        return this.programaRepository.findByUsuarioId(usuarioId);
     }
 }
 

@@ -10,7 +10,7 @@ export class CreateProgramaInputDto {
     @IsNotEmpty({ message: 'O título não pode estar vazio!' })
     titulo: string;
 
-    @ApiProperty({ type: String })
+    @ApiProperty({ type: mongoose.Types.ObjectId, required: true })
     @IsNotEmpty()
     usuarioId: mongoose.Types.ObjectId;
 

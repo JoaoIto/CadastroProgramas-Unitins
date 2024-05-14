@@ -6,16 +6,15 @@ import {
   Headers,
   Logger,
   Param,
+  Patch,
   Post,
   Put, Req,
   UploadedFile,
-  UseGuards,
-  UseInterceptors
+  UseGuards
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
 import { CreateProgramaInputDto } from "./dto/create/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
-import { AtualizarProgramaDto } from "./dto/update/atualizarPrograma.dto";
+import { UpdateProgramaInputDto } from "./dto/update/atualizarPrograma.dto";
 import { Programa } from "./programa.model";
 import * as path from "path";
 import * as fs from "fs";
@@ -27,6 +26,7 @@ import { Role } from "../roles/roles.enum";
 import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
 import { Usuario } from "../usuario/usuario.model";
 import { UsuarioService } from "../usuario/usuario.service";
+import { IMultipartFile } from "./interfaces/IMultpartFile.interface";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -39,14 +39,11 @@ export class ProgramaController {
   constructor(private programaService: ProgramaService, private readonly  usuarioService: UsuarioService, private readonly usuarioProgramaService: UsuarioProgramaService) {
   }
 
-  @Post('/uploads')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  @Patch('/uploads')
+  async uploadFile(@UploadedFile() file: IMultipartFile) {
     try {
-      if (!file) {
-        throw new Error('Arquivo não encontrado');
-      }
-
+      console.log(file);
+      
       console.log('Arquivo recebido:', file.originalname);
 
       const timestamp = Date.now().toString();
@@ -59,7 +56,6 @@ export class ProgramaController {
       }
 
       const filePath = path.join(uploadFolderPath, newFileName);
-      fs.writeFileSync(filePath, file.buffer);
 
       return { fileName: file.originalname };
     } catch (error) {
@@ -75,7 +71,6 @@ export class ProgramaController {
   @ApiCreatedResponse({ description: "Operação bem-sucedida", type: Programa })
   async create(@Body() formData: CreateProgramaInputDto, @Headers() headers: Record<string, string>) {
     this.logger.log("Fazendo cadastro de programa: " + formData);
-    const usuarioId = headers["usuario-id"];
     const programaData = new Programa();
 
     programaData.titulo = formData.titulo;
@@ -92,7 +87,7 @@ export class ProgramaController {
     programaData.usuarioId = formData.usuarioId
 
     // Salva os dados do programa no banco de dados
-    const novoPrograma = await this.programaService.criar(programaData, usuarioId);
+    const novoPrograma = await this.programaService.criar(programaData, programaData.usuarioId);
     return novoPrograma;
   }
 
@@ -117,12 +112,8 @@ export class ProgramaController {
       const usuarioCpf = req.user.cpf;
       const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
       this.logger.log("Fazendo a busca dos dados de programas do usuario");
-      const usuarioPrograma = await this.usuarioProgramaService.getUsuarioProgramasPorUsuario(usuario._id.toString());
-      // Extrai os valores de 'programaId' de cada objeto e cria um array com eles
-      const programaIds = usuarioPrograma.map(item => item.programaId.toString());
-
       // Passa o array de 'programaIds' para o serviço de programas
-      const programas = await this.programaService.getProgramasPorIds(programaIds);
+      const programas = await this.programaService.getProgramasPorUsuarioId(usuario._id);
 
       return programas;
     } catch (error) {
@@ -184,22 +175,29 @@ export class ProgramaController {
     return this.programaService.consultarByAprovados(ProgramaStatus.APROVADO);
   }
 
-  /* @Put("/:uuid")
+  @Put("/:uuid")
   @Roles(Role.Admin, Role.User)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizando programa pelo uuid dele' })
-  @ApiBody({ type: AtualizarProgramaDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
-  @ApiCreatedResponse({ description: "Operação bem-sucedida", type: AtualizarProgramaDto })
-  atualizar(@Param("uuid") uuid: string, @Body() updateData: AtualizarProgramaDto) {
-    let programaEditado = new Programa();
-    programaEditado.nomeCompleto = updateData.nomeCompleto;
-    programaEditado.rg = updateData.rg;
-    programaEditado.cpf = updateData.cpf;
-    programaEditado.dataNascimento = updateData.dataNascimento;
-    programaEditado.estadoCivil = updateData.estadoCivil;
+  @ApiBody({ type: UpdateProgramaInputDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
+  @ApiCreatedResponse({ description: "Operação bem-sucedida" })
+  atualizar(@Param("uuid") uuid: string, @Body() updateData: UpdateProgramaInputDto) {
+    const programaEditado = new Programa();
 
+    programaEditado.titulo = updateData.titulo;
+    programaEditado.descricao = updateData.descricao;
+    programaEditado.solucaoProblemaDesc = updateData.solucaoProblemaDesc;
+    programaEditado.linguagens = updateData.linguagens;
+    programaEditado.descricaoMercado = updateData.descricaoMercado;
+    programaEditado.dataCriacaoPrograma = updateData.dataCriacaoPrograma;
+    programaEditado.vinculoUnitins = updateData.vinculoUnitins;
+    programaEditado.vinculoInstitucional = updateData.vinculoInstitucional;
+    programaEditado.fasePublicacao = updateData.fasePublicacao;
+    programaEditado.status = updateData.status;
+    programaEditado.nomeArquivo = updateData.nomeArquivo;
+    
     return this.programaService.atualizar(uuid, programaEditado);
-  } */
+  }
 
   @Delete("/:uuid")
   @Roles(Role.Admin)
