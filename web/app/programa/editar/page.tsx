@@ -75,7 +75,10 @@ const EditarSolicitacao = () => {
                         setValue('titulo', programaData.titulo);
                         setValue('descricao', programaData.descricao);
                         setValue('solucaoProblemaDesc', programaData.solucaoProblemaDesc);
-        
+                        if (programaData.linguagens.length > 0) {
+                            setLinguagens(programaData.linguagens);
+                        }
+                                                
                         setValue('descricaoMercado', programaData.descricaoMercado);
                         setValue('dataCriacaoPrograma', programaData.dataCriacaoPrograma);
                         setValue('vinculoUnitins', programaData.vinculoUnitins);
