@@ -58,6 +58,11 @@ export class ProgramaService {
         this.logger.log(`Recebido ${usuarioId} id de usuario`)
         return this.programaRepository.findByUsuarioId(usuarioId);
     }
+
+    async getProgramasPorUsuarioIdTitulo(usuarioId: mongoose.Types.ObjectId, titulo: string) {
+        this.logger.log(`Recebido ${usuarioId} id de usuario`)
+        return this.programaRepository.findProgramaTituloByUsuarioId(usuarioId, titulo);
+    }
 }
 
 export default ProgramaService;

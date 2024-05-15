@@ -13,8 +13,7 @@ export class UsuarioProgramaRepository {
     }
 
     async find(usuarioId: string): Promise<UsuarioPrograma[]> {
-        mongoose.set('debug', true);
-        return this.usuarioProgramaModel.find({ usuarioId }).exec();
+        return this.usuarioProgramaModel.find({ usuarioId: usuarioId }).exec();
     }
 
     async create(usuarioProgramaData: Partial<UsuarioPrograma>): Promise<UsuarioPrograma> {

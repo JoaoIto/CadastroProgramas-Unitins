@@ -22,7 +22,7 @@
         black: "#000",
         cinzaClaro: "#F5F5F5",
         cinzaTraco: "#ADADAD",
-        azulEscuro: "#00255B",
+        azulEscuro: "#18428F",
         azulClaroGradient: "#8ed4ff",
         azulEscuroGradient: "#18428F",
         verdeClaro: "#30D64C",

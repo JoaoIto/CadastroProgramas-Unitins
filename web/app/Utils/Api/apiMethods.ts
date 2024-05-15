@@ -63,9 +63,32 @@ class ApiUtils {
         return undefined;
     }
 
-    static async post<T>(endpoint: string, data: object, token: string): Promise<T | undefined> {
+    static async post<T>(
+        endpoint: string,
+        data: object,
+        token: string,
+        additionalHeaders?: Record<string, string>
+    ): Promise<T | undefined> {
         const options: RequestInit = {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...additionalHeaders, // Adicione cabeçalhos adicionais se fornecidos
+            },
+            body: JSON.stringify(data),
+        };
+
+        return ApiUtils.performRequest<T>(endpoint, options);
+    }
+
+    static async patch<T>(
+        endpoint: string,
+        data: object,
+        token: string,
+    ): Promise<T | undefined> {
+        const options: RequestInit = {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,

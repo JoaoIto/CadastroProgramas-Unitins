@@ -61,7 +61,13 @@ export class ProgramaRepository {
         return programa;
     }
 
-
+    async findProgramaTituloByUsuarioId(usuarioId: mongoose.Types.ObjectId, titulo: string): Promise<Programa[]> {
+        let query = { usuarioId: usuarioId , titulo: titulo};
+        const programas = await this.programa.find(query).exec();
+        this.logger.log('programas retornados: ' + programas);
+        return programas;
+    }
+    
     async update(
         uuid: string,
         updateData: Programa,

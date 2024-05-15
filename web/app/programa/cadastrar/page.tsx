@@ -1,175 +1,207 @@
-"use client"
+'use client'
 
-import React, {useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
+import React, { useEffect, useState, useCallback } from 'react';
+import Button from '@mui/material/Button';
+import { z } from 'zod';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import {Sidebar} from '../../components/MenuLateral/sidebar';
-import ApiUtils from '@/app/Utils/Api/apiMethods';
-import {ProgramaStatus} from '@/app/enum/programa-status.enum';
 import Grid from "@mui/material/Grid";
 import Title from "@/app/components/Title/title";
+import { getStorageItem } from "@/app/functions/getStorageItem/getStorageItem";
+import { fetchPerfil } from "@/app/service/perfil/logUser";
+import { TextareaAutosize } from '@mui/material';
+import { ProgramaStatus } from '@/app/enum/programa-status.enum';
+import { postPrograma } from '@/app/service/programa/post/postPrograma';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+//import DatePicker from '@mui/lab/DatePicker';
 
 const programa = z.object({
-    nomeCompleto: z.string().nonempty('Campo obrigatório'),
-    rg: z.string().refine(value => /^\d+$/.test(value), {
-        message: 'Somente números',
-        path: ['rg'],
-    }).refine(value => value.length >= 7, {
-        message: 'Mínimo de 7 dígitos',
-        path: ['rg'],
-    }),
-    cpf: z.string().refine(value => /^\d+$/.test(value), {
-        message: 'Somente números',
-        path: ['cpf'],
-    }).refine(value => value.length >= 11, {
-        message: 'Mínimo de 11 dígitos',
-        path: ['cpf'],
-    }),
-    dataNascimento: z.string().nonempty('Campo obrigatório'),
-    estadoCivil: z.string().nonempty('Campo obrigatório'),
-    status: z.string(),
-    nomeArquivo: z.any(),
+    titulo: z.string().min(1, { message: 'Campo obrigatório' }),
+    descricao: z.string().min(1, { message: 'Campo obrigatório' }),
+    solucaoProblemaDesc: z.string().min(1, { message: 'Campo obrigatório' }),
+    linguagens: z.array(z.string()).nonempty({ message: 'Campo obrigatório' }),
+    descricaoMercado: z.string().min(1, { message: 'Campo obrigatório' }),
+    dataCriacaoPrograma: z.string().min(1, { message: 'Campo obrigatório' }),
+    vinculoUnitins: z.boolean(),
+    fasePublicacao: z.string().min(1, { message: 'Campo obrigatório' }),
+    status: z.string().min(1, { message: 'Campo obrigatório' }),
+    nomeArquivo: z.any().optional(),
 });
 
 type FormData = z.infer<typeof programa>;
 
-function NovaSolicitacao() {
-    const {
-        register,
-        handleSubmit,
-        formState: {errors},
-    } = useForm<FormData>({
-        resolver: zodResolver(programa),
-    });
+async function getUsuarioId(token: string) {
+    try {
+        const perfil = await fetchPerfil(token);
+        const usuarioId = perfil?._id;
+        return usuarioId;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
-    const usuarioId = sessionStorage.getItem('perfilId');
-    let fileName: string | undefined = undefined;
+export default function NovaSolicitacao() {
+    const router = useRouter();
+    const token = getStorageItem();
+    const [usuarioId, setUsuarioId] = useState<string | undefined>(undefined);
+    const [linguagens, setLinguagens] = useState<string[]>([]);
+    const [linguagemInput, setLinguagemInput] = useState<string>('');
     const [status, setStatus] = useState<ProgramaStatus>(ProgramaStatus.RASCUNHO);
 
-    console.log("Render")
+    useEffect(() => {
+        const usuarioIdPromise = getUsuarioId(token);
+        usuarioIdPromise.then(id => {
+            console.log('Usuario ID:', id);
+            setUsuarioId(id);
+        }).catch(error => {
+            console.error('Erro ao obter o usuarioId:', error);
+        });
+    }, [token]);
 
-    // Função para enviar o arquivo para /programa/uploads
-    async function enviarArquivo(arquivo: File) {
-        try {
-            const formData = new FormData();
-            formData.append('file', arquivo);
-            const response = await ApiUtils.post('http://localhost:3333/programa/uploads', formData);
-            return response;
-        } catch (error) {
-            console.error('Erro ao enviar o arquivo:', error);
-            throw error;
+    const handleLinguagensKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+        const trimmedInput = linguagemInput.trim();
+        if ((event.key === 'Enter' || event.key === ' ' || event.key === ',') && trimmedInput !== '') {
+            event.preventDefault();
+            setLinguagens(prev => [...prev, trimmedInput]);
+            setLinguagemInput('');
         }
-    }
+    }, [linguagemInput]);
+    
 
-    const onSubmit = async (data: FormData) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const headers: Record<string, string> = { 'usuario-id': usuarioId || '' };
+
+        const data = {
+            titulo: formData.get('titulo') as string,
+            descricao: formData.get('descricao') as string,
+            solucaoProblemaDesc: formData.get('solucaoProblemaDesc') as string,
+            linguagens: linguagens,
+            descricaoMercado: formData.get('descricaoMercado') as string,
+            dataCriacaoPrograma: formData.get('dataCriacaoPrograma') as string,
+            vinculoUnitins: formData.get('vinculoUnitins') === 'Sim',
+            fasePublicacao: formData.get('fasePublicacao') as string,
+            status: formData.get('status') as string,
+            nomeArquivo: formData.get('nomeArquivo') as File,
+            usuarioId: usuarioId
+        };
+        console.log('Data antes de enviar:', data);
+
         try {
-            if (fileName) {
-                const response = await enviarArquivo(data.nomeArquivo[0]);
-            }
-            data.nomeArquivo = data.nomeArquivo[0].name;
-            console.log(data);
-            // Enviar o formulário para /programa/cadastrar
-            const programaCriado = await ApiUtils.post('http://localhost:3333/programa/cadastrar', {
-                ...data,
-                status: status,
-            });
-            // window.open('/dashboard', '_self'); // Abre a página de dashboard na mesma janela
+            await postPrograma(data, headers, token);
+            toast.success('Programa enviado com sucesso!')
+            router.push('/');
         } catch (error) {
-            console.error('Erro ao cadastrar o programa:', error);
+            toast.error('Erro ao enviar o programa. Tente novamente.')
         }
     };
 
-    const handleSave = () => {
-        console.log("Salvar clickado!")
-        setStatus(ProgramaStatus.RASCUNHO); // Altera o status para RASCUNHO antes de chamar a função de submissão
-        handleSubmit(onSubmit); // Chama a função de submissão passando os dados do formulário
-    };
-    const handleSend = () => {
-        console.log("Enviar clickado!")
-        setStatus(ProgramaStatus.ENVIADO); // Altera o status para ENVIADO antes de chamar a função de submissão
-        handleSubmit(onSubmit); // Chama a função de submissão passando os dados do formulário
-    };
-
-    const isSmallScreen = window.innerWidth < 870;
-
-    return <div className="flex w-screen h-screen">
-        <Sidebar/>
+    return (
         <div className="flex-grow bg-sky-200 p-8">
             <Title>Nova Solicitação</Title>
-            <form className="mx-auto" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mx-auto" onSubmit={handleSubmit}>
                 <Grid
-                    style={{ maxWidth: isSmallScreen ? '400px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
                     className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
                     container spacing={2}>
-                    <Grid item xs={12} md={6}>
+                        <h2 className={`text-2xl font-medium`}>Dados do programa de computador: </h2>
+                    <Grid item xs={12}>
                         <TextField
-                            label="Nome Completo"
-                            {...register('nomeCompleto')}
+                            label="Título do Programa"
+                            name={'titulo'}
                             fullWidth
                             type="text"
-                            error={!!errors.nomeCompleto}
-                            helperText={errors.nomeCompleto?.message || ' '}
-                            style={{ maxWidth: isSmallScreen ? '220px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="RG"
-                            {...register('rg')}
-                            fullWidth
-                            type="text"
-                            error={!!errors.rg}
-                            helperText={errors.rg?.message || ' '}
-                            style={{ maxWidth: isSmallScreen ? '220px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="CPF"
-                            {...register('cpf')}
-                            fullWidth
-                            type="text"
-                            error={!!errors.cpf}
-                            helperText={errors.cpf?.message || ' '}
-                            style={{ maxWidth: isSmallScreen ? '220px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="Data de Nascimento"
-                            type="date"
-                            {...register('dataNascimento')}
-                            fullWidth
-                            error={!!errors.dataNascimento}
-                            helperText={errors.dataNascimento?.message || ' '}
-                            style={{ maxWidth: isSmallScreen ? '220px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl fullWidth error={!!errors.estadoCivil}>
-                            <InputLabel htmlFor="estadoCivil">Estado Civil</InputLabel>
-                            <Select id="estadoCivil" {...register('estadoCivil')}>
-                                <MenuItem value="solteiro">Solteiro</MenuItem>
-                                <MenuItem value="casado">Casado</MenuItem>
-                                <MenuItem value="viuvo">Viúvo</MenuItem>
-                            </Select>
-                            {errors.estadoCivil && <span className="text-red-500">{errors.estadoCivil.message}</span>}
+                        <FormControl fullWidth>
+                            <TextareaAutosize
+                                minRows={4}
+                                placeholder="Descrição do Programa..."
+                                name="descricao"
+                                id="descricao"
+                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                            />
                         </FormControl>
                     </Grid>
-                    <Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <TextareaAutosize
+                                minRows={4}
+                                placeholder="Descrição do Programa..."
+                                name="solucaoProblemaDesc"
+                                id="solucaoProblemaDesc"
+                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                            />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <TextareaAutosize
+                                minRows={4}
+                                placeholder="Descrição do Mercado..."
+                                name="descricaoMercado"
+                                id="descricaoMercado"
+                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                            />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Linguagens"
+                            name={'linguagens'}
+                            fullWidth
+                            type="text"
+                            value={linguagemInput}
+                            onChange={(e) => setLinguagemInput(e.target.value)}
+                            onKeyDown={handleLinguagensKeyDown}
+                        />
+                        <div>
+                            {linguagens.map((linguagem, index) => (
+                                <span key={index} className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                                    {linguagem}
+                                </span>
+                            ))}
+                        </div>
+                    </Grid>
+                    <Grid item xs={12}>
+                    {/* <DatePicker
+                        label="Data de Criação do Programa"
+                        name="dataCriacaoPrograma"
+                    /> */}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel htmlFor="vinculoUnitins">Vínculo com a Unitins</InputLabel>
+                            <Select name="vinculoUnitins" id="vinculoUnitins">
+                                <MenuItem value="Sim">Sim</MenuItem>
+                                <MenuItem value="Não">Não</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel htmlFor="fasePublicacao">Fase de Publicação</InputLabel>
+                            <Select name="fasePublicacao" id="fasePublicacao">
+                                <MenuItem value="ARTIGO">ARTIGO</MenuItem>
+                                <MenuItem value="TESE">TESE</MenuItem>
+                                <MenuItem value="RESUMO">RESUMO</MenuItem>
+                                <MenuItem value="CONGRESSO">CONGRESSO</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                         <input
                             type="file"
                             accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                            {...register('nomeArquivo')}
+                            name={'nomeArquivo'}
                             onChange={(event) => {
                                 if (event.target.files && event.target.files.length > 0) {
-                                    fileName = event.target.files[0].name;
+                                    console.log('Nome do arquivo selecionado:', event.target.files[0].name);
                                 }
                             }}
                         />
@@ -177,18 +209,11 @@ function NovaSolicitacao() {
                 </Grid>
 
                 <div className="mt-4">
-                    <button className="bg-blue-500 border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2" type="submit"
-                            onClick={handleSave}>
-                        Salvar
-                    </button>
-                    <button className="bg-blue-700 border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2" type="submit"
-                            onClick={handleSend}>
+                    <Button variant='contained' className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2" type="submit">
                         Enviar
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>
-    </div>;
+    );
 }
-
-export default NovaSolicitacao;

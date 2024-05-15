@@ -101,6 +101,27 @@ export class ProgramaController {
     return this.programaService.listar();
   }
 
+  @Get('/titulo')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.User)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Retorna os programas do usuário logado filtrados pelo titulo' })
+  async getProgramasByUserTitulo(@Req() req, @Param ("titulo") titulo: string): Promise<Programa[]> {
+    try {
+      this.logger.log("Retornando os programas do usuário logado");
+      const usuarioCpf = req.user.cpf;
+      const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
+      this.logger.log("Fazendo a busca dos dados de programas do usuario");
+      // Passa o array de 'programaIds' para o serviço de programas
+      const programas = await this.programaService.getProgramasPorUsuarioIdTitulo(usuario._id, titulo);
+
+      return programas;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar programas do usuário: ${error.message}`);
+      throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
+    }
+  }
+
   @Get('/porUsuario')
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.User)
@@ -122,25 +143,17 @@ export class ProgramaController {
     }
   }
 
-  @Get("/porUsuario/:uuid")
+  @Get("/porUsuario/:id")
   @ApiBearerAuth()
   @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: 'Fazendo a busca dos dados de programas do usuario' })
-  async getDadosByUser(@Param("uuid") uuid: string): Promise<Programa[]> {
-    try {
-      this.logger.log("Fazendo a busca dos dados de programas do usuario");
-      const usuarioPrograma = await this.usuarioProgramaService.getUsuarioProgramasPorUsuario(uuid);
-      // Extrai os valores de 'programaId' de cada objeto e cria um array com eles
-      const programaIds = usuarioPrograma.map(item => item.programaId.toString());
-
-      // Passa o array de 'programaIds' para o serviço de programas
-      const programas = await this.programaService.getProgramasPorIds(programaIds);
-
-      return programas;
-    } catch (error) {
-      this.logger.error(`Erro ao buscar dados de programas: ${error.message}`);
-      throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
-    }
+  async getDadosProgramaByUser(@Param("id") id: string): Promise<Programa> {
+    this.logger.log("Fazendo a busca dos dados do programa com o uuid: " + id);
+    let programaPromise = this.programaService.consultar(id);
+    programaPromise.then(value => {
+      console.log(value);
+    });
+    return programaPromise;
   }
 
 

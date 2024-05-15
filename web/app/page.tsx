@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { CardProgram } from "./components/CardPrograma/Card";
-import ButtonLinkPage from "./components/ButtonLinkPage/ButtonLinkPage";
 import Title from "./components/Title/title";
 import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
 import {getProgramasUsuario} from "@/app/service/programa/programaUserLogado";
@@ -24,7 +23,7 @@ export default function DashboardPage (){
                             Nova solicitação +
                         </Button>
                     </div>
-                    <main className="flex flex-wrap items-center justify-center">
+                    <main className="flex flex-wrap items-center justify-center gap-4 p-2">
                         {programas.map((programa) => (
                             <CardProgram
                                 key={programa._id}
