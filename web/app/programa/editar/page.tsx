@@ -1,104 +1,53 @@
 "use client"
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid'; 
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 import { useRouter } from 'next/navigation';
-import ApiUtils from '@/app/Utils/Api/apiMethods';
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/getStorageItem/getStorageItem";
-import { toast } from 'react-toastify';
-//import DatePicker from '@mui/lab/DatePicker';
 import Button from '@mui/material/Button';
 import { getProgramaById } from '@/app/service/programa/getById/getById';
-import { getProgramaId } from '@/app/functions/programa/getProgramaId/getProgramaId';
 import { tokenService } from '@/app/Utils/Cookies/tokenStorage';
-
-const programaSchema = z.object({
-    titulo: z.string().min(1, { message: 'Campo obrigatório' }),
-    descricao: z.string().min(1, { message: 'Campo obrigatório' }),
-    solucaoProblemaDesc: z.string().min(1, { message: 'Campo obrigatório' }),
-    linguagens: z.array(z.string()).nonempty({ message: 'Campo obrigatório' }),
-    descricaoMercado: z.string().min(1, { message: 'Campo obrigatório' }),
-    dataCriacaoPrograma: z.string().min(1, { message: 'Campo obrigatório' }),
-    vinculoUnitins: z.boolean(),
-    fasePublicacao: z.string().min(1, { message: 'Campo obrigatório' }),
-    status: z.string().min(1, { message: 'Campo obrigatório' }),
-    nomeArquivo: z.any().optional(),
-});
-
-type Programa = z.infer<typeof programaSchema>;
+import { putPrograma } from '@/app/service/programa/put/putPrograma';
+import { toast } from 'react-toastify';
 
 const EditarSolicitacao = () => {
-    const { register, handleSubmit, formState: { errors }, setValue } = useForm<Programa>({
-        resolver: zodResolver(programaSchema),
-    });
-    const router = useRouter();
-   
-    const token = getStorageItem();
     const [isLoading, setIsLoading] = useState(true);
     const [linguagens, setLinguagens] = useState<string[]>([]);
     const [linguagemInput, setLinguagemInput] = useState<string>('');
-    const [programaId, setProgramaId] = useState<string>(''); // State para armazenar o ID do programa
-
-    useEffect(() => {
-        // Função para buscar o ID do programa
-        const fetchProgramaId = () => {
-            try {
-                const programaId = tokenService.getProgramaId() // Função getProgramaId() que retorna o ID
-                console.log("Esse foi o id do programa", programaId);
-                setProgramaId(programaId);
-            } catch (error) {
-                console.error('Erro ao buscar o ID do programa:', error);
-            }
-        };
-
-        fetchProgramaId(); // Chamada da função de busca do ID do programa
-    }, []);
+    const [programaData, setProgramaData] = useState<any>({});
+    const router = useRouter();
+    const token = getStorageItem();
+    const programaId = tokenService.getProgramaId(); // Função getProgramaId() que retorna o ID
 
     useEffect(() => {
         if (programaId) {
-            // Função para buscar os dados do programa com base no ID
             const fetchProgramaData = async () => {
                 try {
                     const programaData = await getProgramaById(token, programaId);
                     if (programaData) {
-                        // Definir os valores nos campos do formulário com base nos dados do programa
-                        setValue('titulo', programaData.titulo);
-                        setValue('descricao', programaData.descricao);
-                        setValue('solucaoProblemaDesc', programaData.solucaoProblemaDesc);
-                        if (programaData.linguagens.length > 0) {
-                            setLinguagens(programaData.linguagens);
-                        }
-                                                
-                        setValue('descricaoMercado', programaData.descricaoMercado);
-                        setValue('dataCriacaoPrograma', programaData.dataCriacaoPrograma);
-                        setValue('vinculoUnitins', programaData.vinculoUnitins);
-                        setValue('fasePublicacao', programaData.fasePublicacao);
-                        setValue('status', programaData.status);
-                        setValue('nomeArquivo', programaData.nomeArquivo);
-                        setIsLoading(false); // Marcar como não carregando
+                        setProgramaData(programaData);
+                        setLinguagens(programaData.linguagens || []);
+                        setIsLoading(false);
                     } else {
                         console.error('Programa não encontrado');
-                        setIsLoading(false); // Marcar como não carregando
+                        setIsLoading(false);
                     }
                 } catch (error) {
                     console.error('Erro ao buscar os dados:', error);
-                    setIsLoading(false); // Marcar como não carregando
+                    setIsLoading(false);
                 }
             };
 
-            fetchProgramaData(); // Chamada da função de busca dos dados do programa
+            fetchProgramaData();
         }
-    }, [programaId, token, setValue]);
+    }, [programaId, token]);
 
     const handleLinguagensKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         const trimmedInput = linguagemInput.trim();
@@ -109,30 +58,52 @@ const EditarSolicitacao = () => {
         }
     }, [linguagemInput]);
 
-    const onSubmit = async (data: Programa) => {
-        console.log('onSubmit');
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+
+        const data = {
+            titulo: formData.get('titulo') as string,
+            descricao: formData.get('descricao') as string,
+            solucaoProblemaDesc: formData.get('solucaoProblemaDesc') as string,
+            linguagens: linguagens,
+            descricaoMercado: formData.get('descricaoMercado') as string,
+            dataCriacaoPrograma: formData.get('dataCriacaoPrograma') as string,
+            vinculoUnitins: formData.get('vinculoUnitins') === 'Sim',
+            fasePublicacao: formData.get('fasePublicacao') as string,
+            status: formData.get('status') as string,
+            nomeArquivo: formData.get('nomeArquivo') as File
+        };
+        console.log('Data antes de enviar:', data);
+
+        try {
+            await putPrograma(data, programaId, token);
+            toast.success('Programa atualizado com sucesso!');
+            router.push('/');
+        } catch (error) {
+            toast.error('Erro ao atualizar o programa. Tente novamente.');
+        }
+    };
 
     if (isLoading) {
         return <div>Carregando...</div>;
     }
-}
 
     return (
         <div className="flex-grow bg-sky-200 p-8">
             <Title>Editar Solicitação</Title>
-            <form className="mx-auto" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mx-auto" onSubmit={handleSubmit}>
                 <Grid
                     className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
                     container spacing={2}>
-                    <h2 className={`text-2xl font-medium`}>Dados do programa de computador:</h2>
+                    <h2 className="text-2xl font-medium">Dados do programa de computador:</h2>
                     <Grid item xs={12}>
                         <TextField
                             label="Título do Programa"
-                            {...register('titulo')}
+                            name="titulo"
                             fullWidth
                             type="text"
-                            error={!!errors.titulo}
-                            helperText={errors.titulo?.message || ' '}
+                            defaultValue={programaData.titulo || ''}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -140,12 +111,10 @@ const EditarSolicitacao = () => {
                             <TextareaAutosize
                                 minRows={4}
                                 placeholder="Descrição do Programa..."
-                                {...register('descricao')}
-                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                                name="descricao"
+                                className="w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none"
+                                defaultValue={programaData.descricao || ''}
                             />
-                            {errors.descricao && (
-                                <span className="text-red-500">{errors.descricao.message}</span>
-                            )}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
@@ -153,12 +122,10 @@ const EditarSolicitacao = () => {
                             <TextareaAutosize
                                 minRows={4}
                                 placeholder="Solução do Problema..."
-                                {...register('solucaoProblemaDesc')}
-                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                                name="solucaoProblemaDesc"
+                                className="w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none"
+                                defaultValue={programaData.solucaoProblemaDesc || ''}
                             />
-                            {errors.solucaoProblemaDesc && (
-                                <span className="text-red-500">{errors.solucaoProblemaDesc.message}</span>
-                            )}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
@@ -166,12 +133,10 @@ const EditarSolicitacao = () => {
                             <TextareaAutosize
                                 minRows={4}
                                 placeholder="Descrição do Mercado..."
-                                {...register('descricaoMercado')}
-                                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                                name="descricaoMercado"
+                                className="w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none"
+                                defaultValue={programaData.descricaoMercado || ''}
                             />
-                            {errors.descricaoMercado && (
-                                <span className="text-red-500">{errors.descricaoMercado.message}</span>
-                            )}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
@@ -191,67 +156,60 @@ const EditarSolicitacao = () => {
                             ))}
                         </div>
                     </Grid>
-                    {/* <Grid item xs={12}>
-                        <DatePicker
-                            label="Data de Criação do Programa"
-                            {...register('dataCriacaoPrograma')}
-                            renderInput={(params) => <TextField {...params} />}
-                            error={!!errors.dataCriacaoPrograma}
-                            helperText={errors.dataCriacaoPrograma?.message || ' '}
-                        />
-                    </Grid> */}
                     <Grid item xs={12}>
                         <FormControl fullWidth>
                             <InputLabel htmlFor="vinculoUnitins">Vínculo com a Unitins</InputLabel>
                             <Select
-                                {...register('vinculoUnitins')}
-                                error={!!errors.vinculoUnitins}
-                                defaultValue="Sim"
+                                name="vinculoUnitins"
+                                defaultValue={programaData.vinculoUnitins ? 'Sim' : 'Não'}
                             >
                                 <MenuItem value="Sim">Sim</MenuItem>
                                 <MenuItem value="Não">Não</MenuItem>
                             </Select>
-                            {errors.vinculoUnitins && (
-                                <span className="text-red-500">{errors.vinculoUnitins.message}</span>
-                            )}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth>
                             <InputLabel htmlFor="fasePublicacao">Fase de Publicação</InputLabel>
                             <Select
-                                {...register('fasePublicacao')}
-                                error={!!errors.fasePublicacao}
-                                defaultValue="ARTIGO"
+                                name="fasePublicacao"
+                                defaultValue={programaData.fasePublicacao || 'ARTIGO'}
                             >
-                                <MenuItem value="ARTIGO">ARTIGO</MenuItem>
-                                <MenuItem value="TESE">TESE</MenuItem>
-                                <MenuItem value="RESUMO">RESUMO</MenuItem>
-                                <MenuItem value="CONGRESSO">CONGRESSO</MenuItem>
+                                <MenuItem value="ARTIGO">Artigo</MenuItem>
+                                <MenuItem value="MONOGRAFIA">Monografia</MenuItem>
+                                <MenuItem value="LIVRO">Livro</MenuItem>
+                                <MenuItem value="DISCERTACAO">Dissertação</MenuItem>
+                                <MenuItem value="TESE">Tese</MenuItem>
                             </Select>
-                            {errors.fasePublicacao && (
-                                <span className="text-red-500">{errors.fasePublicacao.message}</span>
-                            )}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                        <input
+                        <FormControl fullWidth>
+                            <InputLabel htmlFor="status">Status</InputLabel>
+                            <Select
+                                name="status"
+                                defaultValue={programaData.status || 'EM ANDAMENTO'}
+                            >
+                                <MenuItem value="EM ANDAMENTO">Em Andamento</MenuItem>
+                                <MenuItem value="CONCLUIDO">Concluído</MenuItem>
+                                <MenuItem value="PUBLICADO">Publicado</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Nome do Arquivo"
+                            name="nomeArquivo"
+                            fullWidth
                             type="file"
-                            accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                            {...register('nomeArquivo')}
-                            onChange={(event) => {
-                                if (event.target.files && event.target.files.length > 0) {
-                                    console.log('Nome do arquivo selecionado:', event.target.files[0].name);
-                                }
-                            }}
                         />
                     </Grid>
-                </Grid>
-                <div className="mt-4">
+                    <Grid item xs={12}>
                     <Button variant='contained' className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2" type="submit">
                         Atualizar
                     </Button>
-                </div>
+                    </Grid>
+                </Grid>
             </form>
         </div>
     );

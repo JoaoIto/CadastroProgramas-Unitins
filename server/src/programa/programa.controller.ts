@@ -188,8 +188,32 @@ export class ProgramaController {
     return this.programaService.consultarByAprovados(ProgramaStatus.APROVADO);
   }
 
-  @Put("/:uuid")
+  @Put("/porUsuario/:id")
   @Roles(Role.Admin, Role.User)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Atualizando programa pelo id dele' })
+  @ApiBody({ type: UpdateProgramaInputDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
+  @ApiCreatedResponse({ description: "Operação bem-sucedida" })
+  atualizarProgramaUsuario(@Param("id") id: string, @Body() updateData: UpdateProgramaInputDto) {
+    const programaEditado = new Programa();
+
+    programaEditado.titulo = updateData.titulo;
+    programaEditado.descricao = updateData.descricao;
+    programaEditado.solucaoProblemaDesc = updateData.solucaoProblemaDesc;
+    programaEditado.linguagens = updateData.linguagens;
+    programaEditado.descricaoMercado = updateData.descricaoMercado;
+    programaEditado.dataCriacaoPrograma = updateData.dataCriacaoPrograma;
+    programaEditado.vinculoUnitins = updateData.vinculoUnitins;
+    programaEditado.vinculoInstitucional = updateData.vinculoInstitucional;
+    programaEditado.fasePublicacao = updateData.fasePublicacao;
+    programaEditado.status = updateData.status;
+    programaEditado.nomeArquivo = updateData.nomeArquivo;
+    
+    return this.programaService.atualizar(id, programaEditado);
+  }
+
+  @Put("/:uuid")
+  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizando programa pelo uuid dele' })
   @ApiBody({ type: UpdateProgramaInputDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
