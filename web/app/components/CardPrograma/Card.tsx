@@ -24,7 +24,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
     };
 
     return (
-        <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl">
+        <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl m-4">
             <CardContent className="p-4">
                 <Typography variant="h5" component="div">
                     {programa.titulo}

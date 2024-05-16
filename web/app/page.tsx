@@ -23,7 +23,7 @@ export default function DashboardPage (){
                             Nova solicitação +
                         </Button>
                     </div>
-                    <main className="flex flex-wrap items-center justify-center gap-4 p-2">
+                    <main className="flex flex-wrap items-center justify-center">
                         {programas.map((programa) => (
                             <CardProgram
                                 key={programa._id}
