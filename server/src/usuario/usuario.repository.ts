@@ -27,7 +27,7 @@ export class UsuarioRepository {
 
     async update(
       uuid: string,
-      updateData: Usuario,
+      updateData: Partial<Usuario>,
     ): Promise<Usuario | null> {
         const usuarioAtualizado = await this.usuario.findByIdAndUpdate(
           uuid,

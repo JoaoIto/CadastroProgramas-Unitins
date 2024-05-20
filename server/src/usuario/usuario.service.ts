@@ -16,7 +16,7 @@ export class UsuarioService{
         return this.usuarioRepository.findAll();
     }
 
-    async atualizarInformacoes(uuid: string, updateData: Usuario): Promise<Usuario>{
+    async atualizarInformacoes(uuid: string, updateData: Partial<Usuario>): Promise<Usuario>{
         return this.usuarioRepository.update(uuid, updateData)
     }
     async consultar(uuid): Promise<Usuario> {

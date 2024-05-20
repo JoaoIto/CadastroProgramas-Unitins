@@ -4,4 +4,5 @@ interface Perfil {
     perfil: string;
     nome: string;
     rg: string;
+    matricula: string;
 }

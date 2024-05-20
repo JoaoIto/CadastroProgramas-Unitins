@@ -7,6 +7,7 @@ import { Roles } from "../roles/roles.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../roles/roles.guard";
 import { CreateUsuarioInputDto } from "./dto/create/createUsuario.dto";
+import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
 
 @ApiTags('usuario')
 @Controller('/usuario')
@@ -34,7 +35,7 @@ import { CreateUsuarioInputDto } from "./dto/create/createUsuario.dto";
     @Put('/:uuid')
     async atualizarInformacoesAdicionais(
       @Param("uuid") uuid: string,
-      @Body() novasInformacoes: any, // Aqui você pode definir um DTO específico se necessário
+      @Body() novasInformacoes: UpdateUsuarioInputDto, // Aqui você pode definir um DTO específico se necessário
     ) {
         this.logger.log('Atualizando informações adicionais do usuário com o uuid: ' + uuid);
         return this.usuarioService.atualizarInformacoes(uuid, novasInformacoes);
