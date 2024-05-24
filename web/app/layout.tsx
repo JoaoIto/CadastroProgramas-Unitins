@@ -4,9 +4,9 @@ import React, {ReactNode} from 'react';
 import {usePathname} from 'next/navigation';
 import {Open_Sans} from 'next/font/google';
 import {checkPublicRoute} from '@/app/functions/checkPublicRoute';
-import PrivateRoute from '@/app/Utils/PrivaterRoute/index';
-import {Search} from "@/app/components/HeaderSearch/cabecalho";
-import {Sidebar} from "@/app/components/MenuLateral/sidebar";
+import { Search } from './components/HeaderSearch/cabecalho';
+import { Sidebar } from './components/MenuLateral/sidebar';
+import PrivateRoute from './Utils/PrivaterRoute';
 
 const openSans = Open_Sans({subsets: ['latin']});
 
@@ -27,8 +27,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
         <div className="flex h-screen w-full">
             <Sidebar/>
             <main className="h-full w-full">
-                {isPublicPage && children}
-                {!isPublicPage && (
+                {isPublicPage ? children : (
                     <PrivateRoute>
                         {children}
                     </PrivateRoute>
@@ -37,7 +36,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
         </div>
         </body>
         </html>
-
     )
 }
-    export default RootLayout;
+
+export default RootLayout;
