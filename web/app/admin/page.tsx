@@ -4,13 +4,13 @@ import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
 import Button from "@mui/material/Button";
 import Title from "../components/Title/title";
 import { CardProgram } from "../components/CardPrograma/Card";
-import { getProgramasAll } from "../service/programa/getAll/getProgramaAll";
+import { getProgramasEnviados } from "../service/programa/admin/getEnviados/getEnviados";
 
 export default function DashboardPage (){
     const token = getStorageItem();
     const [programas, setProgramas] = useState<IPrograma[]>([]);
     useEffect(() => {
-        getProgramasAll(token).then(data => setProgramas(data ?? []));
+        getProgramasEnviados(token).then(data => setProgramas(data ?? []));
     }, [token]);
 
     return (

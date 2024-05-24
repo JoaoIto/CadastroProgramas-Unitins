@@ -9,7 +9,7 @@ export function Sidebar(){
 
     return (
         <aside
-            className={`bg-azulEscuro text-white flex flex-col items-center flex-shrink-0 shadow-cinzaTraco drop-shadow-lg shadow-lg`}>
+            className={`h-full bg-azulEscuro text-white flex flex-col items-center flex-shrink-0 shadow-cinzaTraco drop-shadow-lg shadow-lg`}>
             <ul className="flex flex-col items-center gap-10 mt-8 flex-1">
                 <li className="flex items-center space-x-2">
                     <Button variant="text" className="text-white" href="/">

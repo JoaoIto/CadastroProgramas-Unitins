@@ -48,6 +48,10 @@ export class ProgramaService {
         this.usuarioProgramaService.delete(uuid)
     }
 
+    async getProgramasEnviados() {
+        return this.programaRepository.findProgramasEnviados();
+    }
+
     async getProgramasPorIds(programaIds: string[]) {
         this.logger.log(`Recebido ${programaIds.length} ids de programas`)
         this.logger.log("Recido programaIds: " + programaIds)

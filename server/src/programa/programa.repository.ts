@@ -48,6 +48,18 @@ export class ProgramaRepository {
     }
 
 
+    async findProgramasEnviados(): Promise<Programa[]> {
+        try {
+          const programas = await this.programa
+            .find({ status: { $ne: ProgramaStatus.RASCUNHO } })
+            .exec();
+          this.logger.log('Programas retornados: ' + programas);
+          return programas;
+        } catch (error) {
+          this.logger.error('Erro ao buscar programas', error);
+          throw error;
+        }
+      }
 
     async findByStatus(status: ProgramaStatus): Promise<Programa[]> {
         const programa = await this.programa.find({ status: 'APROVADO' }).exec();
