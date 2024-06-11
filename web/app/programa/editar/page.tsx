@@ -21,6 +21,7 @@ import { getProgramaById } from "@/app/service/programa/getById/getById";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 import { putPrograma } from "@/app/service/programa/put/putPrograma";
 import { toast } from "react-toastify";
+import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
 
 const EditarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +29,7 @@ const EditarSolicitacao = () => {
   const [linguagemInput, setLinguagemInput] = useState<string>("");
   const [programaData, setProgramaData] = useState<any>({});
   const [open, setOpen] = useState(false);
+  const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId(); // Função getProgramaId() que retorna o ID
@@ -54,6 +56,21 @@ const EditarSolicitacao = () => {
       fetchProgramaData();
     }
   }, [programaId, token]);
+
+  useEffect(() => {
+    const fetchUsuarioId = async () => {
+      try {
+        const id = await getUsuarioId(token);
+        if (id!== undefined) {
+          setUsuarioId(id);
+        }
+      } catch (error) {
+        console.error("Erro ao obter o usuarioId:", error);
+      }
+    };
+  
+    fetchUsuarioId();
+  }, [token]);
 
   const handleLinguagensKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -91,11 +108,12 @@ const EditarSolicitacao = () => {
       vinculoUnitins: formData.get("vinculoUnitins") === "Sim",
       fasePublicacao: formData.get("fasePublicacao") as string,
       status: formData.get("status") as string,
-      nomeArquivo: formData.get("nomeArquivo") as File
+      nomeArquivo: formData.get("nomeArquivo") as File,
+      usuarioId: usuarioId,
     };
 
     try {
-      await putPrograma(data, programaId, token);
+      await putPrograma(formData, programaId, token);
       toast.success("Programa atualizado com sucesso!");
       router.push("/");
     } catch (error) {
@@ -207,12 +225,14 @@ const EditarSolicitacao = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <FormControl fullWidth>
+            <FormControl disabled fullWidth>
               <InputLabel htmlFor="status">Status</InputLabel>
-              <Select name="status" defaultValue={programaData.status || "EM ANDAMENTO"}>
-                <MenuItem value="EM ANDAMENTO">Em Andamento</MenuItem>
-                <MenuItem value="CONCLUIDO">Concluído</MenuItem>
-                <MenuItem value="PUBLICADO">Publicado</MenuItem>
+              <Select name="status" defaultValue={programaData.status}>
+                <MenuItem value="RASCUNHO">RASCUNHO</MenuItem>
+                <MenuItem value="ENVIADO">ENVIADO</MenuItem>
+                <MenuItem value="EM_ANALISE">EM_ANALISE</MenuItem>
+                <MenuItem value="APROVADO">APROVADO</MenuItem>
+                <MenuItem value="REPROVADO">REPROVADO</MenuItem>
               </Select>
             </FormControl>
           </Grid>

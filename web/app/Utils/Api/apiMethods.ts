@@ -63,37 +63,41 @@ class ApiUtils {
         return undefined;
     }
 
-    static async post<T>(
-        endpoint: string,
-        data: object,
-        token: string,
-        additionalHeaders?: Record<string, string>
-    ): Promise<T | undefined> {
+    static async post(endpoint: string, data: object, token: string): Promise<void> {
         const options: RequestInit = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
-                ...additionalHeaders, // Adicione cabeçalhos adicionais se fornecidos
             },
             body: JSON.stringify(data),
         };
 
-        return ApiUtils.performRequest<T>(endpoint, options);
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 
     static async patch<T>(
         endpoint: string,
-        data: object,
+        data: object | FormData,
         token: string,
     ): Promise<T | undefined> {
+        const headers: Record<string, string> = {
+            'Authorization': `Bearer ${token}`,
+        };
+
+        let body: BodyInit;
+
+        if (data instanceof FormData) {
+            body = data;
+        } else {
+            headers['Content-Type'] = 'application/json';
+            body = JSON.stringify(data);
+        }
+
         const options: RequestInit = {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(data),
+            headers,
+            body,
         };
 
         return ApiUtils.performRequest<T>(endpoint, options);

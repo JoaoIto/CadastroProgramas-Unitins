@@ -43,7 +43,7 @@ export class ProgramaRepository {
                 this.logger.log('Nenhum programa encontrado para UUID ' + uuid);
             }
         }
-
+ 
         return programas;
     }
 
@@ -69,7 +69,6 @@ export class ProgramaRepository {
 
     async findByUsuarioId(usuarioId: mongoose.Types.ObjectId): Promise<Programa[]> {
         const programa = await this.programa.find({ usuarioId: usuarioId }).exec();
-        this.logger.log('programa retornado: ' + programa);
         return programa;
     }
 

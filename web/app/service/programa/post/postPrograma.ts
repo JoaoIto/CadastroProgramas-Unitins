@@ -1,20 +1,50 @@
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 import { enviarArquivo } from "./postArquivos";
 
-export async function postPrograma(data: IProgramaPost, headers: Record<string, string>, token: string) {
-    try {
-        const response = await enviarArquivo(data.nomeArquivo, token);
-        console.log('Resposta do enviarArquivo:', response);
-        data.nomeArquivo = data.nomeArquivo[0]?.name || '';
-        console.log('Dados do formulário antes de enviar:', data);
+export async function postPrograma(data: any, token: string) {
+  try {
+    let fileName = "";
 
-        const programaCriado = await ApiUtils.post('/programa/cadastrar', {
-            ...data,
-            status: status,
-        }, token, headers);
+    const arquivo = data.nomeArquivo as File;
+    if (arquivo) {
+      const response = await enviarArquivo(arquivo, token);
+      console.log("Resposta do enviarArquivo:", response);
 
-        console.log('Resposta do programa/cadastrar:', programaCriado);
-    } catch (error) {
-        console.error('Erro ao cadastrar o programa:', error);
+      if (
+        typeof response === "object" &&
+        response !== null &&
+        "fileName" in response
+      ) {
+        fileName = (response as { fileName: string }).fileName;
+      }
     }
+
+    // Construa um objeto JSON com os dados necessários
+    const requestData = {
+      titulo: data.titulo,
+      descricao: data.descricao,
+      solucaoProblemaDesc: data.solucaoProblemaDesc,
+      linguagens: data.linguagens,
+      descricaoMercado: data.descricaoMercado,
+      dataCriacaoPrograma: data.dataCriacaoPrograma,
+      vinculoUnitins: data.vinculoUnitins,
+      fasePublicacao: data.fasePublicacao,
+      status: data.status,
+      usuarioId: data.usuarioId,
+      nomeArquivo: fileName,
+    };
+
+    console.log("Dados do formulário antes de enviar:", requestData);
+
+    // Envie a requisição utilizando o objeto JSON construído
+    const programa = await ApiUtils.post(
+      `/programa/cadastrar/`,
+      requestData,
+      token
+    );
+
+    console.log(`Resposta do programa/cadastrar/ :`, programa);
+  } catch (error) {
+    console.error("Erro ao cadastrar o programa:", error);
+  }
 }

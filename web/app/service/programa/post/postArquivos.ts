@@ -1,10 +1,11 @@
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 export async function enviarArquivo(arquivo: File, token: string) {
-    const file = arquivo
-    
+    const formData = new FormData();
+    formData.append('file', arquivo);
+
     try {
-        const response = await ApiUtils.patch('/programa/uploads', file, token);
+        const response = await ApiUtils.patch('/programa/uploads', formData, token);
         console.log(response);
         return response;
     } catch (error) {
