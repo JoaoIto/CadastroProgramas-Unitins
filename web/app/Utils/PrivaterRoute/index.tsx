@@ -1,64 +1,55 @@
 "use client"
-import {ReactNode, useEffect, useState} from "react";
-import {useRouter} from "next/navigation";
-import {checkUserAuthenticated} from "../../functions/checkUserAuthenticated/checkUserAuthenticated";
-import {APP_ROUTES} from "@/app/constants/app-routes";
+import { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getUserRole } from "@/app/functions/getUserRole/getUserRole";
+import { APP_ROUTES } from "@/app/constants/app-routes";
 import { getStorageItem } from "@/app/functions/getStorageItem/getStorageItem";
+import { checkUserAuthenticated } from "@/app/functions/checkUserAuthenticated/checkUserAuthenticated";
 
 type PrivateRouteProps = {
     children: ReactNode;
 }
 
-const PrivateRoute = ({children}: PrivateRouteProps) => {
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
     const { push } = useRouter();
-    const [isUserAuthenticated, setIsUserAuthenticated] = useState<boolean | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
+    const isUserAuthenticated = checkUserAuthenticated();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const authenticated = checkUserAuthenticated();
-            setIsUserAuthenticated(authenticated);
-
-            if (authenticated) {
+        const fetchUserRole = async () => {
+            if (isUserAuthenticated) {
                 try {
-                    const token = getStorageItem();
+                    const token = getStorageItem()
                     const role = await getUserRole(token);
                     setUserRole(role);
                 } catch (error) {
-                    console.error("Erro ao obter perfil do usuário:", error);
-                    setIsUserAuthenticated(false);
+                    console.error("Erro ao obter o tipo de usuário:", error);
                 }
-            } else {
-                push(APP_ROUTES.public.login);
             }
         };
 
-        checkAuth();
-    }, [push]);
+        fetchUserRole();
+    }, [isUserAuthenticated]);
 
     useEffect(() => {
-        if (isUserAuthenticated === false) {
+        if (!isUserAuthenticated) {
             push(APP_ROUTES.public.login);
-        } else if (isUserAuthenticated && userRole) {
-            if (userRole === 'admin') {
-                push(APP_ROUTES.private.admin.dashboard);
-            } else {
-                push(APP_ROUTES.private.user.dashboard);
-            }
+        } else if (userRole === "admin" && !window.location.pathname.startsWith("/admin")) {
+            push(APP_ROUTES.private.admin.dashboard);
+        } else if (userRole === "user" && window.location.pathname.startsWith("/admin")) {
+            push(APP_ROUTES.private.user.dashboard); // Adicione a rota do dashboard do usuário aqui
         }
     }, [isUserAuthenticated, userRole, push]);
 
-    if (isUserAuthenticated === null) {
-        // Pode exibir um loader ou algo similar enquanto verifica a autenticação
-        return <div>Loading...</div>;
+    if (!isUserAuthenticated || userRole === null) {
+        return <div>Carregando...</div>; // ou algum componente de carregamento
     }
 
     return (
         <>
             {isUserAuthenticated && children}
         </>
-    );
+    )
 }
 
 export default PrivateRoute;
