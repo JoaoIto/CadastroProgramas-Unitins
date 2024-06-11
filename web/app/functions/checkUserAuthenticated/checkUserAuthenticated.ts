@@ -1,5 +1,5 @@
 "use client"
-import { getStorageItem } from '../getStorageItem/getStorageItem';
+import { getStorageItem } from '../storage/getStorageItem/getStorageItem';
 
 export const checkUserAuthenticated = () => {
     const userToken = getStorageItem();

@@ -2,7 +2,7 @@ import ApiUtils from "@/app/Utils/Api/apiMethods";
 
 export async function getProgramaById(token: string, id: string){
     try {
-        const programa = await ApiUtils.get<IPrograma>(`/programa/porUsuario/${id}`, token);
+        const programa = await ApiUtils.get<IPrograma>(`/programa/porUsuario/id/${id}`, token);
         console.log("Esse é o programa encontrado: ", programa);
         
         return programa;

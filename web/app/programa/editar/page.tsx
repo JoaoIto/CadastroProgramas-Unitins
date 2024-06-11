@@ -10,7 +10,7 @@ import Grid from "@mui/material/Grid";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import { useRouter } from "next/navigation";
 import Title from "@/app/components/Title/title";
-import { getStorageItem } from "@/app/functions/getStorageItem/getStorageItem";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";

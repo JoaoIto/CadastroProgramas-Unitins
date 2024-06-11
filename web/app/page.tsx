@@ -1,16 +1,24 @@
-"use client";
+'use client'
 import React, { useEffect, useState } from "react";
 import { CardProgram } from "./components/CardPrograma/Card";
 import Title from "./components/Title/title";
-import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
-import {getProgramasUsuario} from "@/app/service/programa/programaUserLogado";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
+import { getProgramasUsuario } from "@/app/service/programa/programaUserLogado";
 import Button from "@mui/material/Button";
+import { getProgramasSearch } from "./functions/storage/getProgramaSearch";
 
 export default function DashboardPage (){
     const token = getStorageItem();
     const [programas, setProgramas] = useState<IPrograma[]>([]);
+
     useEffect(() => {
-        getProgramasUsuario(token).then(data => setProgramas(data ?? []));
+        const programaSearch = getProgramasSearch();
+        if (programaSearch) {
+            const parsedProgramas = JSON.parse(programaSearch); // Converter a string de volta para um array de programas
+            setProgramas(parsedProgramas); // Definir os programas no estado
+        } else {
+            getProgramasUsuario(token).then(data => setProgramas(data ?? []));
+        }
     }, [token]);
 
     return (

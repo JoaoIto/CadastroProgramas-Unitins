@@ -137,6 +137,7 @@ const Perfil: React.FC = () => {
                   onChange={handleChange}
                   fullWidth
                   variant="outlined"
+                  disabled
                 />
               </Grid>
               <Grid className="w-full flex justify-end" item xs={12}>
