@@ -1,6 +1,6 @@
 "use client"
 import React, {useEffect, useState} from "react";
-import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
+import {getStorageItem} from "@/app/functions/storage/getStorageItem/getStorageItem";
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 import Perfil from "@/app/perfil/page";
 import {getProgramasUsuario} from "@/app/service/programa/programaUserLogado";

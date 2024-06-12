@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Title from "@/app/components/Title/title";
-import { getStorageItem } from "@/app/functions/getStorageItem/getStorageItem";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import { fetchPerfil } from "@/app/service/perfil/logUser";
 import { updatePerfil } from "../service/perfil/put/putUser";
 import { toast } from "react-toastify";
