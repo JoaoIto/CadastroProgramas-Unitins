@@ -80,12 +80,15 @@ const EditarSolicitacao = () => {
         trimmedInput !== ""
       ) {
         event.preventDefault();
+        console.log("Nova linguagem:", trimmedInput); // Adicione este console.log para verificar a nova linguagem
         setLinguagens((prev) => [...prev, trimmedInput]);
+        console.log(linguagens);
         setLinguagemInput("");
       }
     },
-    [linguagemInput]
+    [linguagemInput, linguagens]
   );
+  
 
   const handleOpen = () => {
     setOpen(true);
@@ -93,12 +96,12 @@ const EditarSolicitacao = () => {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
+  };  
+  
   const handleConfirm = async () => {
     const formData = new FormData(document.getElementById('editar-form') as HTMLFormElement);
 
-    const data = {
+    const data: Partial<IPrograma> = {
       titulo: formData.get("titulo") as string,
       descricao: formData.get("descricao") as string,
       solucaoProblemaDesc: formData.get("solucaoProblemaDesc") as string,
@@ -109,11 +112,13 @@ const EditarSolicitacao = () => {
       fasePublicacao: formData.get("fasePublicacao") as string,
       status: formData.get("status") as string,
       nomeArquivo: formData.get("nomeArquivo") as File,
-      usuarioId: usuarioId,
+      usuarioId: usuarioId!== null? usuarioId : undefined, // Add this line
     };
 
+    console.log(data);
+  
     try {
-      await putPrograma(formData, programaId, token);
+      await putPrograma(data, programaId, token);
       toast.success("Programa atualizado com sucesso!");
       router.push("/");
     } catch (error) {
@@ -121,7 +126,7 @@ const EditarSolicitacao = () => {
     }
     handleClose();
   };
-
+  
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleOpen();

@@ -13,5 +13,5 @@ interface IPrograma {
     vinculoInstitucional: string | null;
     fasePublicacao: string;
     status: string;
-    nomeArquivo: string;
+    nomeArquivo: File;
 }
