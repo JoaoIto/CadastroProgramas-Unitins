@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {getStorageItem} from "@/app/functions/getStorageItem/getStorageItem";
+import {getStorageItem} from "@/app/functions/storage/getStorageItem/getStorageItem";
 import Button from "@mui/material/Button";
 import Title from "../components/Title/title";
 import { CardProgram } from "../components/CardPrograma/Card";
