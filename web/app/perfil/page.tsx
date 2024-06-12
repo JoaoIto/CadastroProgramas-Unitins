@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
@@ -16,8 +17,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useRouter } from "next/navigation";
+import { tokenService } from "../Utils/Cookies/tokenStorage";
+import { IconButton } from "@mui/material";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
-const Perfil: React.FC = () => {
+export function Perfil() {
   const router = useRouter();
   const [perfil, setPerfil] = useState<Partial<Perfil>>({
     cpf: "",
@@ -30,6 +34,7 @@ const Perfil: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const token = getStorageItem();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +59,19 @@ const Perfil: React.FC = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleLogout = () => {
+    tokenService.delete(); // Remove o token
+    window.location.reload(); // Recarrega a página
+  };
+
+  const handleOpenLogoutModal = () => {
+    setLogoutModalOpen(true);
+  };
+
+  const handleCloseLogoutModal = () => {
+    setLogoutModalOpen(false);
   };
 
   const handleConfirm = async () => {
@@ -141,6 +159,9 @@ const Perfil: React.FC = () => {
                 />
               </Grid>
               <Grid className="w-full flex justify-end" item xs={12}>
+              <IconButton onClick={handleOpenLogoutModal} color="primary">
+                <ExitToAppIcon />
+              </IconButton>
                 <Button
                   variant="contained"
                   className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2" 
@@ -174,6 +195,30 @@ const Perfil: React.FC = () => {
           </Button>
           <Button onClick={handleConfirm} color="primary" autoFocus>
             Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={logoutModalOpen}
+        onClose={handleCloseLogoutModal}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          Confirmar Logout
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Tem certeza que deseja sair?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLogoutModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleLogout} color="primary" autoFocus>
+            Logout
           </Button>
         </DialogActions>
       </Dialog>
