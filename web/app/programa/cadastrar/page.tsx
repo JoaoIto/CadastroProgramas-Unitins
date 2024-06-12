@@ -11,13 +11,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
-import { fetchPerfil } from "@/app/service/perfil/logUser";
-import { TextareaAutosize } from "@mui/material";
-import { ProgramaStatus } from "@/app/enum/programa-status.enum";
+import { IconButton, TextareaAutosize } from "@mui/material";
 import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const programa = z.object({
   titulo: z.string().min(1, { message: "Campo obrigatório" }),
@@ -70,6 +69,10 @@ export default function NovaSolicitacao() {
     },
     [linguagemInput]
   );
+
+  const handleRemoveLinguagem = (index: number) => {
+    setLinguagens((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -165,11 +168,17 @@ export default function NovaSolicitacao() {
             <div>
               {linguagens.map((linguagem, index) => (
                 <span
-                  key={index}
-                  className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                key={index}
+                className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+              >
+                {linguagem}
+                <IconButton
+                  size="small"
+                  onClick={() => handleRemoveLinguagem(index)}
                 >
-                  {linguagem}
-                </span>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
               ))}
             </div>
           </Grid>

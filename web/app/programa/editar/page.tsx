@@ -22,6 +22,8 @@ import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 import { putPrograma } from "@/app/service/programa/put/putPrograma";
 import { toast } from "react-toastify";
 import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const EditarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -88,7 +90,11 @@ const EditarSolicitacao = () => {
     },
     [linguagemInput, linguagens]
   );
-  
+
+  const handleRemoveLinguagem = (index: number) => {
+    setLinguagens((prev) => prev.filter((_, i) => i !== index));
+  };
+
 
   const handleOpen = () => {
     setOpen(true);
@@ -200,11 +206,18 @@ const EditarSolicitacao = () => {
             <div>
               {linguagens.map((linguagem, index) => (
                 <span
-                  key={index}
-                  className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                key={index}
+                className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+              >
+                {linguagem}
+                <IconButton
+                  size="small"
+                  onClick={() => handleRemoveLinguagem(index)}
                 >
-                  {linguagem}
-                </span>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+              
               ))}
             </div>
           </Grid>
