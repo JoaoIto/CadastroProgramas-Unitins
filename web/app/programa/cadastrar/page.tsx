@@ -11,7 +11,14 @@ import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
-import { IconButton, TextareaAutosize } from "@mui/material";
+import {
+  FormHelperText,
+  IconButton,
+  TextareaAutosize,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+} from "@mui/material";
 import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -42,6 +49,9 @@ export default function NovaSolicitacao() {
   const [dataCriacaoPrograma, setDataCriacaoPrograma] = useState<Date | null>(
     null
   );
+  const [isModification, setIsModification] = useState(false);
+  const [isComposed, setIsComposed] = useState(false);
+  const [isFonte, setIsFonte] = useState(false);
 
   useEffect(() => {
     const usuarioIdPromise = getUsuarioId(token);
@@ -115,17 +125,28 @@ export default function NovaSolicitacao() {
             Dados do programa de computador:{" "}
           </h2>
           <Grid item xs={12}>
-            <TextField
-              label="Título do Programa"
-              name={"titulo"}
-              fullWidth
-              type="text"
-            />
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                1. Informe o título do seu programa de computador.
+              </FormHelperText>
+              <TextField
+                required
+                label="Título do Programa"
+                name="titulo"
+                fullWidth
+                type="text"
+              />
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                2. Descreva o seu programa de computador, incluindo seus
+                principais recursos e funcionalidades.
+              </FormHelperText>
               <TextareaAutosize
-                minRows={4}
+                required
+                minRows={15}
                 placeholder="Descrição do Programa..."
                 name="descricao"
                 id="descricao"
@@ -135,9 +156,14 @@ export default function NovaSolicitacao() {
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                3. Descreva qual problema técnico o seu programa pretende
+                resolver e como ele pretende fazê-lo.
+              </FormHelperText>
               <TextareaAutosize
+                required
                 minRows={4}
-                placeholder="Descrição do Programa..."
+                placeholder="Este programa é a solução de qual problema?..."
                 name="solucaoProblemaDesc"
                 id="solucaoProblemaDesc"
                 className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
@@ -146,7 +172,12 @@ export default function NovaSolicitacao() {
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                4. Descreva o mercado ou nicho para o qual o seu programa de
+                computador é destinado.
+              </FormHelperText>
               <TextareaAutosize
+                required
                 minRows={4}
                 placeholder="Descrição do Mercado..."
                 name="descricaoMercado"
@@ -156,36 +187,117 @@ export default function NovaSolicitacao() {
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              label="Linguagens"
-              name={"linguagens"}
-              fullWidth
-              type="text"
-              value={linguagemInput}
-              onChange={(e) => setLinguagemInput(e.target.value)}
-              onKeyDown={handleLinguagensKeyDown}
-            />
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                Este programa é modificação tecnológica ou derivação? Caso
+                afirmativo, informe o nome do programa original e respectivo
+                número de registro.
+              </FormHelperText>
+              <RadioGroup
+                row
+                value={isModification ? "Sim" : "Não"}
+                onChange={(e) => setIsModification(e.target.value === "Sim")}
+              >
+                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
+                <FormControlLabel value="Não" control={<Radio />} label="Não" />
+              </RadioGroup>
+              {isModification && (
+                <TextField
+                  label="Nome do Programa Original e Número de Registro"
+                  name="programaOriginal"
+                  fullWidth
+                  type="text"
+                />
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                Este programa é composto por outras obras de natureza
+                intelectual?
+              </FormHelperText>
+              <RadioGroup
+                row
+                value={isComposed ? "Sim" : "Não"}
+                onChange={(e) => setIsComposed(e.target.value === "Sim")}
+              >
+                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
+                <FormControlLabel value="Não" control={<Radio />} label="Não" />
+              </RadioGroup>
+              {isComposed && (
+                <TextField
+                  label="Descrição das Outras Obras"
+                  name="outrasObras"
+                  fullWidth
+                  type="text"
+                />
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+              Possui fonte de financiamento? Se sim, qual.
+              </FormHelperText>
+              <RadioGroup
+                row
+                value={isFonte? "Sim" : "Não"}
+                onChange={(e) => setIsFonte(e.target.value === "Sim")}
+              >
+                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
+                <FormControlLabel value="Não" control={<Radio />} label="Não" />
+              </RadioGroup>
+              {isFonte && (
+                <TextField
+                  label="Descreva a fonte de financiamento"
+                  name="fonteFinanciamento"
+                  fullWidth
+                  type="text"
+                />
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                5. Informe as linguagens de programação utilizadas no
+                desenvolvimento do programa.
+              </FormHelperText>
+              <TextField
+                label="Linguagens"
+                name={"linguagens"}
+                fullWidth
+                type="text"
+                value={linguagemInput}
+                onChange={(e) => setLinguagemInput(e.target.value)}
+                onKeyDown={handleLinguagensKeyDown}
+              />
+            </FormControl>
             <div>
               {linguagens.map((linguagem, index) => (
                 <span
-                key={index}
-                className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-              >
-                {linguagem}
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveLinguagem(index)}
+                  key={index}
+                  className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
                 >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </span>
+                  {linguagem}
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveLinguagem(index)}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </span>
               ))}
             </div>
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel htmlFor="vinculoUnitins">
-                Vínculo com a Unitins
+                6. Vínculo com a Unitins
               </InputLabel>
               <Select name="vinculoUnitins" id="vinculoUnitins">
                 <MenuItem value="Sim">Sim</MenuItem>
@@ -195,52 +307,68 @@ export default function NovaSolicitacao() {
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel htmlFor="fasePublicacao">
-                Fase de Publicação
-              </InputLabel>
-              <Select name="fasePublicacao" id="fasePublicacao">
-                <MenuItem value="ARTIGO">ARTIGO</MenuItem>
-                <MenuItem value="TESE">TESE</MenuItem>
-                <MenuItem value="RESUMO">RESUMO</MenuItem>
-                <MenuItem value="CONGRESSO">CONGRESSO</MenuItem>
+              <FormHelperText className="text-lg">
+                7. Está em fase de publicação em algum periódico científico,
+                congresso, tese, artigo ou resumo?
+              </FormHelperText>
+              <Select required name="fasePublicacao" id="fasePublicacao">
+                <MenuItem value="ARTIGO">Artigo</MenuItem>
+                <MenuItem value="TESE">Tese</MenuItem>
+                <MenuItem value="RESUMO">Resumo</MenuItem>
+                <MenuItem value="CONGRESSO">Congresso</MenuItem>
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              label="Data de Criação do Programa"
-              name="dataCriacaoPrograma"
-              type="date"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              value={
-                dataCriacaoPrograma
-                  ? dataCriacaoPrograma.toISOString().split("T")[0]
-                  : ""
-              }
-              onChange={(e) => {
-                const dateString = e.target.value;
-                setDataCriacaoPrograma(
-                  dateString ? new Date(dateString) : null
-                );
-              }}
-            />
+            <FormControl fullWidth>
+              <FormHelperText className="text-lg">
+                8. Informe a data de criação do programa de computador.
+              </FormHelperText>
+              <TextField
+                required
+                label="Data de Criação do Programa"
+                name="dataCriacaoPrograma"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                value={
+                  dataCriacaoPrograma
+                    ? dataCriacaoPrograma.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) => {
+                  const dateString = e.target.value;
+                  setDataCriacaoPrograma(
+                    dateString ? new Date(dateString) : null
+                  );
+                }}
+                helperText=""
+              />
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-              name={"nomeArquivo"}
-              onChange={(event) => {
-                if (event.target.files && event.target.files.length > 0) {
-                  console.log(
-                    "Nome do arquivo selecionado:",
-                    event.target.files[0].name
-                  );
-                }
-              }}
-            />
+            <div>
+              <p>
+                Selecione um arquivo relacionado ao seu programa de computador.
+              </p>
+              <input
+                required
+                type="file"
+                accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
+                name={"nomeArquivo"}
+                onChange={(event) => {
+                  if (event.target.files && event.target.files.length > 0) {
+                    return (
+                      <p>
+                        Nome do arquivo selecionado:,
+                        {event.target.files[0].name}
+                      </p>
+                    );
+                  }
+                }}
+              />
+            </div>
           </Grid>
         </Grid>
 
