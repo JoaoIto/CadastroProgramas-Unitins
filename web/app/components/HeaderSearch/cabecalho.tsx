@@ -1,24 +1,23 @@
-import SearchIcon from "@mui/icons-material/Search";
-import TextField from "@mui/material/TextField";
-import Image from "next/image";
 import React, { useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, TextField } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import Image from "next/image";
 import UnitinsLogo from "@/public/logoUnitins.png";
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import { setProgramaItem } from "@/app/functions/storage/setProgramaSearch";
+import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 
-export function Search() {
+export function Search (){
   const token = getStorageItem();
   const [searchTitle, setSearchTitle] = useState("");
   const [searchResults, setSearchResults] = useState<IPrograma[]>([]);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const handleSearch = async () => {
     try {
-      const response = await ApiUtils.get<IPrograma[]>(
-        `/programa/porUsuario/${searchTitle}`,
-        token
-      );
+      const response = await ApiUtils.get<IPrograma[]>(`/programa/porUsuario/${searchTitle}`, token);
       if (response) {
         setSearchResults(response);
         setProgramaItem("programaSearch", JSON.stringify(response)); // Armazena os resultados da pesquisa no sessionStorage
@@ -37,7 +36,20 @@ export function Search() {
   const handleClearSearch = () => {
     sessionStorage.removeItem("programaSearch"); // Remove a pesquisa do sessionStorage
     setSearchResults([]); // Limpa os resultados da pesquisa
-    window.location.reload();// Recarrega a página após a pesquisa
+    window.location.reload(); // Recarrega a página após a pesquisa
+  };
+
+  const handleLogout = () => {
+    tokenService.delete(); // Remove o token
+    window.location.reload(); // Recarrega a página
+  };
+
+  const handleOpenLogoutModal = () => {
+    setLogoutModalOpen(true);
+  };
+
+  const handleCloseLogoutModal = () => {
+    setLogoutModalOpen(false);
   };
 
   return (
@@ -50,6 +62,9 @@ export function Search() {
             alt="Unitins Logo"
             className="sm:hidden border-r-4 border-b-4 border-cinzaTraco h-56 w-52 mr-10"
           />
+          <IconButton onClick={handleOpenLogoutModal} color="primary">
+            <ExitToAppIcon />
+          </IconButton>
           <TextField
             type="text"
             placeholder="Pesquisar pelo titulo: "
@@ -79,6 +94,29 @@ export function Search() {
           </div>
         </header>
       </div>
+
+      {/* Modal de confirmação de logout */}
+      <Dialog
+        open={logoutModalOpen}
+        onClose={handleCloseLogoutModal}
+      >
+        <DialogTitle>Confirmar Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Você tem certeza que deseja sair?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLogoutModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleLogout} color="primary" autoFocus>
+            Sair
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
-}
+};
+
+export default Search;
