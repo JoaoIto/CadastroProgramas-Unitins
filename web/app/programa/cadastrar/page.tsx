@@ -18,6 +18,12 @@ import {
   FormControlLabel,
   RadioGroup,
   Radio,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { toast } from "react-toastify";
@@ -43,6 +49,9 @@ type FormData = z.infer<typeof programa>;
 export default function NovaSolicitacao() {
   const router = useRouter();
   const token = getStorageItem();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
   const [usuarioId, setUsuarioId] = useState<string | undefined>(undefined);
   const [linguagens, setLinguagens] = useState<string[]>([]);
   const [linguagemInput, setLinguagemInput] = useState<string>("");
@@ -52,6 +61,23 @@ export default function NovaSolicitacao() {
   const [isModification, setIsModification] = useState(false);
   const [isComposed, setIsComposed] = useState(false);
   const [isFonte, setIsFonte] = useState(false);
+  const [revelacaoTerceiros, setRevelacaoTerceiros] = useState(false);
+  const [fasePublicacao, setFasePublicacao] = useState(false);
+  const [revelacaoOral, setRevelacaoOral] = useState(false);
+
+  const handleNext = () => {
+    if (currentPage < 3) {
+      setCurrentPage(currentPage + 1);
+    } else {
+      setShowConfirmationModal(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   useEffect(() => {
     const usuarioIdPromise = getUsuarioId(token);
@@ -106,162 +132,88 @@ export default function NovaSolicitacao() {
     try {
       await postPrograma(data, token);
       toast.success("Programa enviado com sucesso!");
+      setShowConfirmationModal(false);
       router.push("/");
     } catch (error) {
       toast.error("Erro ao enviar o programa. Tente novamente.");
     }
   };
 
-  return (
-    <div className="flex-grow bg-sky-200 p-8">
-      <Title>Nova Solicitação</Title>
-      <form className="mx-auto" onSubmit={handleSubmit}>
-        <Grid
-          className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
-          container
-          spacing={2}
-        >
-          <h2 className={`text-2xl font-medium`}>
-            Dados do programa de computador:{" "}
-          </h2>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                1. Informe o título do seu programa de computador.
-              </FormHelperText>
-              <TextField
-                required
-                label="Título do Programa"
-                name="titulo"
-                fullWidth
-                type="text"
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                2. Descreva o seu programa de computador, incluindo seus
-                principais recursos e funcionalidades.
-              </FormHelperText>
-              <TextareaAutosize
-                required
-                minRows={15}
-                placeholder="Descrição do Programa..."
-                name="descricao"
-                id="descricao"
-                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                3. Descreva qual problema técnico o seu programa pretende
-                resolver e como ele pretende fazê-lo.
-              </FormHelperText>
-              <TextareaAutosize
-                required
-                minRows={4}
-                placeholder="Este programa é a solução de qual problema?..."
-                name="solucaoProblemaDesc"
-                id="solucaoProblemaDesc"
-                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                4. Descreva o mercado ou nicho para o qual o seu programa de
-                computador é destinado.
-              </FormHelperText>
-              <TextareaAutosize
-                required
-                minRows={4}
-                placeholder="Descrição do Mercado..."
-                name="descricaoMercado"
-                id="descricaoMercado"
-                className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                Este programa é modificação tecnológica ou derivação? Caso
-                afirmativo, informe o nome do programa original e respectivo
-                número de registro.
-              </FormHelperText>
-              <RadioGroup
-                row
-                value={isModification ? "Sim" : "Não"}
-                onChange={(e) => setIsModification(e.target.value === "Sim")}
-              >
-                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
-                <FormControlLabel value="Não" control={<Radio />} label="Não" />
-              </RadioGroup>
-              {isModification && (
+  const renderPageContent = () => {
+    switch (currentPage) {
+      case 0:
+        return (
+          <Grid
+            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+            container
+            spacing={2}
+          >
+            <Typography className="text-2xl font-medium">
+              INFORMAÇÕES DO PROGRAMA
+            </Typography>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  1. Informe o título do seu programa de computador.
+                </FormHelperText>
                 <TextField
-                  label="Nome do Programa Original e Número de Registro"
-                  name="programaOriginal"
+                  required
+                  label="Título do Programa"
+                  name="titulo"
                   fullWidth
                   type="text"
                 />
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                Este programa é composto por outras obras de natureza
-                intelectual?
-              </FormHelperText>
-              <RadioGroup
-                row
-                value={isComposed ? "Sim" : "Não"}
-                onChange={(e) => setIsComposed(e.target.value === "Sim")}
-              >
-                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
-                <FormControlLabel value="Não" control={<Radio />} label="Não" />
-              </RadioGroup>
-              {isComposed && (
-                <TextField
-                  label="Descrição das Outras Obras"
-                  name="outrasObras"
-                  fullWidth
-                  type="text"
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  2. Descreva o seu programa de computador, incluindo seus
+                  principais recursos e funcionalidades.
+                </FormHelperText>
+                <TextareaAutosize
+                  required
+                  minRows={15}
+                  placeholder="Descrição do Programa..."
+                  name="descricao"
+                  id="descricao"
+                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
                 />
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-              Possui fonte de financiamento? Se sim, qual.
-              </FormHelperText>
-              <RadioGroup
-                row
-                value={isFonte? "Sim" : "Não"}
-                onChange={(e) => setIsFonte(e.target.value === "Sim")}
-              >
-                <FormControlLabel value="Sim" control={<Radio />} label="Sim" />
-                <FormControlLabel value="Não" control={<Radio />} label="Não" />
-              </RadioGroup>
-              {isFonte && (
-                <TextField
-                  label="Descreva a fonte de financiamento"
-                  name="fonteFinanciamento"
-                  fullWidth
-                  type="text"
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  3. Descreva qual problema técnico o seu programa pretende
+                  resolver e como ele pretende fazê-lo.
+                </FormHelperText>
+                <TextareaAutosize
+                  required
+                  minRows={4}
+                  placeholder="Este programa é a solução de qual problema?..."
+                  name="solucaoProblemaDesc"
+                  id="solucaoProblemaDesc"
+                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
                 />
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12}>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  4. Descreva o mercado ou nicho para o qual o seu programa de
+                  computador é destinado.
+                </FormHelperText>
+                <TextareaAutosize
+                  required
+                  minRows={4}
+                  placeholder="Descrição do Mercado..."
+                  name="descricaoMercado"
+                  id="descricaoMercado"
+                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
             <FormControl fullWidth>
               <FormHelperText className="text-lg">
                 5. Informe as linguagens de programação utilizadas no
@@ -294,7 +246,202 @@ export default function NovaSolicitacao() {
               ))}
             </div>
           </Grid>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  6. Informe a data de criação do programa de computador.
+                </FormHelperText>
+                <TextField
+                  required
+                  label="Data de Criação do Programa"
+                  name="dataCriacaoPrograma"
+                  type="date"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  value={
+                    dataCriacaoPrograma
+                      ? dataCriacaoPrograma.toISOString().split("T")[0]
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const dateString = e.target.value;
+                    setDataCriacaoPrograma(
+                      dateString ? new Date(dateString) : null
+                    );
+                  }}
+                  helperText=""
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <div>
+                <p>
+                  Selecione um arquivo relacionado ao seu programa de
+                  computador.
+                </p>
+                <input
+                  required
+                  type="file"
+                  accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
+                  name={"nomeArquivo"}
+                  onChange={(event) => {
+                    if (event.target.files && event.target.files.length > 0) {
+                      return (
+                        <p>
+                          Nome do arquivo selecionado:,
+                          {event.target.files[0].name}
+                        </p>
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleNext}
+              >
+                Próximo
+              </Button>
+            </Grid>
+          </Grid>
+        );
+      case 1:
+        return (
+          <Grid
+            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+            container
+            spacing={2}
+          >
+            <Typography className="text-2xl font-medium">
+              CARACTERIZAÇÃO DO PROGRAMA DE COMPUTADOR
+            </Typography>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Este programa é modificação tecnológica ou derivação? Caso
+                  afirmativo, informe o nome do programa original e respectivo
+                  número de registro.
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={isModification ? "Sim" : "Não"}
+                  onChange={(e) => setIsModification(e.target.value === "Sim")}
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {isModification && (
+                  <TextField
+                    label="Nome do Programa Original e Número de Registro"
+                    name="programaOriginal"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Este programa é composto por outras obras de natureza
+                  intelectual?
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={isComposed ? "Sim" : "Não"}
+                  onChange={(e) => setIsComposed(e.target.value === "Sim")}
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {isComposed && (
+                  <TextField
+                    label="Descrição das Outras Obras"
+                    name="outrasObras"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Possui fonte de financiamento? Se sim, qual.
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={isFonte ? "Sim" : "Não"}
+                  onChange={(e) => setIsFonte(e.target.value === "Sim")}
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {isFonte && (
+                  <TextField
+                    label="Descreva a fonte de financiamento"
+                    name="fonteFinanciamento"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleBack}
+              >
+                Anterior
+              </Button>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleNext}
+              >
+                Próximo
+              </Button>
+            </Grid>
+          </Grid>
+        );
+      case 2:
+        return (
+          <Grid
+            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+            container
+            spacing={2}
+          >
+            <Typography className="text-2xl font-medium">VÍNCULO E PUBLICAÇÃO</Typography>
+            <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel htmlFor="vinculoUnitins">
                 6. Vínculo com a Unitins
@@ -307,7 +454,7 @@ export default function NovaSolicitacao() {
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <FormHelperText className="text-lg">
+              <FormHelperText className="text-lg"> 
                 7. Está em fase de publicação em algum periódico científico,
                 congresso, tese, artigo ou resumo?
               </FormHelperText>
@@ -320,68 +467,182 @@ export default function NovaSolicitacao() {
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                8. Informe a data de criação do programa de computador.
-              </FormHelperText>
-              <TextField
-                required
-                label="Data de Criação do Programa"
-                name="dataCriacaoPrograma"
-                type="date"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                value={
-                  dataCriacaoPrograma
-                    ? dataCriacaoPrograma.toISOString().split("T")[0]
-                    : ""
-                }
-                onChange={(e) => {
-                  const dateString = e.target.value;
-                  setDataCriacaoPrograma(
-                    dateString ? new Date(dateString) : null
-                  );
-                }}
-                helperText=""
-              />
-            </FormControl>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleBack}
+              >
+                Anterior
+              </Button>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleNext}
+              >
+                Próximo
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <div>
-              <p>
-                Selecione um arquivo relacionado ao seu programa de computador.
-              </p>
-              <input
-                required
-                type="file"
-                accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                name={"nomeArquivo"}
-                onChange={(event) => {
-                  if (event.target.files && event.target.files.length > 0) {
-                    return (
-                      <p>
-                        Nome do arquivo selecionado:,
-                        {event.target.files[0].name}
-                      </p>
-                    );
-                  }
-                }}
-              />
-            </div>
-          </Grid>
-        </Grid>
-
-        <div className="mt-4">
-          <Button
-            variant="contained"
-            className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-            type="submit"
+        );
+      case 3:
+        return (
+          <Grid
+            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+            container
+            spacing={2}
           >
-            Enviar
+            <Typography className="text-2xl font-medium">
+              SIGILO E CONFIDENCIALIDADE
+            </Typography>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Já houve revelação para terceiros não vinculados ao NIT
+                  UNITINS?
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={revelacaoTerceiros ? "Sim" : "Não"}
+                  onChange={(e) =>
+                    setRevelacaoTerceiros(e.target.value === "Sim")
+                  }
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {revelacaoTerceiros && (
+                  <TextField
+                    label="Detalhes da Revelação"
+                    name="detalhesRevelacao"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Está em fase de publicação em algum periódico científico,
+                  congresso, tese, artigo ou resumo?
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={fasePublicacao ? "Sim" : "Não"}
+                  onChange={(e) => setFasePublicacao(e.target.value === "Sim")}
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {fasePublicacao && (
+                  <TextField
+                    label="Detalhes da Publicação"
+                    name="detalhesPublicacao"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Já foi revelada sob forma oral por meio de palestra, oficina,
+                  roda de conversa e outros?
+                </FormHelperText>
+                <RadioGroup
+                  row
+                  value={revelacaoOral ? "Sim" : "Não"}
+                  onChange={(e) => setRevelacaoOral(e.target.value === "Sim")}
+                >
+                  <FormControlLabel
+                    value="Sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="Não"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+                {revelacaoOral && (
+                  <TextField
+                    label="Detalhes da Revelação Oral"
+                    name="detalhesRevelacaoOral"
+                    fullWidth
+                    type="text"
+                  />
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleBack}
+              >
+                Anterior
+              </Button>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleNext}
+                type="submit" // Aqui você deve especificar type="submit" para enviar o formulário
+              >
+                Concluir
+              </Button>
+            </Grid>
+          </Grid>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      <Grid className="w-full flex flex-col justify-center self-center items-center">
+        {renderPageContent()}
+      </Grid>
+      <Dialog
+        open={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+      >
+        <DialogTitle>Confirmar Submissão</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Tem certeza de que deseja enviar este formulário?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setShowConfirmationModal(false)}
+            color="primary"
+          >
+            Cancelar
           </Button>
-        </div>
-      </form>
-    </div>
+          <Button type="submit" color="primary">
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
