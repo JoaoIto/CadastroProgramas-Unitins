@@ -87,7 +87,7 @@ export default function NovaSolicitacao() {
     } else {
       setCurrentPage(currentPage + 1);
     }
-  };  
+  };
 
   const handleBack = () => {
     if (currentPage > 0) {
@@ -172,9 +172,7 @@ export default function NovaSolicitacao() {
     setLinguagens((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     const data: FormData = {
       titulo: formInputs.titulo as string,
       descricao: formInputs.descricao as string,
@@ -718,22 +716,25 @@ export default function NovaSolicitacao() {
               {dataCriacaoPrograma?.toISOString()}
             </p>
             <p>
-              <strong>Linguagens:</strong> {<div>
-                {linguagens.map((linguagem, index) => (
-                  <span
-                    key={index}
-                    className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                  >
-                    {linguagem}
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveLinguagem(index)}
+              <strong>Linguagens:</strong>{" "}
+              {
+                <div>
+                  {linguagens.map((linguagem, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
                     >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </span>
-                ))}
-              </div>}
+                      {linguagem}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveLinguagem(index)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </span>
+                  ))}
+                </div>
+              }
             </p>
             <p>
               <strong>Vínculo Unitins:</strong>{" "}
@@ -748,7 +749,7 @@ export default function NovaSolicitacao() {
           >
             Cancelar
           </Button>
-          <Button type="submit" color="primary">
+          <Button onClick={handleSubmit} type="submit" color="primary">
             Confirmar
           </Button>
         </DialogActions>
