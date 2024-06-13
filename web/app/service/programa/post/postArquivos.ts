@@ -4,6 +4,8 @@ export async function enviarArquivo(arquivo: File, token: string) {
     const formData = new FormData();
     formData.append('file', arquivo);
 
+    console.log(formData.get('file'));
+    
     try {
         const response = await ApiUtils.patch('/programa/uploads', formData, token);
         console.log(response);

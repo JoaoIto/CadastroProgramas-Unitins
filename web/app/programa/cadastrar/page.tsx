@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Button from "@mui/material/Button";
 import { z } from "zod";
 import TextField from "@mui/material/TextField";
@@ -9,7 +9,6 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
-import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import {
   FormHelperText,
@@ -48,6 +47,7 @@ type FormData = z.infer<typeof programa>;
 
 export default function NovaSolicitacao() {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement | null>(null);
   const token = getStorageItem();
   const [currentPage, setCurrentPage] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -64,18 +64,80 @@ export default function NovaSolicitacao() {
   const [revelacaoTerceiros, setRevelacaoTerceiros] = useState(false);
   const [fasePublicacao, setFasePublicacao] = useState(false);
   const [revelacaoOral, setRevelacaoOral] = useState(false);
+  // Estado para armazenar os dados do formulário
+  const [formInputs, setFormInputs] = useState<Partial<IPrograma>>({
+    titulo: "",
+    descricao: "",
+    solucaoProblemaDesc: "",
+    linguagens: linguagens,
+    modificacaoTecnologicaDesc: null,
+    descricaoMercado: "",
+    dataCriacaoPrograma: dataCriacaoPrograma,
+    dataCriacao: "", // Precisa ser definido
+    vinculoUnitins: true,
+    vinculoInstitucional: null,
+    fasePublicacao: "",
+    status: "ENVIADO", // Definido como ENVIADO por padrão
+    nomeArquivo: null,
+  });
 
   const handleNext = () => {
-    if (currentPage < 3) {
-      setCurrentPage(currentPage + 1);
-    } else {
+    if (currentPage >= 3) {
       setShowConfirmationModal(true);
+    } else {
+      setCurrentPage(currentPage + 1);
     }
-  };
+  };  
 
   const handleBack = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+
+    setFormInputs((prevInputs) => ({
+      ...prevInputs,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    fieldName: string
+  ) => {
+    const { value } = event.target;
+
+    if (fieldName === "vinculoUnitins") {
+      const newValue = value === "Sim"; // Convertendo para booleano apenas para vinculoUnitins
+
+      setFormInputs((prevInputs) => ({
+        ...prevInputs,
+        [fieldName]: newValue,
+      }));
+    } else {
+      // Para outros campos, como fasePublicacao, salvar o valor como string
+      setFormInputs((prevInputs) => ({
+        ...prevInputs,
+        [fieldName]: value as string,
+      }));
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
+
+    console.log(file);
+
+    if (file) {
+      setFormInputs((prevInputs) => ({
+        ...prevInputs,
+        nomeArquivo: file,
+      }));
     }
   };
 
@@ -112,19 +174,23 @@ export default function NovaSolicitacao() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
 
-    const data = {
-      titulo: formData.get("titulo") as string,
-      descricao: formData.get("descricao") as string,
-      solucaoProblemaDesc: formData.get("solucaoProblemaDesc") as string,
+    const data: FormData = {
+      titulo: formInputs.titulo as string,
+      descricao: formInputs.descricao as string,
+      solucaoProblemaDesc: formInputs.solucaoProblemaDesc as string,
       linguagens: linguagens,
-      descricaoMercado: formData.get("descricaoMercado") as string,
-      dataCriacaoPrograma: formData.get("dataCriacaoPrograma") as string,
-      vinculoUnitins: formData.get("vinculoUnitins") === "Sim",
-      fasePublicacao: formData.get("fasePublicacao") as string,
+      descricaoMercado: formInputs.descricaoMercado as string,
+      dataCriacaoPrograma: dataCriacaoPrograma
+        ? dataCriacaoPrograma.toISOString()
+        : "", // Converte para ISO String se definido
+      vinculoUnitins:
+        formInputs.vinculoUnitins !== undefined
+          ? formInputs.vinculoUnitins
+          : true,
+      fasePublicacao: formInputs.fasePublicacao as string,
       status: "ENVIADO",
-      nomeArquivo: formData.get("nomeArquivo") as File,
+      nomeArquivo: formInputs.nomeArquivo as File,
       usuarioId: usuarioId,
     };
     console.log("Data antes de enviar:", data);
@@ -162,6 +228,7 @@ export default function NovaSolicitacao() {
                   name="titulo"
                   fullWidth
                   type="text"
+                  onChange={handleInputChange}
                 />
               </FormControl>
             </Grid>
@@ -178,6 +245,7 @@ export default function NovaSolicitacao() {
                   name="descricao"
                   id="descricao"
                   className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                  onChange={handleInputChange}
                 />
               </FormControl>
             </Grid>
@@ -194,6 +262,7 @@ export default function NovaSolicitacao() {
                   name="solucaoProblemaDesc"
                   id="solucaoProblemaDesc"
                   className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                  onChange={handleInputChange}
                 />
               </FormControl>
             </Grid>
@@ -210,42 +279,43 @@ export default function NovaSolicitacao() {
                   name="descricaoMercado"
                   id="descricaoMercado"
                   className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
+                  onChange={handleInputChange}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg">
-                5. Informe as linguagens de programação utilizadas no
-                desenvolvimento do programa.
-              </FormHelperText>
-              <TextField
-                label="Linguagens"
-                name={"linguagens"}
-                fullWidth
-                type="text"
-                value={linguagemInput}
-                onChange={(e) => setLinguagemInput(e.target.value)}
-                onKeyDown={handleLinguagensKeyDown}
-              />
-            </FormControl>
-            <div>
-              {linguagens.map((linguagem, index) => (
-                <span
-                  key={index}
-                  className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                >
-                  {linguagem}
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveLinguagem(index)}
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  5. Informe as linguagens de programação utilizadas no
+                  desenvolvimento do programa.
+                </FormHelperText>
+                <TextField
+                  label="Linguagens"
+                  name={"linguagens"}
+                  fullWidth
+                  type="text"
+                  value={linguagemInput}
+                  onChange={(e) => setLinguagemInput(e.target.value)}
+                  onKeyDown={handleLinguagensKeyDown}
+                />
+              </FormControl>
+              <div>
+                {linguagens.map((linguagem, index) => (
+                  <span
+                    key={index}
+                    className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              ))}
-            </div>
-          </Grid>
+                    {linguagem}
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveLinguagem(index)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                ))}
+              </div>
+            </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <FormHelperText className="text-lg">
@@ -284,18 +354,14 @@ export default function NovaSolicitacao() {
                   required
                   type="file"
                   accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                  name={"nomeArquivo"}
-                  onChange={(event) => {
-                    if (event.target.files && event.target.files.length > 0) {
-                      return (
-                        <p>
-                          Nome do arquivo selecionado:,
-                          {event.target.files[0].name}
-                        </p>
-                      );
-                    }
-                  }}
+                  name="nomeArquivo"
+                  onChange={handleFileChange}
                 />
+                {formInputs.nomeArquivo && (
+                  <p>
+                    Nome do arquivo selecionado: {formInputs.nomeArquivo.name}
+                  </p>
+                )}
               </div>
             </Grid>
             <Grid item xs={12}>
@@ -440,33 +506,49 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
-            <Typography className="text-2xl font-medium">VÍNCULO E PUBLICAÇÃO</Typography>
+            <Typography className="text-2xl font-medium">
+              VÍNCULO E PUBLICAÇÃO
+            </Typography>
             <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="vinculoUnitins">
-                6. Vínculo com a Unitins
-              </InputLabel>
-              <Select name="vinculoUnitins" id="vinculoUnitins">
-                <MenuItem value="Sim">Sim</MenuItem>
-                <MenuItem value="Não">Não</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <FormHelperText className="text-lg"> 
-                7. Está em fase de publicação em algum periódico científico,
-                congresso, tese, artigo ou resumo?
-              </FormHelperText>
-              <Select required name="fasePublicacao" id="fasePublicacao">
-                <MenuItem value="ARTIGO">Artigo</MenuItem>
-                <MenuItem value="TESE">Tese</MenuItem>
-                <MenuItem value="RESUMO">Resumo</MenuItem>
-                <MenuItem value="CONGRESSO">Congresso</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="vinculoUnitins">
+                  6. Vínculo com a Unitins
+                </InputLabel>
+                <Select
+                  name="vinculoUnitins"
+                  id="vinculoUnitins"
+                  value={formInputs.vinculoUnitins}
+                  onChange={(event) =>
+                    handleSelectChange(event, "vinculoUnitins")
+                  }
+                >
+                  <MenuItem value="Sim">Sim</MenuItem>
+                  <MenuItem value="Não">Não</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  7. Está em fase de publicação em algum periódico científico,
+                  congresso, tese, artigo ou resumo?
+                </FormHelperText>
+                <Select
+                  required
+                  name="fasePublicacao"
+                  id="fasePublicacao"
+                  onChange={(event) =>
+                    handleSelectChange(event, "fasePublicacao")
+                  }
+                >
+                  <MenuItem value="ARTIGO">ARTIGO</MenuItem>
+                  <MenuItem value="TESE">TESE</MenuItem>
+                  <MenuItem value="RESUMO">RESUMO</MenuItem>
+                  <MenuItem value="CONGRESSO">CONGRESSO</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
               <Button
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
                 variant="contained"
@@ -604,7 +686,6 @@ export default function NovaSolicitacao() {
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
                 variant="contained"
                 onClick={handleNext}
-                type="submit" // Aqui você deve especificar type="submit" para enviar o formulário
               >
                 Concluir
               </Button>
@@ -617,7 +698,7 @@ export default function NovaSolicitacao() {
   };
 
   return (
-    <>
+    <form ref={formRef} onSubmit={handleSubmit} className="h-full">
       <Grid className="w-full flex flex-col justify-center self-center items-center">
         {renderPageContent()}
       </Grid>
@@ -629,6 +710,35 @@ export default function NovaSolicitacao() {
         <DialogContent>
           <DialogContentText>
             Tem certeza de que deseja enviar este formulário?
+            <p>
+              <strong>Nome:</strong> {formInputs.titulo}
+            </p>
+            <p>
+              <strong>Data Criação Programa:</strong>{" "}
+              {dataCriacaoPrograma?.toISOString()}
+            </p>
+            <p>
+              <strong>Linguagens:</strong> {<div>
+                {linguagens.map((linguagem, index) => (
+                  <span
+                    key={index}
+                    className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                  >
+                    {linguagem}
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveLinguagem(index)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                ))}
+              </div>}
+            </p>
+            <p>
+              <strong>Vínculo Unitins:</strong>{" "}
+              {formInputs.vinculoUnitins ? "Sim" : "Não"}
+            </p>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -643,6 +753,6 @@ export default function NovaSolicitacao() {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </form>
   );
 }

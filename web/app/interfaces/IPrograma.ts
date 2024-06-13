@@ -7,11 +7,11 @@ interface IPrograma {
     linguagens: string[];
     modificacaoTecnologicaDesc: string | null;
     descricaoMercado: string;
-    dataCriacaoPrograma: string;
+    dataCriacaoPrograma: Date | null;
     dataCriacao: string;
     vinculoUnitins: boolean;
     vinculoInstitucional: string | null;
     fasePublicacao: string;
     status: string;
-    nomeArquivo: File;
+    nomeArquivo: File | null;
 }

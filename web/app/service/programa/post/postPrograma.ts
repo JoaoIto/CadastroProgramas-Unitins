@@ -4,7 +4,7 @@ import { enviarArquivo } from "./postArquivos";
 export async function postPrograma(data: any, token: string) {
   try {
     let fileName = "";
-
+    console.log(data);
     const arquivo = data.nomeArquivo as File;
     if (arquivo) {
       const response = await enviarArquivo(arquivo, token);
