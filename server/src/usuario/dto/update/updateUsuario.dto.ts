@@ -12,6 +12,11 @@ export class UpdateUsuarioInputDto {
     @IsNotEmpty({ message: 'O CPF não pode estar vazio!' })
     cpf?: string;
 
+    @ApiProperty({ type: String, example: '24643487' })
+    @IsString()
+    @IsNotEmpty({ message: 'O rg não pode estar vazio!' })
+    rg?: string;
+
     @ApiProperty({ type: String, example: 'senha123' })
     @IsString()
     @IsNotEmpty({ message: 'A senha não pode estar vazia!' })

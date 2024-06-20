@@ -19,6 +19,9 @@ export class Usuario {
     @Prop({ required: true })
      cpf: string;
 
+     @Prop({ required: true })
+     rg: string;
+
     @Prop({ required: true })
      senha: string;
 

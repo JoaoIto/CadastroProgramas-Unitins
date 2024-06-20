@@ -1,9 +1,9 @@
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 
-export async function fetchPerfil (token: string) {
+export async function fetchPayload (token: string) {
     try {
-        const perfilData = await ApiUtils.get<Perfil>(
-            `/auth/log-user`,
+        const perfilData = await ApiUtils.get<Partial<Perfil>>(
+            `/auth/log-user/payload`,
             token
         );
         return perfilData;
