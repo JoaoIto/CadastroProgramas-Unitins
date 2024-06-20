@@ -16,7 +16,7 @@ export default function DashboardPage (){
     return (
         <div className="flex w-full h-full">
             <div className="flex flex-col">
-                <div className="w-full h-full i">
+                <div className="w-full h-full">
                     <Title>Dashboard</Title>
                     <div className="flex self-end p-4">
                         <Button variant='contained' href={`/programa/cadastrar`}>
