@@ -120,15 +120,32 @@ import {
         throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
       }
     }
-    @Get('/enviados')
+  @Get('/enviados')
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Retorna os programas do usuário logado' })
+  @ApiOperation({ summary: 'Retornando os programas enviados pelos usuarios para admin' })
   async getProgramasEnviados(@Req() req): Promise<Programa[]> {
     try {
       this.logger.log("Retornando os programas enviados pelos usuarios para admin");
       const programas = await this.programaService.getProgramasEnviados();
+
+      return programas;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
+      throw error;
+    }
+  }
+
+  @Get('/em-analise')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Retornando os programas em analise pelo admin' })
+  async getProgramasEmAnalise(@Req() req): Promise<Programa[]> {
+    try {
+      this.logger.log("Retornando os programas em analise pelo admin");
+      const programas = await this.programaService.getProgramasEmAnalise();
 
       return programas;
     } catch (error) {

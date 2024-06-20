@@ -52,6 +52,10 @@ export class ProgramaService {
         return this.programaRepository.findProgramasEnviados();
     }
 
+    async getProgramasEmAnalise() {
+        return this.programaRepository.findProgramasEmAnalise();
+    }
+
     async getProgramasPorIds(programaIds: string[]) {
         this.logger.log(`Recebido ${programaIds.length} ids de programas`)
         this.logger.log("Recido programaIds: " + programaIds)
