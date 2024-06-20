@@ -5,6 +5,7 @@ import {CardProgram} from "@/app/components/CardPrograma/Card";
 import Title from "@/app/components/Title/title";
 import {fetchPerfil} from "@/app/service/perfil/logUser";
 import { getProgramasEnviados } from "@/app/service/programa/admin/getEnviados/getEnviados";
+import { ProgramCountCard } from "@/app/components/CardPrograma/cardCounter";
 
 export default function ProgramasEnviados() {
     const token = getStorageItem();
@@ -19,6 +20,7 @@ export default function ProgramasEnviados() {
     return (
   <div className="flex flex-col h-screen">
     <Title>Status: ENVIADO</Title>
+    <ProgramCountCard count={programas.length} />
       <main className="flex flex-wrap items-center">
           {programas.map((programa) => (
               <CardProgram
