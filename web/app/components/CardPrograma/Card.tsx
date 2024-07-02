@@ -23,6 +23,11 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
         router.push(`/programa/editar`);
     };
 
+    const handleView = () => {
+        tokenService.setProgramaId(programa._id);
+        router.push(`/programa/vizualizar`);
+    };
+
     return (
         <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl m-4">
             <CardContent className="p-4">
@@ -35,7 +40,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                     ))}
                 </div>
                 <Typography variant="caption">
-                    Data de Criação do Programa: {new Date(programa.dataCriacaoPrograma).toLocaleDateString()}
+                Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
                 </Typography>
                 <CardActions>
                     <Button
@@ -52,12 +57,14 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                     </Typography>
                 )}
                 <div className="flex gap-2 items-center mt-2">
-                    <Button className="bg-azulEscuroGradient" variant="contained">
+                    <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleView}>
                         Visualizar
                     </Button>
-                    <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleEdit}>
-                        Editar
-                    </Button>
+                    {programa.status === 'RASCUNHO' && (
+                        <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleEdit}>
+                            Editar
+                        </Button>
+                    )}
                 </div>
             </CardContent>
         </Card>
