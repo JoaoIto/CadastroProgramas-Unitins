@@ -1,8 +1,8 @@
-import { IsString, IsNotEmpty, IsArray, IsDateString, IsBooleanString, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsDateString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProgramaStatus } from "../../programa-status.enum";
 import { ProgramaFase } from '../../programa-fase.enum';
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
 export class CreateProgramaInputDto {
     @ApiProperty({ type: String, example: 'Título do Programa' })
@@ -30,6 +30,26 @@ export class CreateProgramaInputDto {
     @IsNotEmpty({ message: 'A lista de linguagens não pode estar vazia!' })
     linguagens: string[];
 
+    @ApiProperty({ type: String, example: 'Descrição de outras obras' })
+    @IsOptional()
+    @IsString()
+    outrasObrasDesc?: string;
+
+    @ApiProperty({ type: String, example: 'Descrição da fonte de financiamento' })
+    @IsOptional()
+    @IsString()
+    fonteFinanciamentoDesc?: string;
+
+    @ApiProperty({ type: String, example: 'Descrição da revelação' })
+    @IsOptional()
+    @IsString()
+    revelacaoDesc?: string;
+
+    @ApiProperty({ type: String, example: 'Descrição da revelação pública' })
+    @IsOptional()
+    @IsString()
+    revelacaoPublicaDesc?: string;
+
     @ApiProperty({ type: String, example: 'Descrição do mercado' })
     @IsString()
     @IsNotEmpty({ message: 'A descrição do mercado não pode estar vazia!' })
@@ -41,7 +61,8 @@ export class CreateProgramaInputDto {
     dataCriacaoPrograma: Date;
 
     @ApiProperty({ type: Boolean, example: true })
-    @IsBooleanString({ message: 'O vínculo com a Unitins deve ser uma string booleana!' })
+    @IsBoolean()
+    @IsNotEmpty({ message: 'O vínculo com a Unitins deve ser informado!' })
     vinculoUnitins: boolean;
 
     @ApiProperty({ type: String, example: 'Descrição do vínculo institucional' })
@@ -58,5 +79,6 @@ export class CreateProgramaInputDto {
     status: ProgramaStatus;
 
     @ApiProperty({ type: 'string', format: 'binary', example: 'nome_do_arquivo.extensao' })
+    @IsOptional()
     nomeArquivo?: string;
 }

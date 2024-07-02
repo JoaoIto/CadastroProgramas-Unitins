@@ -40,6 +40,10 @@ const programa = z.object({
   vinculoUnitins: z.boolean(),
   fasePublicacao: z.string().min(1, { message: "Campo obrigatório" }),
   status: z.string().min(1, { message: "Campo obrigatório" }),
+  outrasObrasDesc: z.string().optional(),
+  fonteFinanciamentoDesc: z.string().optional(),
+  revelacaoDesc: z.string().optional(),
+  revelacaoPublicaDesc: z.string().optional(),
   nomeArquivo: z.any().optional(),
 });
 
@@ -70,7 +74,6 @@ export default function NovaSolicitacao() {
     descricao: "",
     solucaoProblemaDesc: "",
     linguagens: linguagens,
-    modificacaoTecnologicaDesc: null,
     descricaoMercado: "",
     dataCriacaoPrograma: dataCriacaoPrograma,
     dataCriacao: "", // Precisa ser definido
@@ -79,6 +82,10 @@ export default function NovaSolicitacao() {
     fasePublicacao: "",
     status: "ENVIADO", // Definido como ENVIADO por padrão
     nomeArquivo: null,
+    outrasObrasDesc: "",
+    fonteFinanciamentoDesc: "",
+    revelacaoDesc: "",
+    revelacaoPublicaDesc: "",
   });
 
   const handleNext = () => {
@@ -188,6 +195,10 @@ export default function NovaSolicitacao() {
           : true,
       fasePublicacao: formInputs.fasePublicacao as string,
       status: "ENVIADO",
+      outrasObrasDesc: formInputs.outrasObrasDesc as string,
+      fonteFinanciamentoDesc: formInputs.fonteFinanciamentoDesc as string,
+      revelacaoDesc: formInputs.revelacaoDesc as string,
+      revelacaoPublicaDesc: formInputs.revelacaoPublicaDesc as string,
       nomeArquivo: formInputs.nomeArquivo as File,
       usuarioId: usuarioId,
     };
@@ -412,6 +423,7 @@ export default function NovaSolicitacao() {
                     name="programaOriginal"
                     fullWidth
                     type="text"
+                    onChange={handleInputChange}
                   />
                 )}
               </FormControl>
@@ -441,7 +453,7 @@ export default function NovaSolicitacao() {
                 {isComposed && (
                   <TextField
                     label="Descrição das Outras Obras"
-                    name="outrasObras"
+                    name="outrasObrasDesc"
                     fullWidth
                     type="text"
                   />
@@ -472,9 +484,10 @@ export default function NovaSolicitacao() {
                 {isFonte && (
                   <TextField
                     label="Descreva a fonte de financiamento"
-                    name="fonteFinanciamento"
+                    name="fonteFinanciamentoDesc"
                     fullWidth
                     type="text"
+                    onChange={handleInputChange}
                   />
                 )}
               </FormControl>
@@ -601,9 +614,10 @@ export default function NovaSolicitacao() {
                 {revelacaoTerceiros && (
                   <TextField
                     label="Detalhes da Revelação"
-                    name="detalhesRevelacao"
+                    name="revelacaoDesc"
                     fullWidth
                     type="text"
+                    onChange={handleInputChange}
                   />
                 )}
               </FormControl>
@@ -665,9 +679,10 @@ export default function NovaSolicitacao() {
                 {revelacaoOral && (
                   <TextField
                     label="Detalhes da Revelação Oral"
-                    name="detalhesRevelacaoOral"
+                    name="revelacaoPublicaDesc"
                     fullWidth
                     type="text"
+                    onChange={handleInputChange}
                   />
                 )}
               </FormControl>

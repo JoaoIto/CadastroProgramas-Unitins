@@ -28,11 +28,17 @@ export async function postPrograma(data: any, token: string) {
       descricaoMercado: data.descricaoMercado,
       dataCriacaoPrograma: data.dataCriacaoPrograma,
       vinculoUnitins: data.vinculoUnitins,
+      vinculoInstitucional: data.vinculoInstitucional,
+      outrasObrasDesc: data.outrasObrasDesc,
+      fonteFinanciamentoDesc: data.fonteFinanciamentoDesc,
+      revelacaoDesc: data.revelacaoDesc,
+      revelacaoPublicaDesc: data.revelacaoPublicaDesc,
       fasePublicacao: data.fasePublicacao,
       status: data.status,
       usuarioId: data.usuarioId,
       nomeArquivo: fileName,
     };
+    
 
     console.log("Dados do formulário antes de enviar:", requestData);
 

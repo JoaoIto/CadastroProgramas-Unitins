@@ -27,7 +27,16 @@ export class Programa {
     linguagens: string[];
 
     @Prop({default: null})
-    modificacaoTecnologicaDesc: string;
+    outrasObrasDesc: string;
+
+    @Prop({default: null})
+    fonteFinanciamentoDesc: string;
+
+    @Prop({default: null})
+    revelacaoDesc: string;
+
+    @Prop({default: null})
+    revelacaoPublicaDesc: string;
 
     @Prop({ required: true })
     descricaoMercado: string;

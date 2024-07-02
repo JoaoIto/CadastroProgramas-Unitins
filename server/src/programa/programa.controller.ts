@@ -73,17 +73,21 @@ import {
       const programaData = new Programa();
   
       programaData.titulo = formData.titulo;
-      programaData.descricao = formData.descricao;
-      programaData.solucaoProblemaDesc = formData.solucaoProblemaDesc;
-      programaData.linguagens = formData.linguagens;
-      programaData.descricaoMercado = formData.descricaoMercado;
-      programaData.dataCriacaoPrograma = formData.dataCriacaoPrograma;
-      programaData.vinculoUnitins = formData.vinculoUnitins;
-      programaData.vinculoInstitucional = formData.vinculoInstitucional;
-      programaData.fasePublicacao = formData.fasePublicacao;
-      programaData.status = formData.status;
-      programaData.nomeArquivo = formData.nomeArquivo;
-      programaData.usuarioId = formData.usuarioId
+        programaData.descricao = formData.descricao;
+        programaData.solucaoProblemaDesc = formData.solucaoProblemaDesc;
+        programaData.linguagens = formData.linguagens;
+        programaData.outrasObrasDesc = formData.outrasObrasDesc;
+        programaData.fonteFinanciamentoDesc = formData.fonteFinanciamentoDesc;
+        programaData.revelacaoDesc = formData.revelacaoDesc;
+        programaData.revelacaoPublicaDesc = formData.revelacaoPublicaDesc;
+        programaData.descricaoMercado = formData.descricaoMercado;
+        programaData.dataCriacaoPrograma = formData.dataCriacaoPrograma;
+        programaData.vinculoUnitins = formData.vinculoUnitins;
+        programaData.vinculoInstitucional = formData.vinculoInstitucional;
+        programaData.fasePublicacao = formData.fasePublicacao;
+        programaData.status = formData.status;
+        programaData.nomeArquivo = formData.nomeArquivo;
+        programaData.usuarioId = formData.usuarioId;
   
       // Salva os dados do programa no banco de dados
       const novoPrograma = await this.programaService.criar(programaData, programaData.usuarioId);

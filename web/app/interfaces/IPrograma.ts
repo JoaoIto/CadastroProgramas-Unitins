@@ -5,7 +5,6 @@ interface IPrograma {
     descricao: string;
     solucaoProblemaDesc: string;
     linguagens: string[];
-    modificacaoTecnologicaDesc: string | null;
     descricaoMercado: string;
     dataCriacaoPrograma: Date | null;
     dataCriacao: string;
@@ -13,5 +12,9 @@ interface IPrograma {
     vinculoInstitucional: string | null;
     fasePublicacao: string;
     status: string;
+    outrasObrasDesc: string | null,
+    fonteFinanciamentoDesc: string | null,
+    revelacaoDesc: string | null,
+    revelacaoPublicaDesc: string | null,
     nomeArquivo: File | null;
 }
