@@ -19,7 +19,7 @@ export default function Programas() {
     }, [token]);
 
     return (
-  <div className="flex h-screen">
+  <div className="flex h-full">
       <main className="flex flex-wrap items-center">
           <Title>Programas do usuário: </Title>
           <div className={`mx-4 p-4 border-4 border-cinzaTraco rounded-2xl`}>
