@@ -1,8 +1,7 @@
 import React from "react";
 import HomeIcon from "@mui/icons-material/Home";
-import ListIcon from "@mui/icons-material/List";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SendIcon from '@mui/icons-material/Send';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Button } from "@mui/material";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 
@@ -22,8 +21,8 @@ export function Sidebar() {
         <ul className="flex flex-col items-center gap-10 mt-8 flex-1">
           <li className="flex items-center space-x-2">
             <Button variant="text" className="text-white" href="/">
-              <HomeIcon className="h-10 w-10" />
-              <h3 className="sm:hidden font-light text-lg p-4">Inicial</h3>
+              <HomeIcon/>
+              <h3 className="sm:hidden font-light text-md p-4">Inicial</h3>
             </Button>
           </li>
           <li className="flex items-center space-x-2">
@@ -32,8 +31,8 @@ export function Sidebar() {
               className="text-white"
               href={`${isAdmin ? "/admin/programa/enviados" : "/programa/listar"}`}
             >
-              <ListIcon className="h-10 w-10" />
-              <h3 className="sm:hidden font-light text-lg p-4">
+              <SendIcon/>
+              <h3 className="sm:hidden font-light text-md p-4">
                 {" "}
                 {isAdmin ? "Enviados" : "Programas"}
               </h3>
@@ -46,17 +45,17 @@ export function Sidebar() {
                 className="text-white"
                 href="/admin/programa/em-analise"
               >
-                <AnalyticsIcon className="h-10 w-10" />
-                <h3 className="sm:hidden font-light text-lg p-4">Em Análise</h3>
+                <HourglassEmptyIcon/>
+                <h3 className="sm:hidden font-light text-md p-4">Em Análise</h3>
               </Button>
             </li>
           )}
-          <li className="flex items-center space-x-2">
+         {/*  <li className="flex items-center space-x-2">
             <Button variant="text" className="text-white" href={`${isAdmin ? "/admin/perfil" : "/perfil"}`}>
               <AccountCircleIcon className="h-10 w-10" />
               <h3 className="sm:hidden font-light text-lg p-4">Perfil</h3>
             </Button>
-          </li>
+          </li> */}
         </ul>
       </aside>
     </div>
