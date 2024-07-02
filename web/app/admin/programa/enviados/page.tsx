@@ -18,7 +18,7 @@ export default function ProgramasEnviados() {
     }, [token]);
 
     return (
-  <div className="flex flex-col h-screen">
+  <div className="flex flex-col h-full">
     <Title>Status: ENVIADO</Title>
     <ProgramCountCard count={programas.length} />
       <main className="flex flex-wrap items-center">
