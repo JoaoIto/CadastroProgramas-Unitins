@@ -6,7 +6,7 @@ interface IPrograma {
     solucaoProblemaDesc: string;
     linguagens: string[];
     descricaoMercado: string;
-    dataCriacaoPrograma: Date | null;
+    dataCriacaoPrograma: Date | string | null;
     dataCriacao: string;
     vinculoUnitins: boolean;
     vinculoInstitucional: string | null;

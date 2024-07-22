@@ -11,21 +11,29 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useUserPayload } from "@/app/hooks/user/userPayload";
+import { useRouter } from "next/navigation";
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import { setProgramaItem } from "@/app/functions/storage/setProgramaSearch";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { useUserPayload } from "@/app/hooks/user/userPayload";
+import AlertMessage from "../AlertMessage";
 
 export function Search() {
   const token = getStorageItem();
+  const router = useRouter();
   const { profile, isLoading } = useUserPayload();
   const isAdmin = profile.perfil === "admin";
   const [searchTitle, setSearchTitle] = useState("");
   const [searchResults, setSearchResults] = useState<IPrograma[]>([]);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   const handleSearch = async () => {
     try {
@@ -33,32 +41,51 @@ export function Search() {
         `/programa/porUsuario/${searchTitle}`,
         token
       );
-      if (response) {
+      if (response && response.length > 0) {
         setSearchResults(response);
         setProgramaItem("programaSearch", JSON.stringify(response)); // Armazena os resultados da pesquisa no sessionStorage
-        console.log("Resultados da pesquisa:", response);
-        window.location.reload(); // Recarrega a página após a pesquisa
+        setAlertMessage("Programa encontrado com sucesso!");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+        setTimeout(() => {
+          window.location.reload(); // Recarrega a página após a pesquisa
+        }, 2000);
       } else {
         setSearchResults([]);
-        console.log("Nenhum resultado encontrado.");
+        setAlertMessage(
+          "O programa com o título pesquisado não foi encontrado."
+        );
+        setAlertSeverity("error");
+        setAlertOpen(true);
       }
     } catch (error) {
       console.error("Erro ao realizar a pesquisa:", error);
       setSearchResults([]);
+      setAlertMessage("Erro ao realizar a pesquisa. Tente novamente.");
+      setAlertSeverity("error");
+      setAlertOpen(true);
     }
   };
 
   const handleClearSearch = () => {
     sessionStorage.removeItem("programaSearch"); // Remove a pesquisa do sessionStorage
     setSearchResults([]); // Limpa os resultados da pesquisa
-    window.location.reload(); // Recarrega a página após a pesquisa
+    setAlertMessage("Limpando dados de pesquisa");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      window.location.reload(); // Recarrega a página após a pesquisa
+    }, 2000); // Recarrega a página após a pesquisa
   };
 
   const handleLogout = () => {
     tokenService.delete(); // Remove o token
+    setAlertMessage("Saindo da conta");
+    setAlertSeverity("success");
+    setAlertOpen(true);
     setTimeout(() => {
-      window.location.reload(); // Recarrega a página após 1 segundo
-    }, 1000);
+      window.location.reload();
+    }, 2000);
   };
 
   const handleOpenLogoutModal = () => {
@@ -67,6 +94,19 @@ export function Search() {
 
   const handleCloseLogoutModal = () => {
     setLogoutModalOpen(false);
+  };
+
+  const handleProfileRedirect = () => {
+    setAlertMessage("Redirecionando para a página de perfil...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push(`${isAdmin ? "/admin/perfil" : "/perfil"}`);
+    }, 2000); // Redireciona após 2 segundos
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
   };
 
   return (
@@ -83,50 +123,50 @@ export function Search() {
             <ExitToAppIcon />
           </IconButton>
           <Button
+            className="bg-azulEscuro"
             variant="contained"
-            className="text-white"
-            href={`${isAdmin ? "/admin/perfil" : "/perfil"}`}
+            onClick={handleProfileRedirect}
           >
             <AccountCircleIcon />
             <h3 className="sm:hidden font-light text-lg">Perfil</h3>
           </Button>
         </li>
       </div>
-        {/* Cabeçalho */}
-        <header className="flex justify-evenly sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-full w-full shadow-cinzaTraco shadow-lg">
-          <div className="flex flex-col h-full w-1/2">
-            <label htmlFor="pesquisar">Deseja pesquisar por um título?</label>
-            <TextField
-              type="text"
-              placeholder="Digite o titulo: "
-              className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg min-h-20 w-full"
-              InputProps={{
-                startAdornment: <SearchIcon className="h-6 w-6 m-2" />,
-              }}
-              value={searchTitle}
-              onChange={(e) => setSearchTitle(e.target.value)}
-              id="pesquisar"
-            />
-          </div>
-          <div className="h-full flex gap-2 sm:flex-col">
-            <Button
-              variant="contained"
-              className="md:h-12 sm:h-6 sm:w-6 bg-azulEscuroGradient text-white flex items-center justify-center"
-              onClick={handleSearch}
-            >
-              <span className="sm:hidden">Pesquisar</span>
-              <SearchIcon className="lg:hidden md:hidden" />
-            </Button>
-            <Button
-              variant="outlined"
-              className="md:h-12 sm:h-6 sm:w-6 flex items-center justify-center"
-              onClick={handleClearSearch}
-            >
-              <span className="sm:hidden">Limpar</span>
-              <RestartAltIcon className="lg:hidden md:hidden" />
-            </Button>
-          </div>
-        </header>
+      {/* Cabeçalho */}
+      <header className="flex justify-evenly sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-full w-full shadow-cinzaTraco shadow-lg">
+        <div className="flex flex-col h-full w-1/2">
+          <label htmlFor="pesquisar">Deseja pesquisar por um título?</label>
+          <TextField
+            type="text"
+            placeholder="Digite o titulo: "
+            className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg min-h-20 w-full"
+            InputProps={{
+              startAdornment: <SearchIcon className="h-6 w-6 m-2" />,
+            }}
+            value={searchTitle}
+            onChange={(e) => setSearchTitle(e.target.value)}
+            id="pesquisar"
+          />
+        </div>
+        <div className="h-full flex gap-2 sm:flex-col">
+          <Button
+            variant="contained"
+            className="md:h-12 sm:h-6 sm:w-6 bg-azulEscuroGradient text-white flex items-center justify-center"
+            onClick={handleSearch}
+          >
+            <span className="sm:hidden">Pesquisar</span>
+            <SearchIcon className="lg:hidden md:hidden" />
+          </Button>
+          <Button
+            variant="outlined"
+            className="md:h-12 sm:h-6 sm:w-6 flex items-center justify-center"
+            onClick={handleClearSearch}
+          >
+            <span className="sm:hidden">Limpar</span>
+            <RestartAltIcon className="lg:hidden md:hidden" />
+          </Button>
+        </div>
+      </header>
 
       {/* Modal de confirmação de logout */}
       <Dialog open={logoutModalOpen} onClose={handleCloseLogoutModal}>
@@ -145,6 +185,14 @@ export function Search() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* AlertMessage component */}
+      <AlertMessage
+        open={alertOpen}
+        message={alertMessage}
+        severity={alertSeverity}
+        onClose={handleAlertClose}
+      />
     </>
   );
 }

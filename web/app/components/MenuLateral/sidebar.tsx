@@ -4,10 +4,14 @@ import SendIcon from '@mui/icons-material/Send';
 import { Button, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { useRouter } from "next/navigation";
+import AlertMessage from "../AlertMessage";
 
 export function Sidebar() {
   const router = useRouter();
   const { profile, isLoading } = useUserPayload();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -16,11 +20,31 @@ export function Sidebar() {
   const isAdmin = profile.perfil === "admin";
 
   const routerProgramas = () => {
-    router.push('/programa/listar')
+    setAlertMessage("Redirecionando para seus programas enviados...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/programa/listar');
+      setTimeout(() => {
+      window.location.reload(); 
+      }, 500)// Recarrega a página após o redirecionamento
+    }, 2000);
   };
 
   const routerDashboard = () => {
-    router.push('/')
+    setAlertMessage("Redirecionando para a página inicial...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/');
+      setTimeout(() => {
+      window.location.reload(); 
+      }, 500)// Recarrega a página após o redirecionamento
+    }, 2000);
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
   };
 
   return (
@@ -45,17 +69,22 @@ export function Sidebar() {
               <ListItemIcon>
                 <HomeIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText primary="Inicial" />
+              <ListItemText className="italic" primary="Inicial" />
             </ListItemButton>
             <ListItemButton onClick={routerProgramas}>
               <ListItemIcon>
                 <SendIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText primary="Programas" />
+              <ListItemText className="italic" primary="Programas" />
             </ListItemButton>
           </List>
         </nav>
       </aside>
+
+      {/* AlertMessage component */}
+      <AlertMessage open={alertOpen} message={alertMessage} severity={alertSeverity} onClose={handleAlertClose} />
     </div>
   );
 }
+
+export default Sidebar;
