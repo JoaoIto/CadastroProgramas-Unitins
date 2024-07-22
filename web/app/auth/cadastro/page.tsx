@@ -20,6 +20,14 @@ import { useRouter } from "next/navigation";
 import AlertMessage from "@/app/components/AlertMessage"; // Importa o componente
 import { postUserCadastro } from "@/app/service/auth/postRegister";
 
+const enderecoSchema = z.object({
+  rua: z.string().nonempty("Rua é obrigatória"),
+  bairro: z.string().nonempty("Bairro é obrigatório"),
+  cep: z.string().refine((value) => /^\d{8}$/.test(value), {
+    message: "CEP deve ter 8 dígitos",
+  }),
+});
+
 const novoUsuarioSchema = z.object({
   nome: z.string().nonempty("Nome é obrigatório"),
   cpf: z.string().refine((value) => /^\d{11}$/.test(value), {
@@ -28,11 +36,7 @@ const novoUsuarioSchema = z.object({
   rg: z.string().refine((value) => /^\d{7}$/.test(value), {
     message: "RG deve ter 7 dígitos",
   }),
-  rua: z.string().nonempty("Rua é obrigatória"),
-  bairro: z.string().nonempty("Bairro é obrigatório"),
-  cep: z.string().refine((value) => /^\d{8}$/.test(value), {
-    message: "CEP deve ter 8 dígitos",
-  }),
+  endereco: enderecoSchema,
   senha: z.string().min(4, "Mínimo de 4 caracteres"),
   matricula: z.string().nonempty("Matrícula é obrigatória"),
 });
@@ -70,10 +74,10 @@ export default function CadastroPage() {
         isValid = await trigger(["nome", "cpf", "rg"]);
         break;
       case 1:
-        isValid = await trigger(["rua", "bairro", "cep"]);
+        isValid = await trigger(["endereco.rua", "endereco.bairro", "endereco.cep"]);
         break;
       case 2:
-        isValid = await trigger(["matricula", "senha"]);
+        isValid = await trigger(["senha", "matricula"]);
         break;
     }
 
@@ -88,7 +92,15 @@ export default function CadastroPage() {
 
   async function onSubmit(data: NovoUsuario) {
     try {
-      await postUserCadastro(data);
+      const payload = {
+        ...data,
+        endereco: {
+          rua: data.endereco.rua,
+          bairro: data.endereco.bairro,
+          cep: data.endereco.cep,
+        },
+      };
+      await postUserCadastro(payload);
       setMessage("Cadastro bem-sucedido!");
       setSeverity("success");
       setSnackbarOpen(true);
@@ -142,6 +154,22 @@ export default function CadastroPage() {
               error={!!errors.rg}
               helperText={errors.rg?.message}
             />
+            <Typography
+              component="p"
+              variant="body2"
+              className="mt-4 text-center flex flex-col"
+            >
+              Já possui conta? Faça login.
+              <Button
+                onClick={routerLogin}
+                className="bg-azulEscuro"
+                variant="contained"
+                color="primary"
+                size="small"
+              >
+                Entrar
+              </Button>
+            </Typography>
           </>
         );
       case 1:
@@ -153,9 +181,9 @@ export default function CadastroPage() {
               required
               fullWidth
               label="Rua"
-              {...register("rua")}
-              error={!!errors.rua}
-              helperText={errors.rua?.message}
+              {...register("endereco.rua")}
+              error={!!errors.endereco?.rua}
+              helperText={errors.endereco?.rua?.message}
             />
             <TextField
               margin="normal"
@@ -163,9 +191,9 @@ export default function CadastroPage() {
               required
               fullWidth
               label="Bairro"
-              {...register("bairro")}
-              error={!!errors.bairro}
-              helperText={errors.bairro?.message}
+              {...register("endereco.bairro")}
+              error={!!errors.endereco?.bairro}
+              helperText={errors.endereco?.bairro?.message}
             />
             <TextField
               margin="normal"
@@ -173,9 +201,9 @@ export default function CadastroPage() {
               required
               fullWidth
               label="CEP"
-              {...register("cep")}
-              error={!!errors.cep}
-              helperText={errors.cep?.message}
+              {...register("endereco.cep")}
+              error={!!errors.endereco?.cep}
+              helperText={errors.endereco?.cep?.message}
             />
           </>
         );
@@ -236,7 +264,12 @@ export default function CadastroPage() {
           {renderStepContent(activeStep)}
           <Box className="flex justify-between mt-4">
             {activeStep !== 0 && (
-              <Button onClick={handleBack} variant="contained" color="primary" className="bg-azulEscuro">
+              <Button
+                onClick={handleBack}
+                variant="contained"
+                color="primary"
+                className="bg-azulEscuro"
+              >
                 Voltar
               </Button>
             )}
@@ -250,20 +283,6 @@ export default function CadastroPage() {
                 Cadastrar
               </Button>
             ) : (
-              <>
-              <div>
-              <Typography>
-              Já possui conta? 
-              </Typography>
-              <Button
-    onClick={routerLogin}
-    className="mt-2 bg-azulEscuro"
-    variant="contained"
-    size="small"
-  >
-    Entrar
-  </Button>
-  </div>
               <Button
                 onClick={handleNext}
                 variant="contained"
@@ -272,7 +291,6 @@ export default function CadastroPage() {
               >
                 Próximo
               </Button>
-              </>
             )}
           </Box>
         </form>
