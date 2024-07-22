@@ -1,8 +1,6 @@
-import {Body, Injectable} from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import {UsuarioRepository} from "./usuario.repository";
 import {Usuario} from "./usuario.model";
-import {Programa} from "../programa/programa.model";
-import { Role } from "../roles/roles.enum";
 import { CreateUsuarioInputDto } from './dto/create/createUsuario.dto';
 import { CadastroDTO } from './dto/cadastro.dto';
 

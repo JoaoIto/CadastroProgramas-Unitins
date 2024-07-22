@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
+import { EnderecoDTO } from '../cadastro.dto';
 
 export class UpdateUsuarioInputDto {
     @ApiProperty({ type: String, example: 'Nome do Usuário' })
@@ -28,5 +29,5 @@ export class UpdateUsuarioInputDto {
     matricula?: string;
 
     @ApiProperty({ type: String, example: 'Rua 1, Bairro Teste' })
-    endereco?: string;
+    endereco?: EnderecoDTO;
 }

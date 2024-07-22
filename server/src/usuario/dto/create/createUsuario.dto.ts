@@ -1,27 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
+import { EnderecoDTO } from '../cadastro.dto';
 
 export class CreateUsuarioInputDto {
-    @ApiProperty({ type: String, example: 'Nome do Usuário' })
+    @ApiProperty({ type: String, example: "João da Silva" })
     @IsString()
-    @IsNotEmpty({ message: 'O nome não pode estar vazio!' })
+    @IsNotEmpty({ message: "O nome não pode estar vazio!" })
     nome: string;
-
-    @ApiProperty({ type: String, example: '12345678900' })
+  
+    @ApiProperty({ type: String, example: "00011122233" })
     @IsString()
-    @IsNotEmpty({ message: 'O CPF não pode estar vazio!' })
+    @IsNotEmpty({ message: "O CPF não pode estar vazio!" })
     cpf: string;
-
-    @ApiProperty({ type: String, example: 'senha123' })
+  
+    @ApiProperty({ type: String, example: "1234567" })
     @IsString()
-    @IsNotEmpty({ message: 'A senha não pode estar vazia!' })
+    @IsNotEmpty({ message: "O RG não pode estar vazio!" })
+    rg: string;
+  
+    @ApiProperty({ type: EnderecoDTO })
+    endereco: EnderecoDTO;
+  
+    @ApiProperty({ type: String, example: "minhaSenha123" })
+    @IsString()
+    @IsNotEmpty({ message: "A senha não pode estar vazia!" })
     senha: string;
-
-    @ApiProperty({ type: String, example: '1112324232' })
+  
+    @ApiProperty({ type: String, example: "123456789" })
     @IsString()
-    @IsNotEmpty({ message: 'A matrícula não pode estar vazia!' })
+    @IsNotEmpty({ message: "A matrícula não pode estar vazia!" })
     matricula: string;
-
-    @ApiProperty({ type: String, example: 'Rua 1, Bairro Teste' })
-    endereco?: string;
-}
+  }
+  

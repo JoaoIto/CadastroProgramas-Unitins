@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "../roles/roles.enum";
+import { EnderecoDTO } from './dto/cadastro.dto';
 
 export type UsuarioDocument = Usuario & Document;
 
@@ -29,7 +30,7 @@ export class Usuario {
     matricula: string;
 
     @Prop({default: 'rua 1, bairro teste'})
-    endereco: string;
+    endereco: EnderecoDTO;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
