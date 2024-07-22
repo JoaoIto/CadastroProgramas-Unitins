@@ -49,7 +49,7 @@ export function Sidebar() {
 
   return (
     <div>
-      <aside className="sticky top-20 left-0 h-[250px] bg-azulEscuro py-12 px-6 rounded-e-3xl shadow-lg shadow-cinzaTraco w-64">
+      <aside className="sticky top-20 left-0 h-[500px] bg-azulEscuro py-12 px-6 rounded-e-3xl shadow-lg shadow-cinzaTraco w-64">
         <nav aria-labelledby="menu-sidebar">
           <List
             sx={{ width: '100%', maxWidth: 360 }}

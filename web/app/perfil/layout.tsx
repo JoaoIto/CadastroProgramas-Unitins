@@ -11,7 +11,7 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-const ProgramaLayout: React.FC<RootLayoutProps> = ({ children }) => {
+const PerfilLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const isPublicPage = checkPublicRoute(pathname);
 
@@ -30,4 +30,4 @@ const ProgramaLayout: React.FC<RootLayoutProps> = ({ children }) => {
   );
 };
 
-export default ProgramaLayout;
+export default PerfilLayout;

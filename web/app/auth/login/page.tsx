@@ -124,6 +124,7 @@ export default function LoginPage() {
               fullWidth
               label="Senha: "
               id="senha"
+              type="password"
               autoComplete="current-senha"
               {...register("senha")}
               error={!!errors.senha}
