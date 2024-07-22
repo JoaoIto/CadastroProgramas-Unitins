@@ -11,8 +11,8 @@ export class Programa {
     @Prop({type: SchemaTypes.ObjectId})
     _id: mongoose.Types.ObjectId;
 
-    @Prop({type: SchemaTypes.ObjectId, required: true})
-    usuarioId: mongoose.Types.ObjectId;
+    @Prop({type: [SchemaTypes.ObjectId], required: true})
+    autores: mongoose.Types.ObjectId[];
 
     @Prop({ required: true })
     titulo: string;

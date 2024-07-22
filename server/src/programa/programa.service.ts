@@ -17,12 +17,18 @@ export class ProgramaService {
         private usuarioProgramaService: UsuarioProgramaService,
     ) {}
 
-    async criar(programaModel: Programa, userId: mongoose.Types.ObjectId): Promise<Programa> {
+    async criar(programaModel: Programa, autores: mongoose.Types.ObjectId[]): Promise<Programa> {
+        // Cria o programa
         const programaCriado = await this.programaRepository.create(programaModel);
-        const usuario  = await this.usuarioService.consultar(userId);
-
+        
+        // Consulta cada autor
+        const autoresConsultados = await Promise.all(autores.map(async (autorId) => {
+            return this.usuarioService.consultar(autorId);
+        }));
+    
+        // Retorne o programa criado (ou faça algo com os autores consultados, se necessário)
         return programaCriado;
-    }
+    }    
 
     async listar(): Promise<Programa[]> {
         return this.programaRepository.findAll();

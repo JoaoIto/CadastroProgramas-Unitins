@@ -87,10 +87,10 @@ import {
         programaData.fasePublicacao = formData.fasePublicacao;
         programaData.status = formData.status;
         programaData.nomeArquivo = formData.nomeArquivo;
-        programaData.usuarioId = formData.usuarioId;
+        programaData.autores = formData.autores;
   
-      // Salva os dados do programa no banco de dados
-      const novoPrograma = await this.programaService.criar(programaData, programaData.usuarioId);
+       // Salva os dados do programa no banco de dados
+      const novoPrograma = await this.programaService.criar(programaData, programaData.autores);
       return novoPrograma;
     }
   

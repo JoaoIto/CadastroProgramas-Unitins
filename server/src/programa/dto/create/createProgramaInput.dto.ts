@@ -10,9 +10,11 @@ export class CreateProgramaInputDto {
     @IsNotEmpty({ message: 'O título não pode estar vazio!' })
     titulo: string;
 
-    @ApiProperty({ type: mongoose.Types.ObjectId, required: true })
-    @IsNotEmpty()
-    usuarioId: mongoose.Types.ObjectId;
+    @ApiProperty({ type: [mongoose.Types.ObjectId], required: true, example: ['60d21b4667d0d8992e610c85', '60d21b4667d0d8992e610c86'] })
+    @IsArray()
+    @IsNotEmpty({ each: true, message: 'Cada ID de autor deve ser um ObjectId válido!' })
+    autores: mongoose.Types.ObjectId[];
+
 
     @ApiProperty({ type: String, example: 'Descrição do Programa' })
     @IsString()

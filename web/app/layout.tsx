@@ -1,42 +1,39 @@
-"use client"
-import './globals.css'
-import React, {ReactNode} from 'react';
-import {usePathname} from 'next/navigation';
-import {Open_Sans} from 'next/font/google';
-import {checkPublicRoute} from '@/app/functions/checkPublicRoute';
+"use client";
+import './globals.css';
+import React, { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { Open_Sans } from 'next/font/google';
+import { checkPublicRoute } from '@/app/functions/checkPublicRoute';
 import { Search } from './components/HeaderSearch/cabecalho';
 import { Sidebar } from './components/MenuLateral/sidebar';
 import PrivateRoute from './Utils/PrivaterRoute';
-
-const openSans = Open_Sans({subsets: ['latin']});
+const openSans = Open_Sans({ subsets: ['latin'] });
 
 interface RootLayoutProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
-const RootLayout: React.FC<RootLayoutProps> = ({children}) => {
-    const pathname = usePathname();
-    const isPublicPage = checkPublicRoute(pathname);
+const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const pathname = usePathname();
+  const isPublicPage = checkPublicRoute(pathname);
 
-    return (
-        <html lang="en">
-        <body className={openSans.className}>
-        <div>
-            <Search/>
-        </div>
+  return (
+    <html lang="en">
+      <body className={openSans.className}>
+        {!isPublicPage && <Search />}
         <div className="flex h-full w-full">
-            <Sidebar/>
-            <main className="h-full w-full">
-                {isPublicPage ? children : (
-                    <PrivateRoute>
-                        {children}
-                    </PrivateRoute>
-                )}
-            </main>
+          {!isPublicPage && <Sidebar />}
+          <main className="h-full w-full">
+            {isPublicPage ? children : (
+              <PrivateRoute>
+                {children}
+              </PrivateRoute>
+            )}
+          </main>
         </div>
-        </body>
-        </html>
-    )
-}
+      </body>
+    </html>
+  );
+};
 
 export default RootLayout;

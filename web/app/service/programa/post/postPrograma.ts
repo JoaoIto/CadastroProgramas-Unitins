@@ -35,7 +35,7 @@ export async function postPrograma(data: any, token: string) {
       revelacaoPublicaDesc: data.revelacaoPublicaDesc,
       fasePublicacao: data.fasePublicacao,
       status: data.status,
-      usuarioId: data.usuarioId,
+      autores: data.autores,
       nomeArquivo: fileName,
     };
     

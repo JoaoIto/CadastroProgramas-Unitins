@@ -45,6 +45,7 @@ const programa = z.object({
   revelacaoDesc: z.string().optional(),
   revelacaoPublicaDesc: z.string().optional(),
   nomeArquivo: z.any().optional(),
+  autores: z.array(z.string()).nonempty({ message: "Campo obrigatório" }), // Adiciona validação para autores
 });
 
 type FormData = z.infer<typeof programa>;
@@ -56,6 +57,8 @@ export default function NovaSolicitacao() {
   const [currentPage, setCurrentPage] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
+  const [autores, setAutores] = useState<string[]>([]);
+  const [autorInput, setAutorInput] = useState<string>("");
   const [usuarioId, setUsuarioId] = useState<string | undefined>(undefined);
   const [linguagens, setLinguagens] = useState<string[]>([]);
   const [linguagemInput, setLinguagemInput] = useState<string>("");
@@ -86,10 +89,11 @@ export default function NovaSolicitacao() {
     fonteFinanciamentoDesc: "",
     revelacaoDesc: "",
     revelacaoPublicaDesc: "",
+    autores: autores,
   });
 
   const handleNext = () => {
-    if (currentPage >= 3) {
+    if (currentPage >= 4) {
       setShowConfirmationModal(true);
     } else {
       setCurrentPage(currentPage + 1);
@@ -154,6 +158,10 @@ export default function NovaSolicitacao() {
       .then((id) => {
         console.log("Usuario ID:", id);
         setUsuarioId(id);
+        // Adiciona o usuarioId ao campo autores automaticamente, se ele for uma string válida
+        if (typeof id === "string") {
+          setAutores((prevAutores) => [...prevAutores, id]);
+        }
       })
       .catch((error) => {
         console.error("Erro ao obter o usuarioId:", error);
@@ -184,7 +192,7 @@ export default function NovaSolicitacao() {
       titulo: formInputs.titulo as string,
       descricao: formInputs.descricao as string,
       solucaoProblemaDesc: formInputs.solucaoProblemaDesc as string,
-      linguagens: linguagens,
+      linguagens: linguagens as [string, ...string[]],
       descricaoMercado: formInputs.descricaoMercado as string,
       dataCriacaoPrograma: dataCriacaoPrograma
         ? dataCriacaoPrograma.toISOString()
@@ -200,7 +208,7 @@ export default function NovaSolicitacao() {
       revelacaoDesc: formInputs.revelacaoDesc as string,
       revelacaoPublicaDesc: formInputs.revelacaoPublicaDesc as string,
       nomeArquivo: formInputs.nomeArquivo as File,
-      usuarioId: usuarioId,
+      autores: autores as [string, ...string[]],
     };
     console.log("Data antes de enviar:", data);
 
@@ -217,6 +225,34 @@ export default function NovaSolicitacao() {
   const renderPageContent = () => {
     switch (currentPage) {
       case 0:
+        return (
+          <Grid
+            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
+            container
+            spacing={2}
+          >
+             <Typography className="text-2xl font-medium">
+              INFORMAÇÕES DOS AUTORES
+            </Typography>
+
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <FormHelperText className="text-lg">
+                  Autor 1
+                </FormHelperText>
+                <TextField
+                  required
+                  label="Título do Programa"
+                  name="titulo"
+                  fullWidth
+                  type="text"
+                  onChange={handleInputChange}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
+        );
+      case 1:
         return (
           <Grid
             className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
@@ -384,7 +420,7 @@ export default function NovaSolicitacao() {
             </Grid>
           </Grid>
         );
-      case 1:
+      case 2:
         return (
           <Grid
             className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
@@ -510,7 +546,7 @@ export default function NovaSolicitacao() {
             </Grid>
           </Grid>
         );
-      case 2:
+      case 3:
         return (
           <Grid
             className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
@@ -577,7 +613,7 @@ export default function NovaSolicitacao() {
             </Grid>
           </Grid>
         );
-      case 3:
+      case 4:
         return (
           <Grid
             className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"

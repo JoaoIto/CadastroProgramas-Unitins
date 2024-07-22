@@ -14,7 +14,7 @@ export function Sidebar() {
 
   const isAdmin = profile.perfil === "admin";
   return (
-    <div>
+    <div className="h-full">
       <aside
         className={`h-full bg-azulEscuro text-white flex flex-col items-center flex-shrink-0 shadow-cinzaTraco shadow-lg`}
       >

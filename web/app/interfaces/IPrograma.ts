@@ -17,4 +17,5 @@ interface IPrograma {
     revelacaoDesc: string | null,
     revelacaoPublicaDesc: string | null,
     nomeArquivo: File | null;
+    autores: string[]
 }
