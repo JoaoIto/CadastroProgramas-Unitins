@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Logger, Post, Req, UseGuards } from "@nestjs/common";
 import { LoginDTO } from 'src/usuario/dto/login.dto';
+import { CadastroDTO } from 'src/usuario/dto/cadastro.dto';
 import {
   ApiBody,
   ApiResponse,
@@ -29,6 +30,17 @@ export class AuthController {
   async generateToken(@Body() loginDTO: LoginDTO): Promise<{ access_token: string }> {
     this.logger.log(`Tentando autenticação a partir do usuario com cpf: ${loginDTO.cpf}; e senha: ${loginDTO.senha}`)
     const token = await this.authService.signIn(loginDTO);
+    return token;
+  }
+
+  @Post('/cadastro')
+  @UseGuards(JwtStrategy)
+  @ApiOperation({ summary: 'Cadastrar um novo usuário por meio de autenticação nova' })
+  @ApiBody({ type: CadastroDTO, description: 'Credenciais do usuário para cadastro' })
+  @ApiResponse({ status: 200, description: 'Token gerado com sucesso' })
+  async generateUser(@Body() cadastroDTO: CadastroDTO): Promise<{ access_token: string }> {
+    this.logger.log(`Tentando cadastro a partir de um novo usuario com cpf: ${cadastroDTO.cpf}; e senha: ${cadastroDTO.senha}`)
+    const token = await this.authService.signUp(cadastroDTO);
     return token;
   }
 

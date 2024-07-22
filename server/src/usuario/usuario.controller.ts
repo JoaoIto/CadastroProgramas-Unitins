@@ -27,7 +27,7 @@ import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
         this.logger.log('Criando um novo usuário.');
         return this.usuarioService.create(createUsuarioInputDto);
     }
-
+    
     @Roles(Role.Admin, Role.User)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiBearerAuth()
