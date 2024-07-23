@@ -1,8 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { UsuarioService } from '../usuario/usuario.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDTO } from "../usuario/dto/login.dto";
 import { CadastroDTO } from "src/usuario/dto/cadastro.dto";
+import { EsqueciSenhaDTO } from "src/usuario/dto/esqueciSenha.dto";
 
 @Injectable()
 export class AuthService {
@@ -43,5 +44,14 @@ export class AuthService {
     } else {
       throw new UnauthorizedException();
     }
+  }
+
+  async redefinirSenha(esqueciSenhaDTO: EsqueciSenhaDTO): Promise<boolean> {
+    const usuario = await this.usuarioService.consultarByCpf(esqueciSenhaDTO.cpf);
+    if (!usuario) {
+      throw new BadRequestException('CPF inexistente');
+    }
+    await this.usuarioService.redefinirSenha(esqueciSenhaDTO.cpf, esqueciSenhaDTO.senha);
+    return true;
   }
 }

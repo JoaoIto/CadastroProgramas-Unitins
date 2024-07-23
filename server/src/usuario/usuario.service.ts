@@ -23,6 +23,10 @@ export class UsuarioService{
     async atualizarInformacoes(uuid: string, updateData: Partial<Usuario>): Promise<Usuario>{
         return this.usuarioRepository.update(uuid, updateData)
     }
+
+    async redefinirSenha(cpf: string, senha: string): Promise<void>{
+        return this.usuarioRepository.redefinirSenha(cpf, senha)
+    }
     async consultar(uuid): Promise<Usuario> {
         return this.usuarioRepository.findById(uuid);
     }

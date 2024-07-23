@@ -15,6 +15,7 @@ export const APP_ROUTES = {
   },
   public: {
     login: "/auth/login",
+    esqueceuSenha: "/auth/esqueceu-a-senha",
     cadastrar: "/auth/cadastro",
   },
 };

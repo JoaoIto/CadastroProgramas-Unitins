@@ -57,6 +57,17 @@ export class UsuarioRepository {
         return senhaUsuario;
     }
 
+    async redefinirSenha(cpf: string, novaSenha: string): Promise<void> {
+        const usuario = await this.findByCpf(cpf);
+        if (usuario) {
+            const senhaHash = this.hashService.getHashSenha(novaSenha);
+            await this.usuario.findByIdAndUpdate(usuario._id, { senha: senhaHash });
+            this.logger.log('Senha atualizada para o usuário com CPF: ' + cpf);
+        } else {
+            this.logger.error('Usuário não encontrado com CPF: ' + cpf);
+        }
+    }
+
     async findByLogin(login: LoginDTO): Promise<Usuario | null> {
         const { cpf, senha } = login;
 

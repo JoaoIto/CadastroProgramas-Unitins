@@ -131,7 +131,7 @@ export default function LoginPage() {
               helperText={errors.senha?.message}
             />
             <Grid className="flex flex-col" item xs>
-              <Link href="#" variant="body2">
+              <Link href="/auth/esqueceu-a-senha" variant="body2">
                 Esqueceu a senha?
               </Link>
               <Button

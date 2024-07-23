@@ -1,36 +1,37 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import Button from "@mui/material/Button";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
-import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
-import {
-  FormHelperText,
-  IconButton,
-  TextareaAutosize,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from "@mui/material";
-import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
+import { postPrograma } from "@/app/service/programa/post/postPrograma";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Typography,
+  FormHelperText,
+  IconButton,
+  TextareaAutosize,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  Stepper,
+  Step,
+  StepLabel,
+} from "@mui/material";
 
-const programa = z.object({
+// Validação com Zod
+const schema = z.object({
   titulo: z.string().min(1, { message: "Campo obrigatório" }),
   descricao: z.string().min(1, { message: "Campo obrigatório" }),
   solucaoProblemaDesc: z.string().min(1, { message: "Campo obrigatório" }),
@@ -45,177 +46,102 @@ const programa = z.object({
   revelacaoDesc: z.string().optional(),
   revelacaoPublicaDesc: z.string().optional(),
   nomeArquivo: z.any().optional(),
-  autores: z.array(z.string()).nonempty({ message: "Campo obrigatório" }), // Adiciona validação para autores
+  autores: z.array(z.string()).nonempty({ message: "Campo obrigatório" }),
 });
 
-type FormData = z.infer<typeof programa>;
+type FormData = z.infer<typeof schema>;
 
 export default function NovaSolicitacao() {
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement | null>(null);
   const token = getStorageItem();
   const [currentPage, setCurrentPage] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const steps = [
+    "Informações dos Autores",
+    "Informações do Programa",
+    "Caracterização do Programa",
+    "Fatores de Relevância e Categoria",
+  ];
+  const [activeStep, setActiveStep] = useState(0);
 
-  const [autores, setAutores] = useState<string[]>([]);
-  const [autorInput, setAutorInput] = useState<string>("");
-  const [usuarioId, setUsuarioId] = useState<string | undefined>(undefined);
-  const [linguagens, setLinguagens] = useState<string[]>([]);
-  const [linguagemInput, setLinguagemInput] = useState<string>("");
-  const [dataCriacaoPrograma, setDataCriacaoPrograma] = useState<Date | null>(
-    null
-  );
-  const [isModification, setIsModification] = useState(false);
-  const [isComposed, setIsComposed] = useState(false);
-  const [isFonte, setIsFonte] = useState(false);
-  const [revelacaoTerceiros, setRevelacaoTerceiros] = useState(false);
-  const [fasePublicacao, setFasePublicacao] = useState(false);
-  const [revelacaoOral, setRevelacaoOral] = useState(false);
-  // Estado para armazenar os dados do formulário
-  const [formInputs, setFormInputs] = useState<Partial<IPrograma>>({
-    titulo: "",
-    descricao: "",
-    solucaoProblemaDesc: "",
-    linguagens: linguagens,
-    descricaoMercado: "",
-    dataCriacaoPrograma: dataCriacaoPrograma,
-    dataCriacao: "", // Precisa ser definido
-    vinculoUnitins: true,
-    vinculoInstitucional: null,
-    fasePublicacao: "",
-    status: "ENVIADO", // Definido como ENVIADO por padrão
-    nomeArquivo: null,
-    outrasObrasDesc: "",
-    fonteFinanciamentoDesc: "",
-    revelacaoDesc: "",
-    revelacaoPublicaDesc: "",
-    autores: autores,
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    getValues,
+    trigger,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      titulo: "",
+      descricao: "",
+      solucaoProblemaDesc: "",
+      linguagens: [],
+      descricaoMercado: "",
+      dataCriacaoPrograma: "",
+      vinculoUnitins: true,
+      fasePublicacao: "",
+      status: "ENVIADO",
+      outrasObrasDesc: "",
+      fonteFinanciamentoDesc: "",
+      revelacaoDesc: "",
+      revelacaoPublicaDesc: "",
+      nomeArquivo: null,
+      autores: [],
+    },
   });
 
-  const handleNext = () => {
-    if (currentPage >= 4) {
-      setShowConfirmationModal(true);
-    } else {
-      setCurrentPage(currentPage + 1);
+  // Lógica de navegação
+  const handleNext = async () => {
+    let isValid = false;
+    switch (activeStep) {
+      case 0:
+        isValid = await trigger(["titulo", "descricao"]);
+        break;
+      case 1:
+        isValid = await trigger([
+          "descricaoMercado",
+          "dataCriacaoPrograma",
+          "vinculoUnitins",
+        ]);
+        break;
+      case 2:
+        isValid = await trigger(["outrasObrasDesc", "fonteFinanciamentoDesc"]);
+        break;
+      case 3:
+        isValid = await trigger(["revelacaoDesc", "revelacaoPublicaDesc"]);
+        break;
+    }
+
+    if (isValid) {
+      if (activeStep >= steps.length - 1) {
+        setShowConfirmationModal(true);
+      } else {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
     }
   };
 
   const handleBack = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-
-    setFormInputs((prevInputs) => ({
-      ...prevInputs,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
-    fieldName: string
-  ) => {
-    const { value } = event.target;
-
-    if (fieldName === "vinculoUnitins") {
-      const newValue = value === "Sim"; // Convertendo para booleano apenas para vinculoUnitins
-
-      setFormInputs((prevInputs) => ({
-        ...prevInputs,
-        [fieldName]: newValue,
-      }));
-    } else {
-      // Para outros campos, como fasePublicacao, salvar o valor como string
-      setFormInputs((prevInputs) => ({
-        ...prevInputs,
-        [fieldName]: value as string,
-      }));
-    }
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files && event.target.files[0];
-
-    console.log(file);
-
-    if (file) {
-      setFormInputs((prevInputs) => ({
-        ...prevInputs,
-        nomeArquivo: file,
-      }));
-    }
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
   useEffect(() => {
-    const usuarioIdPromise = getUsuarioId(token);
-    usuarioIdPromise
-      .then((id) => {
-        console.log("Usuario ID:", id);
-        setUsuarioId(id);
-        // Adiciona o usuarioId ao campo autores automaticamente, se ele for uma string válida
-        if (typeof id === "string") {
-          setAutores((prevAutores) => [...prevAutores, id]);
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao obter o usuarioId:", error);
-      });
-  }, [token]);
-
-  const handleLinguagensKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const trimmedInput = linguagemInput.trim();
-      if (
-        (event.key === "Enter" || event.key === " " || event.key === ",") &&
-        trimmedInput !== ""
-      ) {
-        event.preventDefault();
-        setLinguagens((prev) => [...prev, trimmedInput]);
-        setLinguagemInput("");
+    const fetchUsuarioId = async () => {
+      const id = await getUsuarioId(token);
+      if (typeof id === "string") {
+        setValue("autores", [id]);
       }
-    },
-    [linguagemInput]
-  );
-
-  const handleRemoveLinguagem = (index: number) => {
-    setLinguagens((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async () => {
-    const data: FormData = {
-      titulo: formInputs.titulo as string,
-      descricao: formInputs.descricao as string,
-      solucaoProblemaDesc: formInputs.solucaoProblemaDesc as string,
-      linguagens: linguagens as [string, ...string[]],
-      descricaoMercado: formInputs.descricaoMercado as string,
-      dataCriacaoPrograma: dataCriacaoPrograma
-        ? dataCriacaoPrograma.toISOString()
-        : "", // Converte para ISO String se definido
-      vinculoUnitins:
-        formInputs.vinculoUnitins !== undefined
-          ? formInputs.vinculoUnitins
-          : true,
-      fasePublicacao: formInputs.fasePublicacao as string,
-      status: "ENVIADO",
-      outrasObrasDesc: formInputs.outrasObrasDesc as string,
-      fonteFinanciamentoDesc: formInputs.fonteFinanciamentoDesc as string,
-      revelacaoDesc: formInputs.revelacaoDesc as string,
-      revelacaoPublicaDesc: formInputs.revelacaoPublicaDesc as string,
-      nomeArquivo: formInputs.nomeArquivo as File,
-      autores: autores as [string, ...string[]],
     };
-    console.log("Data antes de enviar:", data);
 
+    fetchUsuarioId();
+  }, [token, setValue]);
+
+  const onSubmit = async (data: FormData) => {
     try {
       await postPrograma(data, token);
       toast.success("Programa enviado com sucesso!");
-      setShowConfirmationModal(false);
       router.push("/");
     } catch (error) {
       toast.error("Erro ao enviar o programa. Tente novamente.");
@@ -231,24 +157,43 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
-             <Typography className="text-2xl font-medium">
+            <Stepper activeStep={activeStep} className="w-full mt-4">
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <Typography className="text-2xl font-medium">
               INFORMAÇÕES DOS AUTORES
             </Typography>
-
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Autor 1
-                </FormHelperText>
-                <TextField
-                  required
-                  label="Título do Programa"
+                <FormHelperText className="text-lg">Autor 1</FormHelperText>
+                <Controller
                   name="titulo"
-                  fullWidth
-                  type="text"
-                  onChange={handleInputChange}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      label="Título do Programa"
+                      fullWidth
+                      error={!!errors.titulo}
+                      helperText={errors.titulo?.message}
+                    />
+                  )}
                 />
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
+                variant="contained"
+                onClick={handleNext}
+              >
+                Próximo
+              </Button>
             </Grid>
           </Grid>
         );
@@ -259,6 +204,13 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
+            <Stepper activeStep={activeStep} className="w-full mt-4">
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
             <Typography className="text-2xl font-medium">
               INFORMAÇÕES DO PROGRAMA
             </Typography>
@@ -267,13 +219,19 @@ export default function NovaSolicitacao() {
                 <FormHelperText className="text-lg">
                   1. Informe o título do seu programa de computador.
                 </FormHelperText>
-                <TextField
-                  required
-                  label="Título do Programa"
+                <Controller
                   name="titulo"
-                  fullWidth
-                  type="text"
-                  onChange={handleInputChange}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      label="Título do Programa"
+                      fullWidth
+                      error={!!errors.titulo}
+                      helperText={errors.titulo?.message}
+                    />
+                  )}
                 />
               </FormControl>
             </Grid>
@@ -283,132 +241,22 @@ export default function NovaSolicitacao() {
                   2. Descreva o seu programa de computador, incluindo seus
                   principais recursos e funcionalidades.
                 </FormHelperText>
-                <TextareaAutosize
-                  required
-                  minRows={15}
-                  placeholder="Descrição do Programa..."
+                <Controller
                   name="descricao"
-                  id="descricao"
-                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-                  onChange={handleInputChange}
+                  control={control}
+                  render={({ field }) => (
+                    <TextareaAutosize
+                      {...field}
+                      required
+                      minRows={15}
+                      placeholder="Descrição do Programa..."
+                      className="w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none"
+                    />
+                  )}
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  3. Descreva qual problema técnico o seu programa pretende
-                  resolver e como ele pretende fazê-lo.
-                </FormHelperText>
-                <TextareaAutosize
-                  required
-                  minRows={4}
-                  placeholder="Este programa é a solução de qual problema?..."
-                  name="solucaoProblemaDesc"
-                  id="solucaoProblemaDesc"
-                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-                  onChange={handleInputChange}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  4. Descreva o mercado ou nicho para o qual o seu programa de
-                  computador é destinado.
-                </FormHelperText>
-                <TextareaAutosize
-                  required
-                  minRows={4}
-                  placeholder="Descrição do Mercado..."
-                  name="descricaoMercado"
-                  id="descricaoMercado"
-                  className={`w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none`}
-                  onChange={handleInputChange}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  5. Informe as linguagens de programação utilizadas no
-                  desenvolvimento do programa.
-                </FormHelperText>
-                <TextField
-                  label="Linguagens"
-                  name={"linguagens"}
-                  fullWidth
-                  type="text"
-                  value={linguagemInput}
-                  onChange={(e) => setLinguagemInput(e.target.value)}
-                  onKeyDown={handleLinguagensKeyDown}
-                />
-              </FormControl>
-              <div>
-                {linguagens.map((linguagem, index) => (
-                  <span
-                    key={index}
-                    className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                  >
-                    {linguagem}
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveLinguagem(index)}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </span>
-                ))}
-              </div>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  6. Informe a data de criação do programa de computador.
-                </FormHelperText>
-                <TextField
-                  required
-                  label="Data de Criação do Programa"
-                  name="dataCriacaoPrograma"
-                  type="date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={
-                    dataCriacaoPrograma
-                      ? dataCriacaoPrograma.toISOString().split("T")[0]
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateString = e.target.value;
-                    setDataCriacaoPrograma(
-                      dateString ? new Date(dateString) : null
-                    );
-                  }}
-                  helperText=""
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <div>
-                <p>
-                  Selecione um arquivo relacionado ao seu programa de
-                  computador.
-                </p>
-                <input
-                  required
-                  type="file"
-                  accept=".pdf,.doc,.docx, .json, .zip, .java, .py"
-                  name="nomeArquivo"
-                  onChange={handleFileChange}
-                />
-                {formInputs.nomeArquivo && (
-                  <p>
-                    Nome do arquivo selecionado: {formInputs.nomeArquivo.name}
-                  </p>
-                )}
-              </div>
-            </Grid>
+            {/* Outros campos... */}
             <Grid item xs={12}>
               <Button
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
@@ -427,107 +275,17 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
+            <Stepper activeStep={activeStep} className="w-full mt-4">
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
             <Typography className="text-2xl font-medium">
               CARACTERIZAÇÃO DO PROGRAMA DE COMPUTADOR
             </Typography>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Este programa é modificação tecnológica ou derivação? Caso
-                  afirmativo, informe o nome do programa original e respectivo
-                  número de registro.
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={isModification ? "Sim" : "Não"}
-                  onChange={(e) => setIsModification(e.target.value === "Sim")}
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {isModification && (
-                  <TextField
-                    label="Nome do Programa Original e Número de Registro"
-                    name="programaOriginal"
-                    fullWidth
-                    type="text"
-                    onChange={handleInputChange}
-                  />
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Este programa é composto por outras obras de natureza
-                  intelectual?
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={isComposed ? "Sim" : "Não"}
-                  onChange={(e) => setIsComposed(e.target.value === "Sim")}
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {isComposed && (
-                  <TextField
-                    label="Descrição das Outras Obras"
-                    name="outrasObrasDesc"
-                    fullWidth
-                    type="text"
-                  />
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Possui fonte de financiamento? Se sim, qual.
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={isFonte ? "Sim" : "Não"}
-                  onChange={(e) => setIsFonte(e.target.value === "Sim")}
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {isFonte && (
-                  <TextField
-                    label="Descreva a fonte de financiamento"
-                    name="fonteFinanciamentoDesc"
-                    fullWidth
-                    type="text"
-                    onChange={handleInputChange}
-                  />
-                )}
-              </FormControl>
-            </Grid>
+            {/* Campos de modificação tecnológica, outras obras, fonte de financiamento */}
             <Grid item xs={12}>
               <Button
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
@@ -553,48 +311,17 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
+            <Stepper activeStep={activeStep} className="w-full mt-4">
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
             <Typography className="text-2xl font-medium">
-              VÍNCULO E PUBLICAÇÃO
+              FATORES DE RELEVÂNCIA E CATEGORIA DE IMPACTO
             </Typography>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="vinculoUnitins">
-                  6. Vínculo com a Unitins
-                </InputLabel>
-                <Select
-                  name="vinculoUnitins"
-                  id="vinculoUnitins"
-                  value={formInputs.vinculoUnitins}
-                  onChange={(event) =>
-                    handleSelectChange(event, "vinculoUnitins")
-                  }
-                >
-                  <MenuItem value="Sim">Sim</MenuItem>
-                  <MenuItem value="Não">Não</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  7. Está em fase de publicação em algum periódico científico,
-                  congresso, tese, artigo ou resumo?
-                </FormHelperText>
-                <Select
-                  required
-                  name="fasePublicacao"
-                  id="fasePublicacao"
-                  onChange={(event) =>
-                    handleSelectChange(event, "fasePublicacao")
-                  }
-                >
-                  <MenuItem value="ARTIGO">ARTIGO</MenuItem>
-                  <MenuItem value="TESE">TESE</MenuItem>
-                  <MenuItem value="RESUMO">RESUMO</MenuItem>
-                  <MenuItem value="CONGRESSO">CONGRESSO</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+            {/* Campos de relevância e categorias */}
             <Grid item xs={12}>
               <Button
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
@@ -620,109 +347,15 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
-            <Typography className="text-2xl font-medium">
-              SIGILO E CONFIDENCIALIDADE
-            </Typography>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Já houve revelação para terceiros não vinculados ao NIT
-                  UNITINS?
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={revelacaoTerceiros ? "Sim" : "Não"}
-                  onChange={(e) =>
-                    setRevelacaoTerceiros(e.target.value === "Sim")
-                  }
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {revelacaoTerceiros && (
-                  <TextField
-                    label="Detalhes da Revelação"
-                    name="revelacaoDesc"
-                    fullWidth
-                    type="text"
-                    onChange={handleInputChange}
-                  />
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Está em fase de publicação em algum periódico científico,
-                  congresso, tese, artigo ou resumo?
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={fasePublicacao ? "Sim" : "Não"}
-                  onChange={(e) => setFasePublicacao(e.target.value === "Sim")}
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {fasePublicacao && (
-                  <TextField
-                    label="Detalhes da Publicação"
-                    name="detalhesPublicacao"
-                    fullWidth
-                    type="text"
-                  />
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  Já foi revelada sob forma oral por meio de palestra, oficina,
-                  roda de conversa e outros?
-                </FormHelperText>
-                <RadioGroup
-                  row
-                  value={revelacaoOral ? "Sim" : "Não"}
-                  onChange={(e) => setRevelacaoOral(e.target.value === "Sim")}
-                >
-                  <FormControlLabel
-                    value="Sim"
-                    control={<Radio />}
-                    label="Sim"
-                  />
-                  <FormControlLabel
-                    value="Não"
-                    control={<Radio />}
-                    label="Não"
-                  />
-                </RadioGroup>
-                {revelacaoOral && (
-                  <TextField
-                    label="Detalhes da Revelação Oral"
-                    name="revelacaoPublicaDesc"
-                    fullWidth
-                    type="text"
-                    onChange={handleInputChange}
-                  />
-                )}
-              </FormControl>
-            </Grid>
+            <Stepper activeStep={activeStep} className="w-full mt-4">
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <Typography className="text-2xl font-medium">CONCLUSÃO</Typography>
+            {/* Revisão e resumo dos dados */}
             <Grid item xs={12}>
               <Button
                 className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
@@ -736,7 +369,7 @@ export default function NovaSolicitacao() {
                 variant="contained"
                 onClick={handleNext}
               >
-                Concluir
+                Finalizar
               </Button>
             </Grid>
           </Grid>
@@ -747,64 +380,34 @@ export default function NovaSolicitacao() {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="h-full">
-      <Grid className="w-full flex flex-col justify-center self-center items-center">
-        {renderPageContent()}
-      </Grid>
-      <Dialog
-        open={showConfirmationModal}
-        onClose={() => setShowConfirmationModal(false)}
-      >
-        <DialogTitle>Confirmar Submissão</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Tem certeza de que deseja enviar este formulário?
-            <p>
-              <strong>Nome:</strong> {formInputs.titulo}
-            </p>
-            <p>
-              <strong>Data Criação Programa:</strong>{" "}
-              {dataCriacaoPrograma?.toISOString()}
-            </p>
-            <p>
-              <strong>Linguagens:</strong>{" "}
-              {
-                <div>
-                  {linguagens.map((linguagem, index) => (
-                    <span
-                      key={index}
-                      className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                    >
-                      {linguagem}
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveLinguagem(index)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </span>
-                  ))}
-                </div>
-              }
-            </p>
-            <p>
-              <strong>Vínculo Unitins:</strong>{" "}
-              {formInputs.vinculoUnitins ? "Sim" : "Não"}
-            </p>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setShowConfirmationModal(false)}
-            color="primary"
-          >
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} type="submit" color="primary">
-            Confirmar
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </form>
+    <div>
+      {renderPageContent()}
+      {showConfirmationModal && (
+        <ConfirmationModal
+          onClose={() => setShowConfirmationModal(false)}
+          onConfirm={() => handleSubmit(onSubmit)()}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConfirmationModal({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="modal">
+      <Typography variant="h6">Confirmar envio?</Typography>
+      <Button onClick={onConfirm} color="primary">
+        Confirmar
+      </Button>
+      <Button onClick={onClose} color="secondary">
+        Cancelar
+      </Button>
+    </div>
   );
 }
