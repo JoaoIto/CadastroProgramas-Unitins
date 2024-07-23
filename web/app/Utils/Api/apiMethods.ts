@@ -46,7 +46,7 @@ class ApiUtils {
     private static async performRequest<T>(url: string, options: RequestInit): Promise<T | undefined> {
         try {
             const response = await fetch(`${ApiUtils.baseUrl}${url}`, options);
-
+    
             if (response.ok) {
                 const result = await response.json();
                 console.log('Dados enviados com sucesso:', result);
@@ -58,7 +58,7 @@ class ApiUtils {
             console.error(error);
         }
         return undefined;
-    }
+    }    
 
     static async post(endpoint: string, data: object, token: string): Promise<void> {
         const options: RequestInit = {
@@ -110,6 +110,19 @@ class ApiUtils {
         return ApiUtils.performRequest<T>(endpoint, options);
     }
 
+    static async getPaginate<T>(endpoint: string, token: string, params?: { [key: string]: any }): Promise<T | undefined> {
+        const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
+        const url = `${endpoint}${queryString}`;
+    
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
+    
+        return ApiUtils.performRequest<T>(url, options);
+    }    
+        
     static async getByUuid<T>(endpoint: string, uuid: string, token: string): Promise<T | undefined> {
         const options: RequestInit = {
             headers: {

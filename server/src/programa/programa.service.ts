@@ -73,6 +73,11 @@ export class ProgramaService {
         return this.programaRepository.findByUsuarioId(usuarioId);
     }
 
+    async getProgramasPorUsuarioIdPaginado(usuarioId: mongoose.Types.ObjectId, page: number, limit: number): Promise<{ data: Programa[], total: number }> {
+        this.logger.log(`Recebido ${usuarioId} id de usuario para paginação`);
+        return this.programaRepository.findByUsuarioIdPaginado(usuarioId, page, limit);
+      }
+
     async getProgramasPorUsuarioIdTitulo(usuarioId: mongoose.Types.ObjectId, titulo: string) {
         this.logger.log(`Recebido ${usuarioId} id de usuario`)
         return this.programaRepository.findProgramaTituloByUsuarioId(usuarioId, titulo);
