@@ -106,7 +106,7 @@ export class ProgramaRepository {
     const validPage = page < 1 ? 1 : page;
     
     // Calcular o valor de skip
-    const skip = (validPage - 1) * limit;
+    const skip = (validPage - 1) * limit; 
     
     // Adicionar logs para verificar valores
     this.logger.log(`Página solicitada: ${page}`);

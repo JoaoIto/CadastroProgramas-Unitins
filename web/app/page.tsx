@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import AlertMessage from "./components/AlertMessage";
 import { getProgramasUsuarioPaginado } from "./service/programa/programaUserLogadoPaginado";
+import { Typography } from "@mui/material";
+import { getProgramasSearch } from "./functions/storage/getProgramaSearch";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
@@ -18,26 +20,40 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState<number>(1); // Página inicial deve ser 1
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   useEffect(() => {
     const fetchProgramas = async () => {
       try {
-        const response = await getProgramasUsuarioPaginado(token, currentPage, PAGE_LIMIT);
-        if (response) {
-          const { data = [], total = 0 } = response; // Garantir que data é um array e total é um número
-          setProgramas(data);
-          setTotal(total);
-          setTotalPages(Math.ceil(total / PAGE_LIMIT)); // Calcula o número total de páginas
+        // Verifica se há dados de pesquisa armazenados
+        const searchResults = getProgramasSearch();
+        if (searchResults) {
+          setProgramas(JSON.parse(searchResults));
+          setTotal(searchResults.length);
+          setTotalPages(1); // Considera uma única página para resultados de pesquisa
+        } else {
+          const response = await getProgramasUsuarioPaginado(
+            token,
+            currentPage,
+            PAGE_LIMIT
+          );
+          if (response) {
+            const { data = [], total = 0 } = response;
+            setProgramas(data);
+            setTotal(total);
+            setTotalPages(Math.ceil(total / PAGE_LIMIT));
+          }
         }
       } catch (error) {
-        console.error('Erro ao buscar os dados:', error);
+        console.error("Erro ao buscar os dados:", error);
         setAlertMessage("Erro ao buscar os dados.");
         setAlertSeverity("error");
         setAlertOpen(true);
       }
     };
-
+  
     fetchProgramas();
   }, [token, currentPage]);
 
@@ -50,7 +66,10 @@ export default function DashboardPage() {
     }, 2000); // Exibe a mensagem por 2 segundos
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
     setCurrentPage(page);
   };
 
@@ -58,7 +77,16 @@ export default function DashboardPage() {
     <div className="flex w-full h-full">
       <div className="flex flex-col">
         <div className="w-full h-full">
-          <Title>Dashboard</Title>
+          <Title>Dashboard</Title >
+          <Typography variant="h5" component="div">
+            {`${programas.length} resultados encontrados`}
+          </Typography>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
           <div className="flex self-end p-4">
             <Button
               variant="contained"

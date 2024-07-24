@@ -3,15 +3,15 @@ import React, { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Open_Sans } from 'next/font/google';
 import { checkPublicRoute } from '@/app/functions/checkPublicRoute';
-import Search from '@mui/icons-material/Search';
 import Sidebar from '@/app/components/MenuLateral/sidebar';
+import Search from '@/app/components/HeaderSearch/cabecalho';
 const openSans = Open_Sans({ subsets: ['latin'] });
 
-interface RootLayoutProps {
+interface ProgramaListLayoutProps {
   children: ReactNode;
 }
 
-const ProgramaListLayout: React.FC<RootLayoutProps> = ({ children }) => {
+const ProgramaListLayout: React.FC<ProgramaListLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const isPublicPage = checkPublicRoute(pathname);
 
