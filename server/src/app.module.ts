@@ -9,10 +9,12 @@ import { AuthModule } from './auth/auth.module';
 import { RolesGuard } from "./roles/roles.guard";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
+import { LinguagemModule } from './linguagens/linguagem.module';
 @Module({
   imports: [
       ProgramaModule,
       UsuarioModule,
+      LinguagemModule,
       UsuarioProgramaModule,
       AuthModule,
       JwtModule,
