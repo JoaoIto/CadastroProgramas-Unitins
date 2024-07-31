@@ -20,7 +20,6 @@ const ProgramaLayout: React.FC<RootLayoutProps> = ({ children }) => {
       <body className={openSans.className}>
         <Header />
         <div className="flex h-full w-full">
-          <Sidebar />
           <main className="h-full w-full">
                 {children}
           </main>

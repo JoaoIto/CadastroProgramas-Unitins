@@ -18,11 +18,11 @@ const ProgramaListLayout: React.FC<ProgramaListLayoutProps> = ({ children }) => 
   return (
     <html lang="en">
       <body className={openSans.className}>
-        <Search />
-        <div className="flex h-full w-full">
-          <Sidebar />
-          <main className="h-full w-full">
-                {children}
+        {!isPublicPage && <Search />}
+        <div className="flex h-full">
+          {!isPublicPage && <Sidebar />}
+          <main className="flex-1"> 
+            {children}
           </main>
         </div>
       </body>

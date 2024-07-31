@@ -24,7 +24,7 @@
         cinzaTraco: "#ADADAD",
         azulEscuro: "#18428F",
         azulClaroGradient: "#8ed4ff",
-        azulEscuroGradient: "#18428F",
+        azulEscuroGradient: "#1F4B9F",
         verdeClaro: "#30D64C",
         vermelho: "#CF0E0E"
       },
