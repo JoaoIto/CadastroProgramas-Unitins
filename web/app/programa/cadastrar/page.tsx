@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -17,18 +14,31 @@ import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
 import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import DeleteIcon from "@mui/icons-material/Delete";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+
 import {
   Typography,
   FormHelperText,
   IconButton,
-  TextareaAutosize,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
   Stepper,
   Step,
   StepLabel,
+  Modal,
+  Box,
+  FormControlLabel,
+  Checkbox,
+  Radio,
+  FormLabel,
+  RadioGroup,
+  Autocomplete,
+  Chip,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
+import { useUser } from "@/app/hooks/user/userGet";
+import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll";
 
 // Validação com Zod
 const schema = z.object({
@@ -39,22 +49,35 @@ const schema = z.object({
   descricaoMercado: z.string().min(1, { message: "Campo obrigatório" }),
   dataCriacaoPrograma: z.string().min(1, { message: "Campo obrigatório" }),
   vinculoUnitins: z.boolean(),
+  nomeInstituicao: z.string().min(1, { message: "Campo obrigatório" }),
   fasePublicacao: z.string().min(1, { message: "Campo obrigatório" }),
   status: z.string().min(1, { message: "Campo obrigatório" }),
   outrasObrasDesc: z.string().optional(),
   fonteFinanciamentoDesc: z.string().optional(),
   revelacaoDesc: z.string().optional(),
   revelacaoPublicaDesc: z.string().optional(),
-  nomeArquivo: z.any().optional(),
-  autores: z.array(z.string()).nonempty({ message: "Campo obrigatório" }),
+  nomeArquivo: z.string().optional(),
+  linkCodigoFonte: z.string().optional(),
+  autores: z
+    .array(
+      z.object({
+        nome: z.string().min(1, { message: "Nome é obrigatório" }),
+        matricula: z.string().min(1, { message: "Matrícula é obrigatória" }),
+        cpf: z.string().optional(),
+        nomeCompleto: z.string().optional(),
+        id: z.string().optional(),
+      })
+    )
+    .nonempty({ message: "Pelo menos um autor é necessário" }),
 });
 
 type FormData = z.infer<typeof schema>;
 
 export default function NovaSolicitacao() {
   const router = useRouter();
+  const { profile, isLoading } = useUser();
   const token = getStorageItem();
-  const [currentPage, setCurrentPage] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const steps = [
     "Informações dos Autores",
@@ -62,7 +85,69 @@ export default function NovaSolicitacao() {
     "Caracterização do Programa",
     "Fatores de Relevância e Categoria",
   ];
-  const [activeStep, setActiveStep] = useState(0);
+
+  /* const linguagensDisponiveis = [
+    { id: 1, nome: "JavaScript" },
+    { id: 2, nome: "Python" },
+    { id: 3, nome: "Java" },
+    { id: 4, nome: "C#" },
+    { id: 5, nome: "C++" },
+    { id: 6, nome: "Ruby" },
+    { id: 7, nome: "PHP" },
+    { id: 8, nome: "TypeScript" },
+    { id: 9, nome: "Swift" },
+    { id: 10, nome: "Kotlin" },
+    { id: 11, nome: "Go" },
+    { id: 12, nome: "Rust" },
+    { id: 13, nome: "Scala" },
+    { id: 14, nome: "Dart" },
+    { id: 15, nome: "Objective-C" },
+    { id: 16, nome: "R" },
+    { id: 17, nome: "Perl" },
+    { id: 18, nome: "Lua" },
+    { id: 19, nome: "Haskell" },
+    { id: 20, nome: "Elixir" },
+    { id: 21, nome: "Clojure" },
+    { id: 22, nome: "F#" },
+    { id: 23, nome: "Erlang" },
+  ]; */
+
+  const [autores, setAutores] = useState<Array<FormData["autores"][number]>>(
+    []
+  );
+  const [insercaoOpcao, setInsercaoOpcao] = useState<"arquivo" | "link">(
+    "arquivo"
+  );
+  // Estado para armazenar a opção selecionada para Natureza de Outras Obras
+const [existeOutrasObras, setExisteOutrasObras] = useState<"sim" | "nao">("nao");
+
+// Estado para armazenar a descrição das obras
+const [descricaoObras, setDescricaoObras] = useState<string>("");
+
+// Estado para armazenar a opção selecionada para Fonte de Financiamento
+const [existeFonteFinanciamento, setExisteFonteFinanciamento] = useState<"sim" | "nao">("nao");
+
+// Estado para armazenar a descrição de fonte de financiamento
+const [descricaoFonteFinanciamento, setDescricaoFonteFinanciamento] = useState<string>("");
+  
+// Estado para armazenar a opção de confissão/revelação para outras fontes
+const [confissaoOutrasFontes, setConfissaoOutrasFontes] = useState<"sim" | "nao">("nao");
+
+// Estado para armazenar a descrição de confissão/revelação para outras fontes
+const [descricaoConfissaoOutrasFontes, setDescricaoConfissaoOutrasFontes] = useState<string>("");
+
+// Estado para armazenar a opção de revelação pública
+const [revelacaoPublica, setRevelacaoPublica] = useState<"sim" | "nao">("nao");
+
+// Estado para armazenar a descrição de revelação pública
+const [descricaoRevelacaoPublica, setDescricaoRevelacaoPublica] = useState<string>("");
+
+const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
+
+  const [linguagensDisponiveis, setLinguagensDisponiveis] = useState<
+    ILinguagem[]
+  >([]);
+  const [nomeDocumento, setNomeDocumento] = useState("");
 
   const {
     control,
@@ -70,6 +155,7 @@ export default function NovaSolicitacao() {
     setValue,
     getValues,
     trigger,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -87,24 +173,54 @@ export default function NovaSolicitacao() {
       fonteFinanciamentoDesc: "",
       revelacaoDesc: "",
       revelacaoPublicaDesc: "",
-      nomeArquivo: null,
+      nomeArquivo: "",
+      linkCodigoFonte: "",
       autores: [],
     },
   });
+
+  // Preenche os campos do autor com os dados do perfil do usuário
+  useEffect(() => {
+    if (!isLoading && profile) {
+      const nome = profile.nome || "";
+      const matricula = profile.matricula || "";
+      setAutores([{ nome, matricula }]);
+      setValue("autores", [{ nome, matricula }]);
+    }
+  }, [profile, isLoading, setValue]);
 
   // Lógica de navegação
   const handleNext = async () => {
     let isValid = false;
     switch (activeStep) {
       case 0:
-        isValid = await trigger(["titulo", "descricao"]);
+        isValid = await trigger(["autores", "vinculoUnitins"]);
         break;
       case 1:
-        isValid = await trigger([
-          "descricaoMercado",
-          "dataCriacaoPrograma",
-          "vinculoUnitins",
-        ]);
+        type FormFieldNames =
+          | "titulo"
+          | "descricao"
+          | "solucaoProblemaDesc"
+          | "outrasObrasDesc"
+          | "linguagens"
+          | "nomeArquivo"
+          | "linkCodigoFonte";
+        const fieldsToValidate: FormFieldNames[] = [
+          "titulo",
+          "descricao",
+          "solucaoProblemaDesc",
+          "outrasObrasDesc",
+          "linguagens",
+        ];
+
+        if (insercaoOpcao === "arquivo") {
+          fieldsToValidate.push("nomeArquivo");
+        } else if (insercaoOpcao === "link") {
+          fieldsToValidate.push("linkCodigoFonte");
+        }
+
+        // Passa os nomes dos campos individualmente para o trigger
+        isValid = await trigger(...fieldsToValidate);
         break;
       case 2:
         isValid = await trigger(["outrasObrasDesc", "fonteFinanciamentoDesc"]);
@@ -131,12 +247,52 @@ export default function NovaSolicitacao() {
     const fetchUsuarioId = async () => {
       const id = await getUsuarioId(token);
       if (typeof id === "string") {
-        setValue("autores", [id]);
+        setAutores((prevAutores) => [
+          ...prevAutores,
+          { nome: "", matricula: "", id },
+        ]);
+        setValue("autores", [
+          ...getValues("autores"),
+          { nome: "", matricula: "", id },
+        ]);
       }
     };
 
     fetchUsuarioId();
-  }, [token, setValue]);
+    getLinguagensAll(token)
+      .then((response) => {
+        setLinguagensDisponiveis(response || []);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar linguagens:", error);
+      });
+  }, [token, setValue, getValues]);
+
+  const adicionarAutor = () => {
+    setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "" }]);
+    setValue("autores", [...getValues("autores"), { nome: "", matricula: "" }]);
+  };
+
+  const handleAutorChange = (
+    index: number,
+    field: keyof FormData["autores"][number],
+    value: string
+  ) => {
+    setAutores((prevAutores) => {
+      const newAutores = [...prevAutores];
+      newAutores[index] = { ...newAutores[index], [field]: value };
+      setValue("autores", newAutores);
+      return newAutores;
+    });
+  };
+
+  const removerAutor = (index: number) => {
+    setAutores((prevAutores) => {
+      const newAutores = prevAutores.filter((_, i) => i !== index);
+      setValue("autores", newAutores);
+      return newAutores;
+    });
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -149,7 +305,8 @@ export default function NovaSolicitacao() {
   };
 
   const renderPageContent = () => {
-    switch (currentPage) {
+    const vinculoUnitins = getValues("vinculoUnitins");
+    switch (activeStep) {
       case 0:
         return (
           <Grid
@@ -167,34 +324,109 @@ export default function NovaSolicitacao() {
             <Typography className="text-2xl font-medium">
               INFORMAÇÕES DOS AUTORES
             </Typography>
+            {autores.map((autor, index) => (
+              <Grid container spacing={2} key={index}>
+                <Grid item xs={5}>
+                  <TextField
+                    required
+                    label={`Nome Completo do Autor ${index + 1}`}
+                    fullWidth
+                    value={autor.nome}
+                    onChange={(e) =>
+                      handleAutorChange(index, "nome", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.nome}
+                    helperText={errors.autores?.[index]?.nome?.message}
+                  />
+                </Grid>
+                <Grid item xs={5}>
+                  <TextField
+                    required
+                    label={`Matrícula do Autor ${index + 1}`}
+                    fullWidth
+                    value={autor.matricula}
+                    onChange={(e) =>
+                      handleAutorChange(index, "matricula", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.matricula}
+                    helperText={errors.autores?.[index]?.matricula?.message}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <IconButton
+                    color="error"
+                    onClick={() => removerAutor(index)}
+                    aria-label="delete"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            ))}
+            <Button
+              className="mt-4"
+              variant="outlined"
+              onClick={adicionarAutor}
+            >
+              Adicionar Autor
+            </Button>
+            {/* Radio Group Vinculo Unitins */}
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">Autor 1</FormHelperText>
+              <Controller
+                name="vinculoUnitins"
+                control={control}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <FormControl component="fieldset" fullWidth>
+                    <FormLabel component="legend">Vínculo Unitins</FormLabel>
+                    <RadioGroup
+                      row
+                      {...field}
+                      value={field.value === true ? "true" : "false"}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "true")
+                      }
+                    >
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Sim"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="Não"
+                      />
+                    </RadioGroup>
+                    {errors.vinculoUnitins && (
+                      <FormHelperText error>
+                        {errors.vinculoUnitins.message}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            {/* Nome da Instituição */}
+            {watch("vinculoUnitins") === false && (
+              <Grid item xs={12}>
                 <Controller
-                  name="titulo"
+                  name="nomeInstituicao"
                   control={control}
                   render={({ field }) => (
                     <TextField
-                      {...field}
                       required
-                      label="Título do Programa"
+                      label="Nome da Instituição (Apenas preencha, se caso não fazer parte da UNITINS)"
                       fullWidth
-                      error={!!errors.titulo}
-                      helperText={errors.titulo?.message}
+                      {...field}
+                      error={!!errors.nomeInstituicao}
+                      helperText={errors.nomeInstituicao?.message}
                     />
                   )}
                 />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleNext}
-              >
-                Próximo
-              </Button>
-            </Grid>
+              </Grid>
+            )}
           </Grid>
         );
       case 1:
@@ -214,58 +446,205 @@ export default function NovaSolicitacao() {
             <Typography className="text-2xl font-medium">
               INFORMAÇÕES DO PROGRAMA
             </Typography>
+
+            {/* Título */}
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  1. Informe o título do seu programa de computador.
-                </FormHelperText>
-                <Controller
-                  name="titulo"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      required
-                      label="Título do Programa"
-                      fullWidth
-                      error={!!errors.titulo}
-                      helperText={errors.titulo?.message}
-                    />
-                  )}
-                />
-              </FormControl>
+              <Controller
+                name="titulo"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    required
+                    label="Título"
+                    fullWidth
+                    {...field}
+                    error={!!errors.titulo}
+                    helperText={errors.titulo?.message}
+                  />
+                )}
+              />
             </Grid>
+
+            {/* Descrição */}
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <FormHelperText className="text-lg">
-                  2. Descreva o seu programa de computador, incluindo seus
-                  principais recursos e funcionalidades.
-                </FormHelperText>
-                <Controller
-                  name="descricao"
-                  control={control}
-                  render={({ field }) => (
-                    <TextareaAutosize
-                      {...field}
-                      required
-                      minRows={15}
-                      placeholder="Descrição do Programa..."
-                      className="w-full p-2 border-2 border-cinzaTraco placeholder:text-slate-400 rounded resize-none"
-                    />
-                  )}
-                />
-              </FormControl>
+              <Controller
+                name="descricao"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    required
+                    label="Descrição"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    {...field}
+                    error={!!errors.descricao}
+                    helperText={errors.descricao?.message}
+                  />
+                )}
+              />
             </Grid>
-            {/* Outros campos... */}
+
+            {/* Solução do Problema */}
             <Grid item xs={12}>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleNext}
+              <Controller
+                name="solucaoProblemaDesc"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    required
+                    label="Solução do Problema"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    {...field}
+                    error={!!errors.solucaoProblemaDesc}
+                    helperText={errors.solucaoProblemaDesc?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Linguagens */}
+            <Grid item xs={12}>
+              <Controller
+                name="linguagens"
+                control={control}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <Autocomplete
+                    multiple
+                    freeSolo
+                    options={linguagensDisponiveis.map((option) => option.nome)}
+                    getOptionLabel={(option) => option}
+                    onChange={(event, newValue) =>
+                      field.onChange(newValue as string[])
+                    }
+                    value={field.value || []}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => {
+                        const linguagem = linguagensDisponiveis.find(
+                          (linguagem) => linguagem.nome === option
+                        );
+                        return (
+                          <Chip
+                            key={option} // Use a string única como chave
+                            variant="outlined"
+                            label={linguagem ? option : `${option} (nova tag)`}
+                            {...getTagProps({ index })}
+                          />
+                        );
+                      })
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Linguagens"
+                        error={!!errors.linguagens}
+                        helperText={errors.linguagens?.message}
+                      />
+                    )}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Opção de Inserção de Código Fonte */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1">Inserir Código Fonte</Typography>
+              <RadioGroup
+                aria-required
+                row
+                value={insercaoOpcao}
+                onChange={(e) =>
+                  setInsercaoOpcao(e.target.value as "arquivo" | "link")
+                }
               >
-                Próximo
-              </Button>
+                <FormControlLabel
+                  value="arquivo"
+                  control={<Radio />}
+                  label="Inserir Arquivo"
+                />
+                <FormControlLabel
+                  value="link"
+                  control={<Radio />}
+                  label="Inserir Link"
+                />
+              </RadioGroup>
             </Grid>
+
+            {insercaoOpcao === "arquivo" && (
+              <Grid item xs={12}>
+                <h2
+                  className="text-1xl font-medium"
+                  style={{ marginBottom: 8 }}
+                >
+                  Adicionar Documento
+                </h2>
+                <Grid className="flex flex-col w-full space-y-5 justify-between">
+                  <Button
+                    className="w-[100%] flex p-2"
+                    style={{
+                      height: 100,
+                      backgroundColor: "#F5F5F5",
+                      color: "#999999",
+                      marginTop: 10,
+                    }}
+                    variant="contained"
+                    component="label"
+                  >
+                    {nomeDocumento ? (
+                      nomeDocumento
+                    ) : (
+                      <>
+                        Adicione o documento aqui <UploadFileIcon />
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) =>
+                        setNomeDocumento(e.target.files?.[0]?.name || "")
+                      }
+                    />
+                  </Button>
+
+                  {nomeDocumento && (
+                    <TextField
+                      className="w-[100%]"
+                      label="Documento Selecionado"
+                      variant="standard"
+                      value={nomeDocumento}
+                      disabled
+                      InputProps={{
+                        endAdornment: nomeDocumento && (
+                          <IconButton
+                            onClick={() => setNomeDocumento("")}
+                            edge="end"
+                            aria-label="delete"
+                          >
+                            <CancelOutlinedIcon />
+                          </IconButton>
+                        ),
+                      }}
+                    />
+                  )}
+                </Grid>
+              </Grid>
+            )}
+
+            {insercaoOpcao === "link" && (
+              <Grid item xs={12}>
+                <TextField
+                  label="Link do Código Fonte"
+                  fullWidth
+                  value={linkCodigoFonte}
+                  onChange={(e) => setLinkCodigoFonte(e.target.value)}
+                  error={!!errors.linkCodigoFonte}
+                  helperText={errors.linkCodigoFonte?.message}
+                />
+              </Grid>
+            )}
           </Grid>
         );
       case 2:
@@ -283,25 +662,85 @@ export default function NovaSolicitacao() {
               ))}
             </Stepper>
             <Typography className="text-2xl font-medium">
-              CARACTERIZAÇÃO DO PROGRAMA DE COMPUTADOR
+              CARACTERIZAÇÃO DO PROGRAMA
             </Typography>
-            {/* Campos de modificação tecnológica, outras obras, fonte de financiamento */}
-            <Grid item xs={12}>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleBack}
-              >
-                Anterior
-              </Button>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleNext}
-              >
-                Próximo
-              </Button>
-            </Grid>
+            <Grid container spacing={2}>
+  {/* Opções de Sim e Não */}
+  <Grid item xs={12}>
+    <Typography variant="subtitle1">Existe Natureza de Outras Obras</Typography>
+    <RadioGroup
+      aria-required
+      row
+      value={existeOutrasObras}
+      onChange={(e) => setExisteOutrasObras(e.target.value as "sim" | "nao")}
+    >
+      <FormControlLabel
+        value="sim"
+        control={<Radio />}
+        label="Sim"
+      />
+      <FormControlLabel
+        value="nao"
+        control={<Radio />}
+        label="Não"
+      />
+    </RadioGroup>
+  </Grid>
+
+  {/* Descrição das Obras */}
+  {existeOutrasObras === "sim" && (
+    <Grid item xs={12}>
+      <TextField
+        label="Descrição das Obras"
+        multiline
+        rows={3}
+        fullWidth
+        value={descricaoObras}
+        onChange={(e) => setDescricaoObras(e.target.value)}
+        error={!!errors.outrasObrasDesc}
+        helperText={errors.outrasObrasDesc?.message}
+      />
+    </Grid>
+  )}
+
+  {/* Opções de Sim e Não para Fonte de Financiamento */}
+  <Grid item xs={12}>
+    <Typography variant="subtitle1">Existe Fonte de Financiamento</Typography>
+    <RadioGroup
+      aria-required
+      row
+      value={existeFonteFinanciamento}
+      onChange={(e) => setExisteFonteFinanciamento(e.target.value as "sim" | "nao")}
+    >
+      <FormControlLabel
+        value="sim"
+        control={<Radio />}
+        label="Sim"
+      />
+      <FormControlLabel
+        value="nao"
+        control={<Radio />}
+        label="Não"
+      />
+    </RadioGroup>
+  </Grid>
+
+  {/* Descrição de Fonte de Financiamento */}
+  {existeFonteFinanciamento === "sim" && (
+    <Grid item xs={12}>
+      <TextField
+        label="Descrição de Fonte de Financiamento"
+        multiline
+        rows={3}
+        fullWidth
+        value={descricaoFonteFinanciamento}
+        onChange={(e) => setDescricaoFonteFinanciamento(e.target.value)}
+        error={!!errors.fonteFinanciamentoDesc}
+        helperText={errors.fonteFinanciamentoDesc?.message}
+      />
+    </Grid>
+  )}
+</Grid>
           </Grid>
         );
       case 3:
@@ -319,95 +758,155 @@ export default function NovaSolicitacao() {
               ))}
             </Stepper>
             <Typography className="text-2xl font-medium">
-              FATORES DE RELEVÂNCIA E CATEGORIA DE IMPACTO
+              FATOS DE RELEVÂNCIA E CATEGORIA
             </Typography>
-            {/* Campos de relevância e categorias */}
-            <Grid item xs={12}>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleBack}
-              >
-                Anterior
-              </Button>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleNext}
-              >
-                Próximo
-              </Button>
-            </Grid>
-          </Grid>
-        );
-      case 4:
-        return (
-          <Grid
-            className="w-[90%] bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
-            container
-            spacing={2}
-          >
-            <Stepper activeStep={activeStep} className="w-full mt-4">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Typography className="text-2xl font-medium">CONCLUSÃO</Typography>
-            {/* Revisão e resumo dos dados */}
-            <Grid item xs={12}>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleBack}
-              >
-                Anterior
-              </Button>
-              <Button
-                className="bg-azulEscuroGradient border-solid border-2 border-slate-100 text-white font-medium p-2 px-4 rounded-md mx-2"
-                variant="contained"
-                onClick={handleNext}
-              >
-                Finalizar
-              </Button>
-            </Grid>
+            <Grid container spacing={2}>
+  {/* Opções de Sim e Não para Confissão/Revelação para Outras Fontes */}
+  <Grid item xs={12}>
+    <Typography variant="subtitle1">Já houve confissão/revelação para outras fontes?</Typography>
+    <RadioGroup
+      aria-required
+      row
+      value={confissaoOutrasFontes}
+      onChange={(e) => setConfissaoOutrasFontes(e.target.value as "sim" | "nao")}
+    >
+      <FormControlLabel
+        value="sim"
+        control={<Radio />}
+        label="Sim"
+      />
+      <FormControlLabel
+        value="nao"
+        control={<Radio />}
+        label="Não"
+      />
+    </RadioGroup>
+  </Grid>
+
+  {/* Descrição de Confissão/Revelação para Outras Fontes */}
+  {confissaoOutrasFontes === "sim" && (
+    <Grid item xs={12}>
+      <TextField
+        label="Descrição de Confissão/Revelação para Outras Fontes"
+        multiline
+        rows={3}
+        fullWidth
+        value={descricaoConfissaoOutrasFontes}
+        onChange={(e) => setDescricaoConfissaoOutrasFontes(e.target.value)}
+        error={!!errors.revelacaoDesc}
+        helperText={errors.revelacaoDesc?.message}
+      />
+    </Grid>
+  )}
+
+  {/* Opções de Sim e Não para Revelação Pública */}
+  <Grid item xs={12}>
+    <Typography variant="subtitle1">Já houve revelação pública?</Typography>
+    <RadioGroup
+      aria-required
+      row
+      value={revelacaoPublica}
+      onChange={(e) => setRevelacaoPublica(e.target.value as "sim" | "nao")}
+    >
+      <FormControlLabel
+        value="sim"
+        control={<Radio />}
+        label="Sim"
+      />
+      <FormControlLabel
+        value="nao"
+        control={<Radio />}
+        label="Não"
+      />
+    </RadioGroup>
+  </Grid>
+
+  {/* Descrição de Revelação Pública */}
+  {revelacaoPublica === "sim" && (
+    <Grid item xs={12}>
+      <TextField
+        label="Descrição de Revelação Pública"
+        multiline
+        rows={3}
+        fullWidth
+        value={descricaoRevelacaoPublica}
+        onChange={(e) => setDescricaoRevelacaoPublica(e.target.value)}
+        error={!!errors.revelacaoPublicaDesc}
+        helperText={errors.revelacaoPublicaDesc?.message}
+      />
+    </Grid>
+  )}
+</Grid>
+
           </Grid>
         );
       default:
-        return null;
+        return <div>Conteúdo não encontrado</div>;
     }
   };
 
   return (
-    <div>
+    <div className="w-full flex flex-col justify-center items-center p-4">
       {renderPageContent()}
-      {showConfirmationModal && (
-        <ConfirmationModal
-          onClose={() => setShowConfirmationModal(false)}
-          onConfirm={() => handleSubmit(onSubmit)()}
-        />
-      )}
-    </div>
-  );
-}
+      <div className="mt-4">
+        <Button
+          variant="outlined"
+          onClick={handleBack}
+          disabled={activeStep === 0}
+        >
+          Voltar
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          className="bg-azulEscuroGradient ml-2"
+        >
+          {activeStep === steps.length - 1 ? "Finalizar" : "Próximo"}
+        </Button>
+      </div>
 
-function ConfirmationModal({
-  onClose,
-  onConfirm,
-}: {
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div className="modal">
-      <Typography variant="h6">Confirmar envio?</Typography>
-      <Button onClick={onConfirm} color="primary">
-        Confirmar
-      </Button>
-      <Button onClick={onClose} color="secondary">
-        Cancelar
-      </Button>
+      <Modal
+        open={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Confirmar Envio
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Tem certeza de que deseja enviar este programa?
+          </Typography>
+          <div className="mt-4">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit(onSubmit)}
+            >
+              Confirmar
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setShowConfirmationModal(false)}
+              sx={{ ml: 2 }}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </Box>
+      </Modal>
     </div>
   );
 }
