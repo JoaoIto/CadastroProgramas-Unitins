@@ -221,6 +221,9 @@ export default function NovaSolicitacao() {
 
     if (isValid) {
       if (activeStep >= steps.length - 1) {
+        const formValues = getValues();
+        console.log('Form values before confirmation:', formValues);
+        setFormData(formValues);
         setShowConfirmationModal(true);
       } else {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -242,7 +245,9 @@ export default function NovaSolicitacao() {
             { nome: "", matricula: "", id },
           ]);
           setValue("autores", [
-            ...(Array.isArray(getValues("autores")) ? getValues("autores") : []),
+            ...(Array.isArray(getValues("autores"))
+              ? getValues("autores")
+              : []),
             { nome: "", matricula: "", id },
           ]);
         }
@@ -250,16 +255,22 @@ export default function NovaSolicitacao() {
         console.error("Erro ao buscar o ID do usuário:", error);
       }
     };
-  
+
     fetchUsuarioId();
     getLinguagensAll(token)
-    .then((response) => {
-      setLinguagensDisponiveis(response || []);
-    })
-    .catch((error) => {
-      console.error("Erro ao buscar linguagens:", error);
-    });
-  }, [token, setAutores, setValue, getValues]);  
+      .then((response) => {
+        setLinguagensDisponiveis(response || []);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar linguagens:", error);
+      });
+  }, [token, setAutores, setValue, getValues]);
+
+  const handleFormSubmit = handleSubmit((data) => {
+    console.log('Form data before confirmation:', data);
+    setFormData(data);
+    setShowConfirmationModal(true);
+  });
 
   const adicionarAutor = () => {
     setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "" }]);
@@ -321,15 +332,15 @@ export default function NovaSolicitacao() {
   };
 
   const onSubmit = async (data: FormData) => {
-    setFormData(getValues());
+    console.log("Data do onSubmit", data);
     try {
-      await postPrograma(data, token);
-      toast.success("Programa enviado com sucesso!");
-      router.push("/");
+        await postPrograma(data, token);
+        toast.success("Programa enviado com sucesso!");
+        router.push("/");
     } catch (error) {
-      toast.error("Erro ao enviar o programa. Tente novamente.");
+        toast.error("Erro ao enviar o programa. Tente novamente.");
     }
-  };
+};
 
   const renderPageContent = () => {
     const vinculoUnitins = getValues("vinculoUnitins");
@@ -394,16 +405,16 @@ export default function NovaSolicitacao() {
                   </IconButton>
                 </Grid>
                 <Grid item xs={12}>
-              <TextField
-                type="number"
-                label="Porcentagem de Contribuição (%)"
-                fullWidth
-                value={autores[index].porcentagem || 0}
-                onChange={(e) =>
-                  handlePorcentagemChange(index, parseFloat(e.target.value))
-                }
-              />
-            </Grid>
+                  <TextField
+                    type="number"
+                    label="Porcentagem de Contribuição (%)"
+                    fullWidth
+                    value={autores[index].porcentagem || 0}
+                    onChange={(e) =>
+                      handlePorcentagemChange(index, parseFloat(e.target.value))
+                    }
+                  />
+                </Grid>
               </Grid>
             ))}
             <Button
@@ -551,49 +562,85 @@ export default function NovaSolicitacao() {
                 )}
               />
             </Grid>
-
+            <Grid item xs={12}>
+              <Controller
+                name="descricaoMercado"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Descrição do Mercado"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    error={!!errors.descricaoMercado}
+                    helperText={errors.descricaoMercado?.message}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name="dataCriacaoPrograma"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Data de Criação do Programa"
+                    type="date"
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    error={!!errors.dataCriacaoPrograma}
+                    helperText={errors.dataCriacaoPrograma?.message}
+                  />
+                )}
+              />
+            </Grid>
             {/* Linguagens */}
             <Grid item xs={12}>
-  <Controller
-    name="linguagens"
-    control={control}
-    rules={{ required: "Campo obrigatório" }}
-    render={({ field }) => (
-      <Autocomplete
-        multiple
-        freeSolo
-        options={linguagensDisponiveis.map((option) => option.nome)}
-        getOptionLabel={(option) => option}
-        onChange={(event, newValue) => field.onChange(newValue as string[])}
-        value={field.value || []}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => {
-            const linguagem = linguagensDisponiveis.find(
-              (linguagem) => linguagem.nome === option
-            );
-            return (
-              <Chip
-                variant="outlined"
-                label={linguagem ? option : `${option} (nova tag)`}
-                {...getTagProps({ index })}
+              <Controller
+                name="linguagens"
+                control={control}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <Autocomplete
+                    multiple
+                    freeSolo
+                    options={linguagensDisponiveis.map((option) => option.nome)}
+                    getOptionLabel={(option) => option}
+                    onChange={(event, newValue) =>
+                      field.onChange(newValue as string[])
+                    }
+                    value={field.value || []}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => {
+                        const linguagem = linguagensDisponiveis.find(
+                          (linguagem) => linguagem.nome === option
+                        );
+                        return (
+                          <Chip
+                            variant="outlined"
+                            label={linguagem ? option : `${option} (nova tag)`}
+                            {...getTagProps({ index })}
+                          />
+                        );
+                      })
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Linguagens"
+                        error={!!errors.linguagens}
+                        helperText={errors.linguagens?.message}
+                      />
+                    )}
+                  />
+                )}
               />
-            );
-          })
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Linguagens"
-            error={!!errors.linguagens}
-            helperText={errors.linguagens?.message}
-          />
-        )}
-      />
-    )}
-  />
-</Grid>
-
-
+            </Grid>
 
             {/* Opção de Inserção de Código Fonte */}
             <Grid item xs={12}>
