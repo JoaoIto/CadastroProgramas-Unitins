@@ -31,6 +31,10 @@ export class UsuarioService{
         return this.usuarioRepository.findById(uuid);
     }
 
+    async consultarMatricula(matricula): Promise<Usuario> {
+        return this.usuarioRepository.findByMatricula(matricula);
+    }
+
     async consultarByCpf(cpf): Promise<Usuario> {
         return this.usuarioRepository.findByCpf(cpf);
     }

@@ -59,6 +59,15 @@ import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
     }
 
     @ApiBearerAuth()
+    @Roles(Role.User, Role.Admin)
+    @ApiOperation({ summary: 'Faz a busca dos dados do usuario pela matricula dele' })
+    @Get('/matricula/:matricula')
+    consultarMatricula(@Param("matricula") matricula: string) {
+        this.logger.log('Fazendo a busca dos dados do usuario com o matricula: ' + matricula)
+        return this.usuarioService.consultarMatricula(matricula);
+    }
+
+    @ApiBearerAuth()
     @Roles(Role.Admin)
     @ApiOperation({ summary: 'Faz a busca dos dados do usuario pelo cpf dele' })
     @Get('/cpf/:cpf')

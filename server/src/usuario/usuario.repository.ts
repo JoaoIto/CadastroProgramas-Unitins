@@ -50,6 +50,12 @@ export class UsuarioRepository {
         return usuario;
     }
 
+    async findByMatricula(matricula: string): Promise<Usuario> {
+        const usuario = await this.usuario.findOne({ matricula }).exec();
+        this.logger.log('Usuario retornado: ' + usuario)
+        return usuario;
+    }
+
     async findSenhaUsuario(cpf: string): Promise<string> {
         const usuario = await this.usuario.findOne({ cpf }).exec();
         const senhaUsuario =  usuario.senha;
