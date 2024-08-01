@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { FormControlLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@mui/material';
+import { Grid, IconButton, Radio, RadioGroup, TextField, Typography } from '@mui/material';
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from '@mui/icons-material/Download';
-
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 interface AlertDialogProps {
   open: boolean;
   title: string;
@@ -23,6 +23,9 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+
+  const [nomeDocumento, setNomeDocumento] = useState("");
+  
   return (
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
@@ -63,8 +66,30 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
               <input
                 type="file"
                 hidden
+                onChange={(e) =>
+                  setNomeDocumento(e.target.files?.[0]?.name || "")
+                }
               />
             </Button>
+          
+            <TextField
+                      className="w-[100%]"
+                      label="Documento Selecionado"
+                      variant="standard"
+                      value={nomeDocumento}
+                      disabled
+                      InputProps={{
+                        endAdornment: nomeDocumento && (
+                          <IconButton
+                            onClick={() => setNomeDocumento("")}
+                            edge="end"
+                            aria-label="delete"
+                          >
+                            <CancelOutlinedIcon />
+                          </IconButton>
+                        ),
+                      }}
+                    />
           </Grid>
         </Grid>
         {formData && (

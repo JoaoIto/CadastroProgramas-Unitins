@@ -24,18 +24,12 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Modal,
-  Box,
   FormControlLabel,
-  Checkbox,
   Radio,
   FormLabel,
   RadioGroup,
   Autocomplete,
   Chip,
-  InputLabel,
-  MenuItem,
-  Select,
 } from "@mui/material";
 import { useUser } from "@/app/hooks/user/userGet";
 import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll";
@@ -581,7 +575,7 @@ export default function NovaSolicitacao() {
               <Chip
                 variant="outlined"
                 label={linguagem ? option : `${option} (nova tag)`}
-                {...getTagProps({ index })} // Inclui a key e outras props necessárias
+                {...getTagProps({ index })}
               />
             );
           })
