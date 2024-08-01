@@ -39,6 +39,9 @@ import {
 } from "@mui/material";
 import { useUser } from "@/app/hooks/user/userGet";
 import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll";
+import { PorcentagemAutores } from "@/app/components/PorcentagemAutores";
+import AlertDialog from "@/app/components/AlertDialog/Alert";
+import { getByMatricula } from "@/app/service/perfil/get/getByMatricula";
 
 // Validação com Zod
 const schema = z.object({
@@ -79,6 +82,11 @@ export default function NovaSolicitacao() {
   const token = getStorageItem();
   const [activeStep, setActiveStep] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const handleCancel = () => {
+    setShowConfirmationModal(false);
+  };
+
   const steps = [
     "Informações dos Autores",
     "Informações do Programa",
@@ -86,68 +94,55 @@ export default function NovaSolicitacao() {
     "Fatores de Relevância e Categoria",
   ];
 
-  /* const linguagensDisponiveis = [
-    { id: 1, nome: "JavaScript" },
-    { id: 2, nome: "Python" },
-    { id: 3, nome: "Java" },
-    { id: 4, nome: "C#" },
-    { id: 5, nome: "C++" },
-    { id: 6, nome: "Ruby" },
-    { id: 7, nome: "PHP" },
-    { id: 8, nome: "TypeScript" },
-    { id: 9, nome: "Swift" },
-    { id: 10, nome: "Kotlin" },
-    { id: 11, nome: "Go" },
-    { id: 12, nome: "Rust" },
-    { id: 13, nome: "Scala" },
-    { id: 14, nome: "Dart" },
-    { id: 15, nome: "Objective-C" },
-    { id: 16, nome: "R" },
-    { id: 17, nome: "Perl" },
-    { id: 18, nome: "Lua" },
-    { id: 19, nome: "Haskell" },
-    { id: 20, nome: "Elixir" },
-    { id: 21, nome: "Clojure" },
-    { id: 22, nome: "F#" },
-    { id: 23, nome: "Erlang" },
-  ]; */
+  const [error, setError] = useState<string | null>(null);
 
-  const [autores, setAutores] = useState<Array<FormData["autores"][number]>>(
-    []
-  );
+  const [autores, setAutores] = useState<IAutor[]>([]);
   const [insercaoOpcao, setInsercaoOpcao] = useState<"arquivo" | "link">(
     "arquivo"
   );
   // Estado para armazenar a opção selecionada para Natureza de Outras Obras
-const [existeOutrasObras, setExisteOutrasObras] = useState<"sim" | "nao">("nao");
+  const [existeOutrasObras, setExisteOutrasObras] = useState<"sim" | "nao">(
+    "nao"
+  );
 
-// Estado para armazenar a descrição das obras
-const [descricaoObras, setDescricaoObras] = useState<string>("");
+  // Estado para armazenar a descrição das obras
+  const [descricaoObras, setDescricaoObras] = useState<string>("");
 
-// Estado para armazenar a opção selecionada para Fonte de Financiamento
-const [existeFonteFinanciamento, setExisteFonteFinanciamento] = useState<"sim" | "nao">("nao");
+  // Estado para armazenar a opção selecionada para Fonte de Financiamento
+  const [existeFonteFinanciamento, setExisteFonteFinanciamento] = useState<
+    "sim" | "nao"
+  >("nao");
 
-// Estado para armazenar a descrição de fonte de financiamento
-const [descricaoFonteFinanciamento, setDescricaoFonteFinanciamento] = useState<string>("");
-  
-// Estado para armazenar a opção de confissão/revelação para outras fontes
-const [confissaoOutrasFontes, setConfissaoOutrasFontes] = useState<"sim" | "nao">("nao");
+  // Estado para armazenar a descrição de fonte de financiamento
+  const [descricaoFonteFinanciamento, setDescricaoFonteFinanciamento] =
+    useState<string>("");
 
-// Estado para armazenar a descrição de confissão/revelação para outras fontes
-const [descricaoConfissaoOutrasFontes, setDescricaoConfissaoOutrasFontes] = useState<string>("");
+  // Estado para armazenar a opção de confissão/revelação para outras fontes
+  const [confissaoOutrasFontes, setConfissaoOutrasFontes] = useState<
+    "sim" | "nao"
+  >("nao");
 
-// Estado para armazenar a opção de revelação pública
-const [revelacaoPublica, setRevelacaoPublica] = useState<"sim" | "nao">("nao");
+  // Estado para armazenar a descrição de confissão/revelação para outras fontes
+  const [descricaoConfissaoOutrasFontes, setDescricaoConfissaoOutrasFontes] =
+    useState<string>("");
 
-// Estado para armazenar a descrição de revelação pública
-const [descricaoRevelacaoPublica, setDescricaoRevelacaoPublica] = useState<string>("");
+  // Estado para armazenar a opção de revelação pública
+  const [revelacaoPublica, setRevelacaoPublica] = useState<"sim" | "nao">(
+    "nao"
+  );
 
-const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
+  // Estado para armazenar a descrição de revelação pública
+  const [descricaoRevelacaoPublica, setDescricaoRevelacaoPublica] =
+    useState<string>("");
+
+  const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
 
   const [linguagensDisponiveis, setLinguagensDisponiveis] = useState<
     ILinguagem[]
   >([]);
   const [nomeDocumento, setNomeDocumento] = useState("");
+
+  const [formData, setFormData] = useState<FormData | null>(null);
 
   const {
     control,
@@ -245,28 +240,32 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
 
   useEffect(() => {
     const fetchUsuarioId = async () => {
-      const id = await getUsuarioId(token);
-      if (typeof id === "string") {
-        setAutores((prevAutores) => [
-          ...prevAutores,
-          { nome: "", matricula: "", id },
-        ]);
-        setValue("autores", [
-          ...getValues("autores"),
-          { nome: "", matricula: "", id },
-        ]);
+      try {
+        const id = await getUsuarioId(token);
+        if (typeof id === "string") {
+          setAutores((prevAutores) => [
+            ...prevAutores,
+            { nome: "", matricula: "", id },
+          ]);
+          setValue("autores", [
+            ...(Array.isArray(getValues("autores")) ? getValues("autores") : []),
+            { nome: "", matricula: "", id },
+          ]);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar o ID do usuário:", error);
       }
     };
-
+  
     fetchUsuarioId();
     getLinguagensAll(token)
-      .then((response) => {
-        setLinguagensDisponiveis(response || []);
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar linguagens:", error);
-      });
-  }, [token, setValue, getValues]);
+    .then((response) => {
+      setLinguagensDisponiveis(response || []);
+    })
+    .catch((error) => {
+      console.error("Erro ao buscar linguagens:", error);
+    });
+  }, [token, setAutores, setValue, getValues]);  
 
   const adicionarAutor = () => {
     setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "" }]);
@@ -294,7 +293,41 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
     });
   };
 
+  const buscarAutor = async (index: number) => {
+    // Lógica para buscar o autor na plataforma usando nome ou matrícula
+    const matricula = autores[index].matricula;
+    if (!matricula) {
+      alert("Por favor, insira uma matrícula para buscar.");
+      return;
+    }
+
+    const autorData = await getByMatricula(token, matricula);
+    if (autorData) {
+      handleAutorChange(index, "nome", autorData.nome);
+      // Preencher outros campos do autor se necessário
+    } else {
+      alert("Autor não encontrado.");
+    }
+  };
+
+  const handlePorcentagemChange = (index: number, value: number) => {
+    const novosAutores = [...autores];
+    novosAutores[index].porcentagem = value;
+    const totalPorcentagem = novosAutores.reduce(
+      (acc, autor) => acc + (autor.porcentagem || 0),
+      0
+    );
+
+    if (totalPorcentagem <= 30) {
+      setAutores(novosAutores);
+      setError(null);
+    } else {
+      setError("A soma das porcentagens não pode exceder 30%");
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
+    setFormData(getValues());
     try {
       await postPrograma(data, token);
       toast.success("Programa enviado com sucesso!");
@@ -353,6 +386,11 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
                   />
                 </Grid>
                 <Grid item xs={2}>
+                  <Button variant="outlined" onClick={() => buscarAutor(index)}>
+                    Pesquisar
+                  </Button>
+                </Grid>
+                <Grid item xs={2}>
                   <IconButton
                     color="error"
                     onClick={() => removerAutor(index)}
@@ -361,6 +399,17 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
                     <DeleteIcon />
                   </IconButton>
                 </Grid>
+                <Grid item xs={12}>
+              <TextField
+                type="number"
+                label="Porcentagem de Contribuição (%)"
+                fullWidth
+                value={autores[index].porcentagem || 0}
+                onChange={(e) =>
+                  handlePorcentagemChange(index, parseFloat(e.target.value))
+                }
+              />
+            </Grid>
               </Grid>
             ))}
             <Button
@@ -370,6 +419,10 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
             >
               Adicionar Autor
             </Button>
+
+            {/* Barra de Porcentagem */}
+            <PorcentagemAutores autores={autores} />
+
             {/* Radio Group Vinculo Unitins */}
             <Grid item xs={12}>
               <Controller
@@ -507,47 +560,46 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
 
             {/* Linguagens */}
             <Grid item xs={12}>
-              <Controller
-                name="linguagens"
-                control={control}
-                rules={{ required: "Campo obrigatório" }}
-                render={({ field }) => (
-                  <Autocomplete
-                    multiple
-                    freeSolo
-                    options={linguagensDisponiveis.map((option) => option.nome)}
-                    getOptionLabel={(option) => option}
-                    onChange={(event, newValue) =>
-                      field.onChange(newValue as string[])
-                    }
-                    value={field.value || []}
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => {
-                        const linguagem = linguagensDisponiveis.find(
-                          (linguagem) => linguagem.nome === option
-                        );
-                        return (
-                          <Chip
-                            key={option} // Use a string única como chave
-                            variant="outlined"
-                            label={linguagem ? option : `${option} (nova tag)`}
-                            {...getTagProps({ index })}
-                          />
-                        );
-                      })
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Linguagens"
-                        error={!!errors.linguagens}
-                        helperText={errors.linguagens?.message}
-                      />
-                    )}
-                  />
-                )}
+  <Controller
+    name="linguagens"
+    control={control}
+    rules={{ required: "Campo obrigatório" }}
+    render={({ field }) => (
+      <Autocomplete
+        multiple
+        freeSolo
+        options={linguagensDisponiveis.map((option) => option.nome)}
+        getOptionLabel={(option) => option}
+        onChange={(event, newValue) => field.onChange(newValue as string[])}
+        value={field.value || []}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => {
+            const linguagem = linguagensDisponiveis.find(
+              (linguagem) => linguagem.nome === option
+            );
+            return (
+              <Chip
+                variant="outlined"
+                label={linguagem ? option : `${option} (nova tag)`}
+                {...getTagProps({ index })} // Inclui a key e outras props necessárias
               />
-            </Grid>
+            );
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Linguagens"
+            error={!!errors.linguagens}
+            helperText={errors.linguagens?.message}
+          />
+        )}
+      />
+    )}
+  />
+</Grid>
+
+
 
             {/* Opção de Inserção de Código Fonte */}
             <Grid item xs={12}>
@@ -665,82 +717,92 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
               CARACTERIZAÇÃO DO PROGRAMA
             </Typography>
             <Grid container spacing={2}>
-  {/* Opções de Sim e Não */}
-  <Grid item xs={12}>
-    <Typography variant="subtitle1">Existe Natureza de Outras Obras</Typography>
-    <RadioGroup
-      aria-required
-      row
-      value={existeOutrasObras}
-      onChange={(e) => setExisteOutrasObras(e.target.value as "sim" | "nao")}
-    >
-      <FormControlLabel
-        value="sim"
-        control={<Radio />}
-        label="Sim"
-      />
-      <FormControlLabel
-        value="nao"
-        control={<Radio />}
-        label="Não"
-      />
-    </RadioGroup>
-  </Grid>
+              {/* Opções de Sim e Não */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
+                  Existe Natureza de Outras Obras
+                </Typography>
+                <RadioGroup
+                  aria-required
+                  row
+                  value={existeOutrasObras}
+                  onChange={(e) =>
+                    setExisteOutrasObras(e.target.value as "sim" | "nao")
+                  }
+                >
+                  <FormControlLabel
+                    value="sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="nao"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+              </Grid>
 
-  {/* Descrição das Obras */}
-  {existeOutrasObras === "sim" && (
-    <Grid item xs={12}>
-      <TextField
-        label="Descrição das Obras"
-        multiline
-        rows={3}
-        fullWidth
-        value={descricaoObras}
-        onChange={(e) => setDescricaoObras(e.target.value)}
-        error={!!errors.outrasObrasDesc}
-        helperText={errors.outrasObrasDesc?.message}
-      />
-    </Grid>
-  )}
+              {/* Descrição das Obras */}
+              {existeOutrasObras === "sim" && (
+                <Grid item xs={12}>
+                  <TextField
+                    label="Descrição das Obras"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    value={descricaoObras}
+                    onChange={(e) => setDescricaoObras(e.target.value)}
+                    error={!!errors.outrasObrasDesc}
+                    helperText={errors.outrasObrasDesc?.message}
+                  />
+                </Grid>
+              )}
 
-  {/* Opções de Sim e Não para Fonte de Financiamento */}
-  <Grid item xs={12}>
-    <Typography variant="subtitle1">Existe Fonte de Financiamento</Typography>
-    <RadioGroup
-      aria-required
-      row
-      value={existeFonteFinanciamento}
-      onChange={(e) => setExisteFonteFinanciamento(e.target.value as "sim" | "nao")}
-    >
-      <FormControlLabel
-        value="sim"
-        control={<Radio />}
-        label="Sim"
-      />
-      <FormControlLabel
-        value="nao"
-        control={<Radio />}
-        label="Não"
-      />
-    </RadioGroup>
-  </Grid>
+              {/* Opções de Sim e Não para Fonte de Financiamento */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
+                  Existe Fonte de Financiamento
+                </Typography>
+                <RadioGroup
+                  aria-required
+                  row
+                  value={existeFonteFinanciamento}
+                  onChange={(e) =>
+                    setExisteFonteFinanciamento(e.target.value as "sim" | "nao")
+                  }
+                >
+                  <FormControlLabel
+                    value="sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="nao"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+              </Grid>
 
-  {/* Descrição de Fonte de Financiamento */}
-  {existeFonteFinanciamento === "sim" && (
-    <Grid item xs={12}>
-      <TextField
-        label="Descrição de Fonte de Financiamento"
-        multiline
-        rows={3}
-        fullWidth
-        value={descricaoFonteFinanciamento}
-        onChange={(e) => setDescricaoFonteFinanciamento(e.target.value)}
-        error={!!errors.fonteFinanciamentoDesc}
-        helperText={errors.fonteFinanciamentoDesc?.message}
-      />
-    </Grid>
-  )}
-</Grid>
+              {/* Descrição de Fonte de Financiamento */}
+              {existeFonteFinanciamento === "sim" && (
+                <Grid item xs={12}>
+                  <TextField
+                    label="Descrição de Fonte de Financiamento"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    value={descricaoFonteFinanciamento}
+                    onChange={(e) =>
+                      setDescricaoFonteFinanciamento(e.target.value)
+                    }
+                    error={!!errors.fonteFinanciamentoDesc}
+                    helperText={errors.fonteFinanciamentoDesc?.message}
+                  />
+                </Grid>
+              )}
+            </Grid>
           </Grid>
         );
       case 3:
@@ -761,83 +823,94 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
               FATOS DE RELEVÂNCIA E CATEGORIA
             </Typography>
             <Grid container spacing={2}>
-  {/* Opções de Sim e Não para Confissão/Revelação para Outras Fontes */}
-  <Grid item xs={12}>
-    <Typography variant="subtitle1">Já houve confissão/revelação para outras fontes?</Typography>
-    <RadioGroup
-      aria-required
-      row
-      value={confissaoOutrasFontes}
-      onChange={(e) => setConfissaoOutrasFontes(e.target.value as "sim" | "nao")}
-    >
-      <FormControlLabel
-        value="sim"
-        control={<Radio />}
-        label="Sim"
-      />
-      <FormControlLabel
-        value="nao"
-        control={<Radio />}
-        label="Não"
-      />
-    </RadioGroup>
-  </Grid>
+              {/* Opções de Sim e Não para Confissão/Revelação para Outras Fontes */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
+                  Já houve confissão/revelação para outras fontes?
+                </Typography>
+                <RadioGroup
+                  aria-required
+                  row
+                  value={confissaoOutrasFontes}
+                  onChange={(e) =>
+                    setConfissaoOutrasFontes(e.target.value as "sim" | "nao")
+                  }
+                >
+                  <FormControlLabel
+                    value="sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="nao"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+              </Grid>
 
-  {/* Descrição de Confissão/Revelação para Outras Fontes */}
-  {confissaoOutrasFontes === "sim" && (
-    <Grid item xs={12}>
-      <TextField
-        label="Descrição de Confissão/Revelação para Outras Fontes"
-        multiline
-        rows={3}
-        fullWidth
-        value={descricaoConfissaoOutrasFontes}
-        onChange={(e) => setDescricaoConfissaoOutrasFontes(e.target.value)}
-        error={!!errors.revelacaoDesc}
-        helperText={errors.revelacaoDesc?.message}
-      />
-    </Grid>
-  )}
+              {/* Descrição de Confissão/Revelação para Outras Fontes */}
+              {confissaoOutrasFontes === "sim" && (
+                <Grid item xs={12}>
+                  <TextField
+                    label="Descrição de Confissão/Revelação para Outras Fontes"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    value={descricaoConfissaoOutrasFontes}
+                    onChange={(e) =>
+                      setDescricaoConfissaoOutrasFontes(e.target.value)
+                    }
+                    error={!!errors.revelacaoDesc}
+                    helperText={errors.revelacaoDesc?.message}
+                  />
+                </Grid>
+              )}
 
-  {/* Opções de Sim e Não para Revelação Pública */}
-  <Grid item xs={12}>
-    <Typography variant="subtitle1">Já houve revelação pública?</Typography>
-    <RadioGroup
-      aria-required
-      row
-      value={revelacaoPublica}
-      onChange={(e) => setRevelacaoPublica(e.target.value as "sim" | "nao")}
-    >
-      <FormControlLabel
-        value="sim"
-        control={<Radio />}
-        label="Sim"
-      />
-      <FormControlLabel
-        value="nao"
-        control={<Radio />}
-        label="Não"
-      />
-    </RadioGroup>
-  </Grid>
+              {/* Opções de Sim e Não para Revelação Pública */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1">
+                  Já houve revelação pública?
+                </Typography>
+                <RadioGroup
+                  aria-required
+                  row
+                  value={revelacaoPublica}
+                  onChange={(e) =>
+                    setRevelacaoPublica(e.target.value as "sim" | "nao")
+                  }
+                >
+                  <FormControlLabel
+                    value="sim"
+                    control={<Radio />}
+                    label="Sim"
+                  />
+                  <FormControlLabel
+                    value="nao"
+                    control={<Radio />}
+                    label="Não"
+                  />
+                </RadioGroup>
+              </Grid>
 
-  {/* Descrição de Revelação Pública */}
-  {revelacaoPublica === "sim" && (
-    <Grid item xs={12}>
-      <TextField
-        label="Descrição de Revelação Pública"
-        multiline
-        rows={3}
-        fullWidth
-        value={descricaoRevelacaoPublica}
-        onChange={(e) => setDescricaoRevelacaoPublica(e.target.value)}
-        error={!!errors.revelacaoPublicaDesc}
-        helperText={errors.revelacaoPublicaDesc?.message}
-      />
-    </Grid>
-  )}
-</Grid>
-
+              {/* Descrição de Revelação Pública */}
+              {revelacaoPublica === "sim" && (
+                <Grid item xs={12}>
+                  <TextField
+                    label="Descrição de Revelação Pública"
+                    multiline
+                    rows={3}
+                    fullWidth
+                    value={descricaoRevelacaoPublica}
+                    onChange={(e) =>
+                      setDescricaoRevelacaoPublica(e.target.value)
+                    }
+                    error={!!errors.revelacaoPublicaDesc}
+                    helperText={errors.revelacaoPublicaDesc?.message}
+                  />
+                </Grid>
+              )}
+            </Grid>
           </Grid>
         );
       default:
@@ -865,48 +938,13 @@ const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
         </Button>
       </div>
 
-      <Modal
+      <AlertDialog
         open={showConfirmationModal}
-        onClose={() => setShowConfirmationModal(false)}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography variant="h6" component="h2">
-            Confirmar Envio
-          </Typography>
-          <Typography sx={{ mt: 2 }}>
-            Tem certeza de que deseja enviar este programa?
-          </Typography>
-          <div className="mt-4">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit(onSubmit)}
-            >
-              Confirmar
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => setShowConfirmationModal(false)}
-              sx={{ ml: 2 }}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </Box>
-      </Modal>
+        formData={formData}
+        title="Confirmar Envio"
+        onConfirm={handleSubmit(onSubmit)}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }
