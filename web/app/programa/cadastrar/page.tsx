@@ -222,7 +222,7 @@ export default function NovaSolicitacao() {
     if (isValid) {
       if (activeStep >= steps.length - 1) {
         const formValues = getValues();
-        console.log('Form values before confirmation:', formValues);
+        console.log("Form values before confirmation:", formValues);
         setFormData(formValues);
         setShowConfirmationModal(true);
       } else {
@@ -267,7 +267,7 @@ export default function NovaSolicitacao() {
   }, [token, setAutores, setValue, getValues]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    console.log('Form data before confirmation:', data);
+    console.log("Form data before confirmation:", data);
     setFormData(data);
     setShowConfirmationModal(true);
   });
@@ -334,13 +334,13 @@ export default function NovaSolicitacao() {
   const onSubmit = async (data: FormData) => {
     console.log("Data do onSubmit", data);
     try {
-        await postPrograma(data, token);
-        toast.success("Programa enviado com sucesso!");
-        router.push("/");
+      await postPrograma(data, token);
+      toast.success("Programa enviado com sucesso!");
+      router.push("/");
     } catch (error) {
-        toast.error("Erro ao enviar o programa. Tente novamente.");
+      toast.error("Erro ao enviar o programa. Tente novamente.");
     }
-};
+  };
 
   const renderPageContent = () => {
     const vinculoUnitins = getValues("vinculoUnitins");
@@ -787,15 +787,20 @@ export default function NovaSolicitacao() {
               {/* Descrição das Obras */}
               {existeOutrasObras === "sim" && (
                 <Grid item xs={12}>
-                  <TextField
-                    label="Descrição das Obras"
-                    multiline
-                    rows={3}
-                    fullWidth
-                    value={descricaoObras}
-                    onChange={(e) => setDescricaoObras(e.target.value)}
-                    error={!!errors.outrasObrasDesc}
-                    helperText={errors.outrasObrasDesc?.message}
+                  <Controller
+                    name="outrasObrasDesc"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Descrição das Obras"
+                        multiline
+                        rows={3}
+                        fullWidth
+                        error={!!errors.outrasObrasDesc}
+                        helperText={errors.outrasObrasDesc?.message}
+                      />
+                    )}
                   />
                 </Grid>
               )}
@@ -829,17 +834,20 @@ export default function NovaSolicitacao() {
               {/* Descrição de Fonte de Financiamento */}
               {existeFonteFinanciamento === "sim" && (
                 <Grid item xs={12}>
-                  <TextField
-                    label="Descrição de Fonte de Financiamento"
-                    multiline
-                    rows={3}
-                    fullWidth
-                    value={descricaoFonteFinanciamento}
-                    onChange={(e) =>
-                      setDescricaoFonteFinanciamento(e.target.value)
-                    }
-                    error={!!errors.fonteFinanciamentoDesc}
-                    helperText={errors.fonteFinanciamentoDesc?.message}
+                  <Controller
+                    name="fonteFinanciamentoDesc"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Descrição de Fonte de Financiamento"
+                        multiline
+                        rows={3}
+                        fullWidth
+                        error={!!errors.fonteFinanciamentoDesc}
+                        helperText={errors.fonteFinanciamentoDesc?.message}
+                      />
+                    )}
                   />
                 </Grid>
               )}
@@ -893,17 +901,20 @@ export default function NovaSolicitacao() {
               {/* Descrição de Confissão/Revelação para Outras Fontes */}
               {confissaoOutrasFontes === "sim" && (
                 <Grid item xs={12}>
-                  <TextField
-                    label="Descrição de Confissão/Revelação para Outras Fontes"
-                    multiline
-                    rows={3}
-                    fullWidth
-                    value={descricaoConfissaoOutrasFontes}
-                    onChange={(e) =>
-                      setDescricaoConfissaoOutrasFontes(e.target.value)
-                    }
-                    error={!!errors.revelacaoDesc}
-                    helperText={errors.revelacaoDesc?.message}
+                  <Controller
+                    name="revelacaoDesc"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Descrição de Confissão/Revelação para Outras Fontes"
+                        multiline
+                        rows={3}
+                        fullWidth
+                        error={!!errors.revelacaoDesc}
+                        helperText={errors.revelacaoDesc?.message}
+                      />
+                    )}
                   />
                 </Grid>
               )}
@@ -937,17 +948,20 @@ export default function NovaSolicitacao() {
               {/* Descrição de Revelação Pública */}
               {revelacaoPublica === "sim" && (
                 <Grid item xs={12}>
-                  <TextField
-                    label="Descrição de Revelação Pública"
-                    multiline
-                    rows={3}
-                    fullWidth
-                    value={descricaoRevelacaoPublica}
-                    onChange={(e) =>
-                      setDescricaoRevelacaoPublica(e.target.value)
-                    }
-                    error={!!errors.revelacaoPublicaDesc}
-                    helperText={errors.revelacaoPublicaDesc?.message}
+                  <Controller
+                    name="revelacaoPublicaDesc"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Descrição de Revelação Pública"
+                        multiline
+                        rows={3}
+                        fullWidth
+                        error={!!errors.revelacaoPublicaDesc}
+                        helperText={errors.revelacaoPublicaDesc?.message}
+                      />
+                    )}
                   />
                 </Grid>
               )}

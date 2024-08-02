@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import { Grid, IconButton, Radio, RadioGroup, TextField, Typography } from '@mui/material';
+import React, { useState } from "react";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import {
+  Grid,
+  IconButton,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from "@mui/icons-material/Download";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 interface AlertDialogProps {
   open: boolean;
@@ -23,9 +30,18 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const formFieldTitles = {
+    titulo: "Título",
+    descricao: "Descrição",
+    solucaoProblemaDesc: "Solução do Problema",
+    outrasObrasDesc: "Descrição de Outras Obras",
+    linguagens: "Linguagens",
+    nomeArquivo: "Nome do Arquivo",
+    linkCodigoFonte: "Link do Código Fonte",
+  };
 
   const [nomeDocumento, setNomeDocumento] = useState("");
-  
+
   return (
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
@@ -36,12 +52,16 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
         <Typography variant="body1" gutterBottom>
           Para enviar a solicitação, você precisa encaminhar o documento abaixo!
         </Typography>
-        <Typography variant="body2" gutterBottom>
-          Depois de baixar, você precisa anexar o documento abaixo!
+        <Typography variant="body2" gutterBottom className="text-vermelho">
+          Depois de baixar, você precisa anexar o documento abaixo assinado!
         </Typography>
         <div className="mt-4">
-          <a href="/termos/Currículo%203%20(3).pdf" className='text-azulClaroGradient bg-azulEscuro p-2 rounded border-2 border-azulClaroGradient' download>
-            Baixar Termos de Confidencialidade <DownloadIcon/>
+          <a
+            href="/termos/Currículo%203%20(3).pdf"
+            className="text-azulClaroGradient bg-azulEscuro p-2 rounded border-2 border-azulClaroGradient"
+            download
+          >
+            Baixar Termos de Confidencialidade <DownloadIcon />
           </a>
         </div>
         <Grid item xs={12} style={{ marginTop: 16 }}>
@@ -71,40 +91,43 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                 }
               />
             </Button>
-          
+
             <TextField
-                      className="w-[100%]"
-                      label="Documento Selecionado"
-                      variant="standard"
-                      value={nomeDocumento}
-                      disabled
-                      InputProps={{
-                        endAdornment: nomeDocumento && (
-                          <IconButton
-                            onClick={() => setNomeDocumento("")}
-                            edge="end"
-                            aria-label="delete"
-                          >
-                            <CancelOutlinedIcon />
-                          </IconButton>
-                        ),
-                      }}
-                    />
+              className="w-[100%]"
+              label="Documento Selecionado"
+              variant="standard"
+              value={nomeDocumento}
+              disabled
+              InputProps={{
+                endAdornment: nomeDocumento && (
+                  <IconButton
+                    onClick={() => setNomeDocumento("")}
+                    edge="end"
+                    aria-label="delete"
+                  >
+                    <CancelOutlinedIcon />
+                  </IconButton>
+                ),
+              }}
+            />
           </Grid>
         </Grid>
         {formData && (
-          <div>
+          <div className="grid grid-cols-1 gap-4">
             {Object.entries(formData).map(([key, value]) => (
-              <TextField
-                key={key}
-                label={key}
-                value={value}
-                fullWidth
-                margin="normal"
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
+              <Grid className="" key={key}>
+                <TextField
+                  key={key}
+                  label={key}
+                  value={value}
+                  disabled
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
             ))}
           </div>
         )}
