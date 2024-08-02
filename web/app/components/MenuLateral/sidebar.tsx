@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import HomeIcon from "@mui/icons-material/Home";
 import SendIcon from '@mui/icons-material/Send';
-import { Button, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
+import { List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { useRouter } from "next/navigation";
 import AlertMessage from "../AlertMessage";
-
+import AssignmentLateIcon from '@mui/icons-material/AssignmentLate';
 export function Sidebar() {
   const router = useRouter();
   const { profile, isLoading } = useUserPayload();
@@ -24,7 +24,23 @@ export function Sidebar() {
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
-      router.push('/programa/listar');
+      if (isAdmin) {
+        router.push('/admin/programa/enviados');
+      } else {
+        router.push('/programa/listar');
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
+    }, 2000);
+  };  
+
+  const routerProgramasEmAnalise = () => {
+    setAlertMessage("Redirecionando para seus programas em análise...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/admin/programa/em-analise');
       setTimeout(() => {
       window.location.reload(); 
       }, 500)// Recarrega a página após o redirecionamento
@@ -75,8 +91,16 @@ export function Sidebar() {
               <ListItemIcon>
                 <SendIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="italic" primary="Programas" />
+              <ListItemText className="italic" primary="Enviados" />
             </ListItemButton>
+            {isAdmin && (
+              <ListItemButton onClick={routerProgramasEmAnalise}>
+              <ListItemIcon>
+                <AssignmentLateIcon sx={{ color: 'white' }} />
+              </ListItemIcon>
+              <ListItemText className="italic" primary="Em Análise" />
+            </ListItemButton>
+            )}
           </List>
         </nav>
       </aside>
