@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import AlertMessage from "@/app/components/AlertMessage"; // Importa o componente
+import { redefinirSenha } from "@/app/service/auth/postRedPassword";
 
 // Esquema de validação para os campos do formulário
 const esqueciSenhaSchema = z
@@ -86,7 +87,7 @@ export default function EsqueciSenhaPage() {
 
   async function onSubmit(data: EsqueciSenha) {
     try {
-      // Aqui você pode fazer a lógica de enviar o CPF e nova senha para o servidor
+      await redefinirSenha(data);
       setMessage("Senha redefinida com sucesso!");
       setSeverity("success");
       setSnackbarOpen(true);
