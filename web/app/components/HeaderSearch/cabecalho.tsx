@@ -109,12 +109,25 @@ export function Search() {
     setAlertOpen(false);
   };
 
+  const routerDashboard = () => {
+    setAlertMessage("Redirecionando para a página inicial...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push("/");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
+    }, 2000);
+  };
+
   return (
     <>
       <div className="flex w-full justify-around px-2 py-6">
-        <h1
+      <h1
           style={{ textShadow: "2px 2px 2px rgb(211, 211, 211)" }}
           className="text-azulEscuroGradient font-semibold text-5xl p-2 w-1/2"
+          onClick={routerDashboard}
         >
           Software Hub
         </h1>
