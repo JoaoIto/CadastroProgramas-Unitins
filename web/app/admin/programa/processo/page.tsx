@@ -11,6 +11,7 @@ import {
   StepLabel,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import ExplanationModal from "@/app/components/Modal";
 import FileUploadField from "@/app/components/FileUploadField";
@@ -79,7 +80,7 @@ const ProcessoPage: React.FC = () => {
     }
   };
 
-  const handlePageSelect = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handlePageSelect = (event: SelectChangeEvent<number>) => {
     const selectedPage = event.target.value as number;
     setCurrentPage(selectedPage);
     setActiveStep(selectedPage);
