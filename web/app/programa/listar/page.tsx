@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import { CardProgram } from "@/app/components/CardPrograma/Card";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
-import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import AlertMessage from "@/app/components/AlertMessage";
 import { fetchPerfil } from "@/app/service/perfil/logUser";
-import { getProgramasUsuarioPaginado } from "@/app/service/programa/programaUserLogadoPaginado";
 import { Typography } from "@mui/material";
+import { getProgramasEnviadosUsuarioPaginado } from "@/app/service/programa/programasEnviadosUserLogadoPaginado";
+import { ProgramCountCard } from "@/app/components/CardPrograma/cardCounter";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
@@ -29,7 +29,7 @@ export default function Programas() {
         const perfilData = await fetchPerfil(token);
         setUsuario(perfilData);
 
-        const response = await getProgramasUsuarioPaginado(token, currentPage, PAGE_LIMIT);
+        const response = await getProgramasEnviadosUsuarioPaginado(token, currentPage, PAGE_LIMIT);
         if (response) {
           const { data = [], total = 0 } = response;
           setProgramas(data);
@@ -60,9 +60,7 @@ export default function Programas() {
           <p>Nome: {usuario?.nome}</p>
           <p>CPF: {usuario?.cpf}</p>
         </div>
-        <Typography variant="h5" component="div">
-            {`${programas.length} resultados encontrados`}
-          </Typography>
+        <ProgramCountCard count={programas.length} />
           <Pagination
           count={totalPages}
           page={currentPage}

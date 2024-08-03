@@ -159,61 +159,95 @@ export class ProgramaController {
   @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: "Retornando os programas enviados pelos usuarios para admin",
+    summary: "Retornando os programas enviados pelos usuários",
   })
-  async getProgramasEnviados(@Req() req): Promise<Programa[]> {
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Número da página",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Quantidade de itens por página",
+  })
+  @ApiResponse({ status: 200, description: "Lista de programas enviados paginada" })
+  async getProgramasEnviados(
+    @Req() req,
+    @Query("page") page = 1,
+    @Query("limit") limit = 5
+  ): Promise<{ data: Programa[]; total: number; page: number; limit: number }> {
     try {
-      this.logger.log(
-        "Retornando os programas enviados para admin"
-      );
-      const programas = await this.programaService.getProgramasEnviados();
-
-      return programas;
+      this.logger.log("Retornando os programas enviados para admin");
+      const { data, total } = await this.programaService.getProgramasEnviados(page, limit);
+      return { data, total, page, limit };
     } catch (error) {
       this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
       throw error;
     }
   }
+  
 
   @Get("/enviados/usuario")
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.User)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: "Retornando os programas enviados pelos usuarios para admin",
+    summary: "Retornando os programas enviados pelos usuários",
   })
-  async getProgramasEnviadosByUser(@Req() req): Promise<Programa[]> {
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Número da página",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Quantidade de itens por página",
+  })
+  @ApiResponse({ status: 200, description: "Lista de programas enviados paginada" })
+  async getProgramasEnviadosByUser(
+    @Req() req,
+    @Query("page") page = 1,
+    @Query("limit") limit = 5
+  ): Promise<{ data: Programa[]; total: number; page: number; limit: number }> {
     try {
-      this.logger.log(
-        "Retornando os programas enviados pelos usuarios para admin"
-      );
+      this.logger.log("Retornando os programas enviados pelos usuários");
       const userId = req.user._id;
-      const programas = await this.programaService.getProgramasEnviadosByUser(userId);
-
-      return programas;
+      const { data, total } = await this.programaService.getProgramasEnviadosByUser(userId, page, limit);
+      return { data, total, page, limit };
     } catch (error) {
       this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
       throw error;
     }
-  }
+  }  
 
 
   @Get("/em-analise")
-  @UseGuards(JwtAuthGuard)
-  @Roles(Role.Admin)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: "Retornando os programas em analise pelo admin" })
-  async getProgramasEmAnalise(@Req() req): Promise<Programa[]> {
-    try {
-      this.logger.log("Retornando os programas em analise pelo admin");
-      const programas = await this.programaService.getProgramasEmAnalise();
+@UseGuards(JwtAuthGuard)
+@Roles(Role.Admin)
+@ApiBearerAuth()
+@ApiOperation({ summary: "Retornando os programas em analise pelo admin" })
+async getProgramasEmAnalise(
+  @Req() req,
+  @Query('page') page: number = 1,
+  @Query('limit') limit: number = 10,
+): Promise<{ data: Programa[]; total: number }> {
+  try {
+    this.logger.log("Retornando os programas em analise pelo admin");
+    const { data, total } = await this.programaService.getProgramasEmAnalise(page, limit);
 
-      return programas;
-    } catch (error) {
-      this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
-      throw error;
-    }
+    return { data, total };
+  } catch (error) {
+    this.logger.error(`Erro ao buscar programas em analise: ${error.message}`);
+    throw error;
   }
+}
+
 
   @Get('/porUsuario')
 @UseGuards(JwtAuthGuard)

@@ -54,17 +54,18 @@ export class ProgramaService {
         this.usuarioProgramaService.delete(uuid)
     }
 
-    async getProgramasEnviados() {
-        return this.programaRepository.findProgramasEnviados();
+    async getProgramasEnviados(page: number, limit: number) {
+        return this.programaRepository.findProgramasEnviados(page, limit);
     }
 
-    async getProgramasEnviadosByUser(userId: string): Promise<Programa[]>{
-        return this.programaRepository.findProgramasEnviadosByUser(userId);
+    async getProgramasEnviadosByUser(userId: string, page: number, limit: number): Promise<{ data: Programa[], total: number }>{
+        return this.programaRepository.findProgramasEnviadosByUser(userId, page, limit);
     }
 
-    async getProgramasEmAnalise() {
-        return this.programaRepository.findProgramasEmAnalise();
-    }
+    async getProgramasEmAnalise(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
+        return this.programaRepository.findProgramasEmAnalise(page, limit);
+      }
+      
 
     async getProgramasPorIds(programaIds: string[]) {
         this.logger.log(`Recebido ${programaIds.length} ids de programas`)

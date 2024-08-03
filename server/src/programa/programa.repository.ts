@@ -48,45 +48,63 @@ export class ProgramaRepository {
     return programas;
   }
 
-  async findProgramasEnviados(): Promise<Programa[]> {
+  async findProgramasEnviados(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
     try {
-      const programas = await this.programa
-        .find({ status: ProgramaStatus.ENVIADO })
-        .exec();
-      this.logger.log("Programas retornados: " + programas);
-      return programas;
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.programa.find({ status: ProgramaStatus.ENVIADO })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.programa.countDocuments({ status: ProgramaStatus.ENVIADO })
+      ]);
+      this.logger.log(`Programas retornados: ${data}`);
+      return { data, total };
     } catch (error) {
       this.logger.error("Erro ao buscar programas", error);
       throw error;
     }
-  }
+  }  
 
-  async findProgramasEnviadosByUser(userId: string): Promise<Programa[]> {
+  async findProgramasEnviadosByUser(userId: string, page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
     try {
-      const programas = await this.programa
-        .find({ status: ProgramaStatus.ENVIADO, userId: userId })
-        .exec();
-      this.logger.log("Programas retornados: " + programas);
-      return programas;
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.programa.find({ status: ProgramaStatus.ENVIADO, userId: userId })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.programa.countDocuments({ status: ProgramaStatus.ENVIADO, userId: userId })
+      ]);
+      this.logger.log(`Programas retornados: ${data}`);
+      return { data, total };
     } catch (error) {
       this.logger.error("Erro ao buscar programas", error);
       throw error;
     }
   }
   
+  
 
-  async findProgramasEmAnalise(): Promise<Programa[]> {
+  async findProgramasEmAnalise(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
     try {
-      const programas = await this.programa
-        .find({ status: ProgramaStatus.EM_ANALISE })
-        .exec();
-      this.logger.log("Programas retornados: " + programas);
-      return programas;
+      const offset = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.programa
+          .find({ status: ProgramaStatus.EM_ANALISE })
+          .skip(offset)
+          .limit(limit)
+          .exec(),
+        this.programa.countDocuments({ status: ProgramaStatus.EM_ANALISE }),
+      ]);
+      this.logger.log(`Programas retornados: ${data.length}`);
+      return { data, total };
     } catch (error) {
       this.logger.error("Erro ao buscar programas", error);
       throw error;
     }
   }
+  
 
   async findByStatus(status: ProgramaStatus): Promise<Programa[]> {
     const programa = await this.programa.find({ status: "APROVADO" }).exec();
