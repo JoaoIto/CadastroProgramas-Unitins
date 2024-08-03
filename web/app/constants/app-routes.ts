@@ -9,6 +9,7 @@ export const APP_ROUTES = {
     admin: {
       dashboard: "/admin",
       cadastrar: "/admin/programa/cadastrar",
+      processo: "/admin/programa/processo",
       editar: "/admin/programa/editar",
       listar: "/admin/programa/listar",
     },
