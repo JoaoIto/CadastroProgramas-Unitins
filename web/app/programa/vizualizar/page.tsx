@@ -6,15 +6,23 @@ import { useRouter } from "next/navigation";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
 import { getProgramaById } from "@/app/service/programa/getById/getById";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
+import { IconButton } from "@mui/material";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import CodeIcon from "@mui/icons-material/Code";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [programaData, setProgramaData] = useState<any>({});
+  const [programaData, setProgramaData] = useState<IPrograma | null>(null); // Atualize para usar IPrograma
+  const [mostrarDescricao, setMostrarDescricao] = useState<boolean>(true);
+  const [mostrarSolucao, setMostrarSolucao] = useState<boolean>(true);
+  const [mostrarMercado, setMostrarMercado] = useState<boolean>(true);
   const router = useRouter();
   const token = getStorageItem();
-  const programaId = tokenService.getProgramaId(); // Função getProgramaId() que retorna o ID
+  const programaId = tokenService.getProgramaId();
 
   useEffect(() => {
     if (programaId) {
@@ -22,6 +30,7 @@ const VizualizarSolicitacao = () => {
         try {
           const programaData = await getProgramaById(token, programaId);
           if (programaData) {
+            console.log("Este é o programa data: ", programaData);
             setProgramaData(programaData);
             setIsLoading(false);
           } else {
@@ -40,7 +49,11 @@ const VizualizarSolicitacao = () => {
 
   const handleEdit = () => {
     router.push(`/programa/editar`);
-};
+  };
+
+  const shouldShowButton = (text: string) => {
+    return text.length > 100; // Exemplo de limiar para mostrar o botão
+  };
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -48,84 +61,176 @@ const VizualizarSolicitacao = () => {
 
   return (
     <div className="flex-grow bg-sky-200 p-8">
-      <Title>Vizualizar Solicitação</Title>
+      <Title>Visualizar Solicitação</Title>
       <div className="mx-auto">
         <Grid
-          className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
           container
           spacing={2}
+          className="bg-white p-4 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl m-0"
         >
-          <h2 className="text-2xl font-medium">
-            Dados do programa de computador:
-          </h2>
-          <Grid item xs={12}>
-            <p>
-              <strong>Título do Programa:</strong>{" "}
-              {programaData.titulo || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Descrição do Programa:</strong>{" "}
-              {programaData.descricao || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Solução do Problema:</strong>{" "}
-              {programaData.solucaoProblemaDesc || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Descrição do Mercado:</strong>{" "}
-              {programaData.descricaoMercado || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Linguagens:</strong>{" "}
-              {programaData.linguagens
-                ? programaData.linguagens.join(", ")
-                : "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Vínculo com a Unitins:</strong>{" "}
-              {programaData.vinculoUnitins ? "Sim" : "Não"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Fase de Publicação:</strong>{" "}
-              {programaData.fasePublicacao || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Status:</strong> {programaData.status || "N/A"}
-            </p>
-          </Grid>
-          <Grid item xs={12}>
-            <p>
-              <strong>Nome do Arquivo:</strong>{" "}
-              {programaData.nomeArquivo || "N/A"}
-            </p>
+          {/* Dados do Programa (Esquerda) */}
+          <Grid item xs={12} md={6}>
+            <h2 className="text-2xl font-medium mb-4">Dados do Programa:</h2>
+            <Grid container direction="column" spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Título do Programa"
+                  value={programaData?.titulo || "N/A"}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Vínculo com a Unitins"
+                  value={programaData?.vinculoUnitins ? "Sim" : "Não"}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Fase de Publicação"
+                  value={programaData?.fasePublicacao || "N/A"}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Status"
+                  value={programaData?.status || "N/A"}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <h2 className="text-xl font-medium mb-2">Linguagens:</h2>
+                <div className="flex flex-wrap gap-2">
+                  {programaData?.linguagens && programaData.linguagens.length > 0 ? (
+                    programaData.linguagens.map((linguagem: string, index: number) => (
+                      <Chip key={index} label={linguagem} />
+                    ))
+                  ) : (
+                    <span>N/A</span>
+                  )}
+                </div>
+              </Grid>
+              <Grid item xs={12}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      className="w-[100%]"
+                      label="Nome do Arquivo"
+                      variant="standard"
+                      value={programaData?.nomeArquivo?.name || "N/A"} // Use o nome do arquivo se disponível
+                      disabled
+                      InputProps={{
+                        endAdornment: (
+                          <IconButton
+                            onClick={() => {
+                              /* Coloque a lógica para visualizar o arquivo aqui */
+                            }}
+                            edge="end"
+                            aria-label="view"
+                          >
+                            <VisibilityOutlinedIcon />
+                          </IconButton>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      fullWidth
+                      href={programaData?.nomeArquivo ? `/path-to-view/${programaData.nomeArquivo.name}` : "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      disabled={!programaData?.nomeArquivo}
+                    >
+                      Visualizar Código Fonte
+                      <CodeIcon />
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
           </Grid>
 
-          <Grid item xs={12}>
-            <p className="text-2xl text-azulEscuro">
-              <strong>Deseja editar?</strong>{" "}
-              <Button
-                className="bg-azulEscuroGradient"
-                variant="contained"
-                onClick={handleEdit}
-              >
-                Editar
-              </Button>
-            </p>
+          {/* Descrições do Programa (Direita) */}
+          <Grid item xs={12} md={6}>
+            <h2 className="text-2xl font-medium mb-4">Descrições do Programa:</h2>
+            <Grid container direction="column" spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Descrição do Programa"
+                  value={mostrarDescricao ? programaData?.descricao || "N/A" : "N/A"}
+                  multiline
+                  rows={4}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                {shouldShowButton(programaData?.descricao || "") && (
+                  <Button
+                    onClick={() => setMostrarDescricao(!mostrarDescricao)}
+                  >
+                    {mostrarDescricao ? "Ocultar" : "Mostrar"}
+                  </Button>
+                )}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Solução do Problema"
+                  value={mostrarSolucao ? programaData?.solucaoProblemaDesc || "N/A" : ""}
+                  multiline
+                  rows={4}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                {shouldShowButton(programaData?.solucaoProblemaDesc || "") && (
+                  <Button onClick={() => setMostrarSolucao(!mostrarSolucao)}>
+                    {mostrarSolucao ? "Ocultar" : "Mostrar"}
+                  </Button>
+                )}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Descrição do Mercado"
+                  value={mostrarMercado ? programaData?.descricaoMercado || "N/A" : ""}
+                  multiline
+                  rows={4}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                {shouldShowButton(programaData?.descricaoMercado || "") && (
+                  <Button onClick={() => setMostrarMercado(!mostrarMercado)}>
+                    {mostrarMercado ? "Ocultar" : "Mostrar"}
+                  </Button>
+                )}
+              </Grid>
+            </Grid>
           </Grid>
+        </Grid>
+        <Grid container justifyContent="flex-end" mt={2}>
+          <Button variant="contained" className="bg-azulEscuro" onClick={handleEdit}>
+            Editar
+          </Button>
         </Grid>
       </div>
     </div>
