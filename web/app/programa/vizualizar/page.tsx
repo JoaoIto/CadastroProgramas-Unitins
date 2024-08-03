@@ -13,16 +13,19 @@ import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 import { IconButton, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
+import { useUserPayload } from "@/app/hooks/user/userPayload";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [programaData, setProgramaData] = useState<IPrograma | null>(null); // Atualize para usar IPrograma
+  const [programaData, setProgramaData] = useState<IPrograma | null>(null); 
   const [mostrarDescricao, setMostrarDescricao] = useState<boolean>(true);
   const [mostrarSolucao, setMostrarSolucao] = useState<boolean>(true);
   const [mostrarMercado, setMostrarMercado] = useState<boolean>(true);
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
+  const { profile, isLoading: isProfileLoading } = useUserPayload(); 
+  const isAdmin = profile.perfil === "admin";
 
   useEffect(() => {
     if (programaId) {
@@ -30,7 +33,6 @@ const VizualizarSolicitacao = () => {
         try {
           const programaData = await getProgramaById(token, programaId);
           if (programaData) {
-            console.log("Este é o programa data: ", programaData);
             setProgramaData(programaData);
             setIsLoading(false);
           } else {
@@ -59,7 +61,7 @@ const VizualizarSolicitacao = () => {
     return text.length > 100; // Exemplo de limiar para mostrar o botão
   };
 
-  if (isLoading) {
+  if (isLoading || isProfileLoading) {
     return <div>Carregando...</div>;
   }
 
@@ -262,18 +264,20 @@ const VizualizarSolicitacao = () => {
                 Editar
               </Button>
             </Grid>
-            <Grid container className="flex flex-col self-end w-full" mt={2}>
-              <Typography variant="body1">
-                Deseja prossseguir com a solicitação?
-              </Typography>
-              <Button
-                variant="contained"
-                className="bg-azulEscuro w-1/3"
-                onClick={handleProcesso}
-              >
-                Avançar
-              </Button>
-            </Grid>
+            {isAdmin && ( // Verificação se o usuário é admin
+              <Grid container className="flex flex-col self-end w-full" mt={2}>
+                <Typography variant="body1">
+                  Deseja prossseguir com a solicitação?
+                </Typography>
+                <Button
+                  variant="contained"
+                  className="bg-azulEscuro w-1/3"
+                  onClick={handleProcesso}
+                >
+                  Avançar
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </Grid>
       </div>
