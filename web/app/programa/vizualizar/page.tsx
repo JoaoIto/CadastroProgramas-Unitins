@@ -1,37 +1,17 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import TextField from "@mui/material/TextField";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
 import { useRouter } from "next/navigation";
 import Title from "@/app/components/Title/title";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import { getProgramaById } from "@/app/service/programa/getById/getById";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
-import { putPrograma } from "@/app/service/programa/put/putPrograma";
-import { toast } from "react-toastify";
-import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
-import { IconButton } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [linguagens, setLinguagens] = useState<string[]>([]);
-  const [linguagemInput, setLinguagemInput] = useState<string>("");
   const [programaData, setProgramaData] = useState<any>({});
-  const [open, setOpen] = useState(false);
-  const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId(); // Função getProgramaId() que retorna o ID
@@ -43,7 +23,6 @@ const VizualizarSolicitacao = () => {
           const programaData = await getProgramaById(token, programaId);
           if (programaData) {
             setProgramaData(programaData);
-            setLinguagens(programaData.linguagens || []);
             setIsLoading(false);
           } else {
             console.error("Programa não encontrado");
@@ -58,86 +37,6 @@ const VizualizarSolicitacao = () => {
       fetchProgramaData();
     }
   }, [programaId, token]);
-
-  useEffect(() => {
-    const fetchUsuarioId = async () => {
-      try {
-        const id = await getUsuarioId(token);
-        if (id !== undefined) {
-          setUsuarioId(id);
-        }
-      } catch (error) {
-        console.error("Erro ao obter o usuarioId:", error);
-      }
-    };
-
-    fetchUsuarioId();
-  }, [token]);
-
-  const handleLinguagensKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const trimmedInput = linguagemInput.trim();
-      if (
-        (event.key === "Enter" || event.key === " " || event.key === ",") &&
-        trimmedInput !== ""
-      ) {
-        event.preventDefault();
-        console.log("Nova linguagem:", trimmedInput); // Adicione este console.log para verificar a nova linguagem
-        setLinguagens((prev) => [...prev, trimmedInput]);
-        console.log(linguagens);
-        setLinguagemInput("");
-      }
-    },
-    [linguagemInput, linguagens]
-  );
-
-  const handleRemoveLinguagem = (index: number) => {
-    setLinguagens((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleConfirm = async () => {
-    const formData = new FormData(
-      document.getElementById("editar-form") as HTMLFormElement
-    );
-
-    const data: Partial<IPrograma> = {
-      titulo: formData.get("titulo") as string,
-      descricao: formData.get("descricao") as string,
-      solucaoProblemaDesc: formData.get("solucaoProblemaDesc") as string,
-      linguagens: linguagens,
-      descricaoMercado: formData.get("descricaoMercado") as string,
-      dataCriacaoPrograma: formData.get("dataCriacaoPrograma") as string,
-      vinculoUnitins: formData.get("vinculoUnitins") === "Sim",
-      fasePublicacao: formData.get("fasePublicacao") as string,
-      status: formData.get("status") as string,
-      nomeArquivo: formData.get("nomeArquivo") as File,
-      usuarioId: usuarioId !== null ? usuarioId : undefined, // Add this line
-    };
-
-    console.log(data);
-
-    try {
-      await putPrograma(data, programaId, token);
-      toast.success("Programa atualizado com sucesso!");
-      router.push("/");
-    } catch (error) {
-      toast.error("Erro ao atualizar o programa. Tente novamente.");
-    }
-    handleClose();
-  };
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleOpen();
-  };
 
   const handleEdit = () => {
     router.push(`/programa/editar`);
