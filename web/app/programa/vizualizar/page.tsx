@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 import { getProgramaById } from "@/app/service/programa/getById/getById";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
-import { IconButton } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
 
@@ -49,6 +49,10 @@ const VizualizarSolicitacao = () => {
 
   const handleEdit = () => {
     router.push(`/programa/editar`);
+  };
+
+  const handleProcesso = () => {
+    router.push(`/admin/programa/processo`);
   };
 
   const shouldShowButton = (text: string) => {
@@ -115,10 +119,13 @@ const VizualizarSolicitacao = () => {
               <Grid item xs={12}>
                 <h2 className="text-xl font-medium mb-2">Linguagens:</h2>
                 <div className="flex flex-wrap gap-2">
-                  {programaData?.linguagens && programaData.linguagens.length > 0 ? (
-                    programaData.linguagens.map((linguagem: string, index: number) => (
-                      <Chip key={index} label={linguagem} />
-                    ))
+                  {programaData?.linguagens &&
+                  programaData.linguagens.length > 0 ? (
+                    programaData.linguagens.map(
+                      (linguagem: string, index: number) => (
+                        <Chip key={index} label={linguagem} />
+                      )
+                    )
                   ) : (
                     <span>N/A</span>
                   )}
@@ -153,7 +160,11 @@ const VizualizarSolicitacao = () => {
                       variant="outlined"
                       color="primary"
                       fullWidth
-                      href={programaData?.nomeArquivo ? `/path-to-view/${programaData.nomeArquivo.name}` : "#"}
+                      href={
+                        programaData?.nomeArquivo
+                          ? `/path-to-view/${programaData.nomeArquivo.name}`
+                          : "#"
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       disabled={!programaData?.nomeArquivo}
@@ -169,12 +180,16 @@ const VizualizarSolicitacao = () => {
 
           {/* Descrições do Programa (Direita) */}
           <Grid item xs={12} md={6}>
-            <h2 className="text-2xl font-medium mb-4">Descrições do Programa:</h2>
+            <h2 className="text-2xl font-medium mb-4">
+              Descrições do Programa:
+            </h2>
             <Grid container direction="column" spacing={2}>
               <Grid item xs={12}>
                 <TextField
                   label="Descrição do Programa"
-                  value={mostrarDescricao ? programaData?.descricao || "N/A" : "N/A"}
+                  value={
+                    mostrarDescricao ? programaData?.descricao || "N/A" : "N/A"
+                  }
                   multiline
                   rows={4}
                   fullWidth
@@ -193,7 +208,11 @@ const VizualizarSolicitacao = () => {
               <Grid item xs={12}>
                 <TextField
                   label="Solução do Problema"
-                  value={mostrarSolucao ? programaData?.solucaoProblemaDesc || "N/A" : ""}
+                  value={
+                    mostrarSolucao
+                      ? programaData?.solucaoProblemaDesc || "N/A"
+                      : ""
+                  }
                   multiline
                   rows={4}
                   fullWidth
@@ -210,7 +229,11 @@ const VizualizarSolicitacao = () => {
               <Grid item xs={12}>
                 <TextField
                   label="Descrição do Mercado"
-                  value={mostrarMercado ? programaData?.descricaoMercado || "N/A" : ""}
+                  value={
+                    mostrarMercado
+                      ? programaData?.descricaoMercado || "N/A"
+                      : ""
+                  }
                   multiline
                   rows={4}
                   fullWidth
@@ -226,11 +249,32 @@ const VizualizarSolicitacao = () => {
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid container justifyContent="flex-end" mt={2}>
-          <Button variant="contained" className="bg-azulEscuro" onClick={handleEdit}>
-            Editar
-          </Button>
+          <Grid className="w-full justify-evenly flex">
+            <Grid container className="flex flex-col w-full" mt={2}>
+              <Typography variant="body1">
+                Deseja editar essa solicitação?
+              </Typography>
+              <Button
+                variant="outlined"
+                className=" w-1/3"
+                onClick={handleEdit}
+              >
+                Editar
+              </Button>
+            </Grid>
+            <Grid container className="flex flex-col self-end w-full" mt={2}>
+              <Typography variant="body1">
+                Deseja prossseguir com a solicitação?
+              </Typography>
+              <Button
+                variant="contained"
+                className="bg-azulEscuro w-1/3"
+                onClick={handleProcesso}
+              >
+                Avançar
+              </Button>
+            </Grid>
+          </Grid>
         </Grid>
       </div>
     </div>
