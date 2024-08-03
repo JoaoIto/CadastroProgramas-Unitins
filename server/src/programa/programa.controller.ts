@@ -164,7 +164,7 @@ export class ProgramaController {
   async getProgramasEnviados(@Req() req): Promise<Programa[]> {
     try {
       this.logger.log(
-        "Retornando os programas enviados pelos usuarios para admin"
+        "Retornando os programas enviados para admin"
       );
       const programas = await this.programaService.getProgramasEnviados();
 
@@ -174,6 +174,29 @@ export class ProgramaController {
       throw error;
     }
   }
+
+  @Get("/enviados/usuario")
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.User)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Retornando os programas enviados pelos usuarios para admin",
+  })
+  async getProgramasEnviadosByUser(@Req() req): Promise<Programa[]> {
+    try {
+      this.logger.log(
+        "Retornando os programas enviados pelos usuarios para admin"
+      );
+      const userId = req.user._id;
+      const programas = await this.programaService.getProgramasEnviadosByUser(userId);
+
+      return programas;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
+      throw error;
+    }
+  }
+
 
   @Get("/em-analise")
   @UseGuards(JwtAuthGuard)

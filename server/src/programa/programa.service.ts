@@ -58,6 +58,10 @@ export class ProgramaService {
         return this.programaRepository.findProgramasEnviados();
     }
 
+    async getProgramasEnviadosByUser(userId: string): Promise<Programa[]>{
+        return this.programaRepository.findProgramasEnviadosByUser(userId);
+    }
+
     async getProgramasEmAnalise() {
         return this.programaRepository.findProgramasEmAnalise();
     }
