@@ -9,6 +9,7 @@ import AlertMessage from "./components/AlertMessage";
 import { getProgramasUsuarioPaginado } from "./service/programa/programaUserLogadoPaginado";
 import { Typography } from "@mui/material";
 import { getProgramasSearch } from "./functions/storage/getProgramaSearch";
+import { ProgramCountCard } from "./components/CardPrograma/cardCounter";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
@@ -78,9 +79,7 @@ export default function DashboardPage() {
       <div className="flex flex-col">
         <div className="w-full h-full">
           <Title>Dashboard</Title >
-          <Typography variant="h5" component="div">
-            {`${programas.length} resultados encontrados`}
-          </Typography>
+          <ProgramCountCard count={programas.length} />
           <Pagination
             count={totalPages}
             page={currentPage}
