@@ -30,6 +30,7 @@ import {
   RadioGroup,
   Autocomplete,
   Chip,
+  MenuItem,
 } from "@mui/material";
 import { useUser } from "@/app/hooks/user/userGet";
 import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll";
@@ -190,16 +191,18 @@ export default function NovaSolicitacao() {
           | "titulo"
           | "descricao"
           | "solucaoProblemaDesc"
-          | "outrasObrasDesc"
           | "linguagens"
+          | "descricaoMercado"
+          | "dataCriacaoPrograma"
           | "nomeArquivo"
           | "linkCodigoFonte";
         const fieldsToValidate: FormFieldNames[] = [
           "titulo",
           "descricao",
           "solucaoProblemaDesc",
-          "outrasObrasDesc",
           "linguagens",
+          "descricaoMercado",
+          "dataCriacaoPrograma",
         ];
 
         if (insercaoOpcao === "arquivo") {
@@ -209,7 +212,7 @@ export default function NovaSolicitacao() {
         }
 
         // Passa os nomes dos campos individualmente para o trigger
-        isValid = await trigger(...fieldsToValidate);
+        isValid = await trigger(fieldsToValidate);
         break;
       case 2:
         isValid = await trigger(["outrasObrasDesc", "fonteFinanciamentoDesc"]);
@@ -222,6 +225,9 @@ export default function NovaSolicitacao() {
     if (isValid) {
       if (activeStep >= steps.length - 1) {
         const formValues = getValues();
+        // Formata o campo autores
+        formValues.autores = formValues.autores.map((autor) => autor.nome).join(", ");
+        
         console.log("Form values before confirmation:", formValues);
         setFormData(formValues);
         setShowConfirmationModal(true);
@@ -367,7 +373,7 @@ export default function NovaSolicitacao() {
                 <Grid item xs={5}>
                   <TextField
                     required
-                    label={`Nome Completo do Autor ${index + 1}`}
+                    label={`Nome Completo do Autor ${index + 1}: `}
                     fullWidth
                     value={autor.nome}
                     onChange={(e) =>
@@ -380,7 +386,7 @@ export default function NovaSolicitacao() {
                 <Grid item xs={5}>
                   <TextField
                     required
-                    label={`Matrícula do Autor ${index + 1}`}
+                    label={`Matrícula do Autor ${index + 1}: `}
                     fullWidth
                     value={autor.matricula}
                     onChange={(e) =>
@@ -407,9 +413,10 @@ export default function NovaSolicitacao() {
                 <Grid item xs={12}>
                   <TextField
                     type="number"
-                    label="Porcentagem de Contribuição (%)"
+                    label="Porcentagem de Contribuição (%): "
                     fullWidth
                     value={autores[index].porcentagem || 0}
+                    helperText="Você deve inserir a porcentagem de participação do autor neste programa"
                     onChange={(e) =>
                       handlePorcentagemChange(index, parseFloat(e.target.value))
                     }
@@ -436,7 +443,9 @@ export default function NovaSolicitacao() {
                 rules={{ required: "Campo obrigatório" }}
                 render={({ field }) => (
                   <FormControl component="fieldset" fullWidth>
-                    <FormLabel component="legend">Vínculo Unitins</FormLabel>
+                    <FormLabel component="legend">
+                      Este autor há vínculo com a Unitins
+                    </FormLabel>
                     <RadioGroup
                       row
                       {...field}
@@ -513,7 +522,7 @@ export default function NovaSolicitacao() {
                 render={({ field }) => (
                   <TextField
                     required
-                    label="Título"
+                    label="Título do programa: "
                     fullWidth
                     {...field}
                     error={!!errors.titulo}
@@ -531,7 +540,7 @@ export default function NovaSolicitacao() {
                 render={({ field }) => (
                   <TextField
                     required
-                    label="Descrição"
+                    label="Descrição do programa: "
                     fullWidth
                     multiline
                     rows={4}
@@ -551,7 +560,7 @@ export default function NovaSolicitacao() {
                 render={({ field }) => (
                   <TextField
                     required
-                    label="Solução do Problema"
+                    label="Solução do Problema: "
                     fullWidth
                     multiline
                     rows={4}
@@ -569,13 +578,37 @@ export default function NovaSolicitacao() {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Descrição do Mercado"
+                    label="Descrição do Mercado: "
                     fullWidth
                     multiline
                     rows={4}
                     error={!!errors.descricaoMercado}
                     helperText={errors.descricaoMercado?.message}
                   />
+                )}
+              />
+            </Grid>
+            {/* Fase de Publicação */}
+            <Grid item xs={12}>
+              <Controller
+                name="fasePublicacao"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    required
+                    label="Em qual fase de publicação está o seu programa?"
+                    fullWidth
+                    {...field}
+                    error={!!errors.fasePublicacao}
+                    helperText={errors.fasePublicacao?.message}
+                  >
+                    {["Tese", "Artigo", "TCC", "Outro"].map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 )}
               />
             </Grid>
@@ -586,7 +619,7 @@ export default function NovaSolicitacao() {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Data de Criação do Programa"
+                    label="Data de Criação do Programa: "
                     type="date"
                     fullWidth
                     margin="normal"
@@ -761,7 +794,8 @@ export default function NovaSolicitacao() {
               {/* Opções de Sim e Não */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  Existe Natureza de Outras Obras
+                  Existe Natureza de outras obras de propriedade intelectual
+                  neste programa?
                 </Typography>
                 <RadioGroup
                   aria-required
@@ -793,7 +827,7 @@ export default function NovaSolicitacao() {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Descrição das Obras"
+                        label="Descrição das Obras: "
                         multiline
                         rows={3}
                         fullWidth
@@ -808,7 +842,8 @@ export default function NovaSolicitacao() {
               {/* Opções de Sim e Não para Fonte de Financiamento */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  Existe Fonte de Financiamento
+                  Existe Fonte de Financiamento externa ou interna para este
+                  programa?
                 </Typography>
                 <RadioGroup
                   aria-required
@@ -840,7 +875,7 @@ export default function NovaSolicitacao() {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Descrição de Fonte de Financiamento"
+                        label="Descrição da Fonte de Financiamento: "
                         multiline
                         rows={3}
                         fullWidth
@@ -875,7 +910,8 @@ export default function NovaSolicitacao() {
               {/* Opções de Sim e Não para Confissão/Revelação para Outras Fontes */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  Já houve confissão/revelação para outras fontes?
+                  Já houve confissão/revelação deste programa para outras
+                  fontes?
                 </Typography>
                 <RadioGroup
                   aria-required
@@ -907,7 +943,7 @@ export default function NovaSolicitacao() {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Descrição de Confissão/Revelação para Outras Fontes"
+                        label="Descrição de Confissão/Revelação para Outras Fontes: "
                         multiline
                         rows={3}
                         fullWidth
@@ -922,7 +958,7 @@ export default function NovaSolicitacao() {
               {/* Opções de Sim e Não para Revelação Pública */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  Já houve revelação pública?
+                  Já houve revelação pública deste programa?
                 </Typography>
                 <RadioGroup
                   aria-required
@@ -954,7 +990,7 @@ export default function NovaSolicitacao() {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Descrição de Revelação Pública"
+                        label="Descrição de Revelação Pública: "
                         multiline
                         rows={3}
                         fullWidth
