@@ -54,8 +54,8 @@ const schema = z.object({
   fonteFinanciamentoDesc: z.string().optional(),
   revelacaoDesc: z.string().optional(),
   revelacaoPublicaDesc: z.string().optional(),
-  nomeArquivo: z.string().optional(),
   linkCodigoFonte: z.string().optional(),
+  arquivoCodigoFonte: z.instanceof(File).optional(),
   autores: z
     .array(
       z.object({
@@ -135,7 +135,10 @@ export default function NovaSolicitacao() {
   const [linguagensDisponiveis, setLinguagensDisponiveis] = useState<
     ILinguagem[]
   >([]);
-  const [nomeDocumento, setNomeDocumento] = useState("");
+
+  const [arquivoCodigoFonte, setArquivoCodigoFonte] = useState<File | null>(
+    null
+  );
 
   const [formData, setFormData] = useState<FormData | null>(null);
 
@@ -163,8 +166,8 @@ export default function NovaSolicitacao() {
       fonteFinanciamentoDesc: "",
       revelacaoDesc: "",
       revelacaoPublicaDesc: "",
-      nomeArquivo: "",
       linkCodigoFonte: "",
+      arquivoCodigoFonte: undefined,
       autores: [],
     },
   });
@@ -178,6 +181,14 @@ export default function NovaSolicitacao() {
       setValue("autores", [{ nome, matricula }]);
     }
   }, [profile, isLoading, setValue]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setArquivoCodigoFonte(file);
+      setValue("arquivoCodigoFonte", file);
+    }
+  };
 
   // Lógica de navegação
   const handleNext = async () => {
@@ -226,8 +237,10 @@ export default function NovaSolicitacao() {
       if (activeStep >= steps.length - 1) {
         const formValues = getValues();
         // Formata o campo autores
-        formValues.autores = formValues.autores.map((autor) => autor.nome).join(", ");
-        
+        formValues.autores = formValues.autores
+          .map((autor) => autor.nome)
+          .join(", ");
+
         console.log("Form values before confirmation:", formValues);
         setFormData(formValues);
         setShowConfirmationModal(true);
@@ -273,6 +286,7 @@ export default function NovaSolicitacao() {
   }, [token, setAutores, setValue, getValues]);
 
   const handleFormSubmit = handleSubmit((data) => {
+    const formDataWithFile = { ...data, arquivoCodigoFonte };
     console.log("Form data before confirmation:", data);
     setFormData(data);
     setShowConfirmationModal(true);
@@ -337,12 +351,29 @@ export default function NovaSolicitacao() {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data) => {
     console.log("Data do onSubmit", data);
+
+    const formData = new FormData();
+    formData.append("titulo", data.titulo);
+    formData.append("descricao", data.descricao);
+    formData.append("solucaoProblemaDesc", data.solucaoProblemaDesc);
+    formData.append("linguagens", data.linguagens);
+    formData.append("autores", JSON.stringify(data.autores));
+    if (insercaoOpcao === "arquivo" && arquivoCodigoFonte) {
+      formData.append("codigoFonte", arquivoCodigoFonte);
+    } else if (insercaoOpcao === "link") {
+      formData.append("codigoFonteLink", linkCodigoFonte);
+    }
+
     try {
-      await postPrograma(data, token);
-      toast.success("Programa enviado com sucesso!");
-      router.push("/");
+      const response = await postPrograma(formData, token);
+      if (response.ok) {
+        toast.success("Programa enviado com sucesso!");
+        router.push("/");
+      } else {
+        toast.error("Erro ao enviar o programa. Tente novamente.");
+      }
     } catch (error) {
       toast.error("Erro ao enviar o programa. Tente novamente.");
     }
@@ -719,8 +750,8 @@ export default function NovaSolicitacao() {
                     variant="contained"
                     component="label"
                   >
-                    {nomeDocumento ? (
-                      nomeDocumento
+                    {arquivoCodigoFonte ? (
+                      arquivoCodigoFonte.name
                     ) : (
                       <>
                         Adicione o documento aqui <UploadFileIcon />
@@ -730,22 +761,22 @@ export default function NovaSolicitacao() {
                       type="file"
                       hidden
                       onChange={(e) =>
-                        setNomeDocumento(e.target.files?.[0]?.name || "")
+                        handleFileChange(e, setArquivoCodigoFonte)
                       }
                     />
                   </Button>
 
-                  {nomeDocumento && (
+                  {arquivoCodigoFonte && (
                     <TextField
                       className="w-[100%]"
                       label="Documento Selecionado"
                       variant="standard"
-                      value={nomeDocumento}
+                      value={arquivoCodigoFonte.name}
                       disabled
                       InputProps={{
-                        endAdornment: nomeDocumento && (
+                        endAdornment: (
                           <IconButton
-                            onClick={() => setNomeDocumento("")}
+                            onClick={() => setArquivoCodigoFonte(null)}
                             edge="end"
                             aria-label="delete"
                           >
@@ -1031,9 +1062,10 @@ export default function NovaSolicitacao() {
 
       <AlertDialog
         open={showConfirmationModal}
+        token={token}
         formData={formData}
         title="Confirmar Envio"
-        onConfirm={handleSubmit(onSubmit)}
+        onConfirm={handleSubmit(onSubmit)} // Esta função deve chamar handleSubmit(onSubmit)
         onCancel={handleCancel}
       />
     </div>

@@ -13,12 +13,14 @@ import {
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import { postProgramaComArquivos } from "@/app/service/programa/post/postProgramaComArquivos";
 
 interface AlertDialogProps {
+  token: string;
   open: boolean;
   title: string;
   formData?: Record<string, any> | null;
-  onConfirm: () => void;
+  onConfirm: (formDataWithFile: FormData) => void;
   onCancel: () => void;
 }
 
@@ -36,15 +38,57 @@ const formFieldTitles: { [key: string]: string } = {
 export const AlertDialog: React.FC<AlertDialogProps> = ({
   open,
   title,
+  token,
   formData,
   onConfirm,
   onCancel,
 }) => {
-  const [nomeDocumento, setNomeDocumento] = useState("");
+  const [nomeDocumento, setNomeDocumento] = useState<File | null>(null);
   const [page, setPage] = useState(0);
 
   const handleNextPage = () => setPage((prevPage) => prevPage + 1);
   const handlePrevPage = () => setPage((prevPage) => prevPage - 1);
+
+  const handleConfirm = async () => {
+    if (formData) {
+      const formDataWithFile = new FormData();
+      
+      // Adiciona todos os campos do formData
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataWithFile.append(key, value);
+      });
+      
+      // Adiciona o arquivo, se existir
+      if (nomeDocumento) {
+        formDataWithFile.append("arquivoConfidencialidade", nomeDocumento);
+      }
+      
+      // Passa o FormData para a função de confirmação
+      onConfirm(formDataWithFile);
+  
+      // Log para verificar o conteúdo do FormData
+      console.log("Data depois dos dois arquivos:");
+      
+      // Cria um objeto para armazenar as entradas do FormData
+      const formDataEntries: { [key: string]: any } = {};
+  
+      formDataWithFile.forEach((value, key) => {
+        if (value instanceof File) {
+          formDataEntries[key] = {
+            name: value.name,
+            type: value.type,
+            size: value.size,
+          };
+        } else {
+          formDataEntries[key] = value;
+        }
+      });
+  
+      // Mostra o objeto como JSON
+      console.log("FormData como JSON:", JSON.stringify(formDataEntries, null, 2));
+      await postProgramaComArquivos(formDataWithFile, token);
+    }
+  };  
 
   return (
     <Dialog open={open} onClose={onCancel}>
@@ -58,7 +102,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
             {formData && (
               <div className="grid grid-cols-1 gap-4">
                 {Object.entries(formData).map(([key, value]) => (
-                  <Grid className="" key={key}>
+                  <Grid key={key}>
                     <TextField
                       label={formFieldTitles[key] || key}
                       value={typeof value === "object" ? JSON.stringify(value) : value}
@@ -116,21 +160,23 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                   <input
                     type="file"
                     hidden
-                    onChange={(e) =>
-                      setNomeDocumento(e.target.files?.[0]?.name || "")
-                    }
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setNomeDocumento(e.target.files[0]);
+                      }
+                    }}
                   />
                 </Button>
                 <TextField
                   className="w-[100%]"
                   label="Documento Selecionado"
                   variant="standard"
-                  value={nomeDocumento}
+                  value={nomeDocumento ? nomeDocumento.name : ""}
                   disabled
                   InputProps={{
                     endAdornment: nomeDocumento && (
                       <IconButton
-                        onClick={() => setNomeDocumento("")}
+                        onClick={() => setNomeDocumento(null)}
                         edge="end"
                         aria-label="delete"
                       >
@@ -155,7 +201,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
             Próximo
           </Button>
         ) : (
-          <Button onClick={onConfirm} className="bg-azulEscuro text-white hover:bg-azulEscuro" autoFocus>
+          <Button onClick={handleConfirm} className="bg-azulEscuro text-white hover:bg-azulEscuro" autoFocus>
             Confirmar
           </Button>
         )}
