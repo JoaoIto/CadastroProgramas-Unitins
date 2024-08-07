@@ -3,7 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Headers,
+  HttpStatus,
   Logger,
   Param,
   Patch,
@@ -11,11 +13,13 @@ import {
   Put,
   Query,
   Req,
+  Res,
   UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { Response } from 'express';
 import { CreateProgramaInputDto } from "./dto/create/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
 import { UpdateProgramaInputDto } from "./dto/update/atualizarPrograma.dto";
@@ -41,6 +45,7 @@ import { UsuarioService } from "../usuario/usuario.service";
 import { IMultipartFile } from "./interfaces/IMultpartFile.interface";
 import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express/multer";
 import { diskStorage } from "multer";
+import { join } from "path";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -368,6 +373,46 @@ async getProgramasByUser(@Req() req): Promise<Programa[]> {
     });
     return programaPromise;
   }
+
+  @Get('/download/:tipo/:id')
+@Header('Content-Type', 'application/octet-stream')
+@ApiBearerAuth()
+@Roles(Role.Admin, Role.User)
+@ApiOperation({
+  summary: 'Fazendo download dos arquivos do programa',
+})
+async downloadFile(
+  @Param('tipo') tipo: string,
+  @Param('id') id: string,
+  @Res() res: Response,
+) {
+  const programa = await this.programaService.consultar(id);
+  if (!programa) {
+    res.status(HttpStatus.NOT_FOUND).json({ message: 'Programa não encontrado' });
+    return;
+  }
+
+  let filePath: string;
+  if (tipo === 'codigoFonte') {
+    filePath = programa.codigoFontePath;
+  } else if (tipo === 'documentoConfidencialidade') {
+    filePath = programa.documentoConfidencialidadePath;
+  } else {
+    res.status(HttpStatus.BAD_REQUEST).json({ message: 'Tipo de arquivo inválido' });
+    return;
+  }
+
+  // Verifica se o filePath é absoluto, caso contrário, junta com a pasta uploads
+  const absoluteFilePath = filePath.startsWith(process.cwd())
+    ? filePath
+    : join(process.cwd(), 'uploads', filePath);
+
+  res.download(absoluteFilePath, (err) => {
+    if (err) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Erro ao baixar o arquivo' });
+    }
+  });
+}
 
   @Get("/:uuid")
   @Roles(Role.Admin)

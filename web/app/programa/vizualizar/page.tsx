@@ -14,6 +14,7 @@ import { IconButton, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
+import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +65,14 @@ const VizualizarSolicitacao = () => {
   if (isLoading || isProfileLoading) {
     return <div>Carregando...</div>;
   }
+
+  const handleDownload = async (tipo: string) => {
+    try {
+      await downloadFile(tipo, programaId, token);
+    } catch (error) {
+      console.error("Erro ao baixar o arquivo:", error);
+    }
+  };
 
   return (
     <div className="flex-grow bg-sky-200 p-8">
@@ -140,14 +149,11 @@ const VizualizarSolicitacao = () => {
                       className="w-[100%]"
                       label="Nome do Arquivo"
                       variant="standard"
-                      value={programaData?.nomeArquivo?.name || "N/A"} // Use o nome do arquivo se disponível
+                      value={programaData?.codigoFontePath || "N/A"} // Use o nome do arquivo se disponível
                       disabled
                       InputProps={{
                         endAdornment: (
                           <IconButton
-                            onClick={() => {
-                              /* Coloque a lógica para visualizar o arquivo aqui */
-                            }}
                             edge="end"
                             aria-label="view"
                           >
@@ -162,14 +168,8 @@ const VizualizarSolicitacao = () => {
                       variant="outlined"
                       color="primary"
                       fullWidth
-                      href={
-                        programaData?.nomeArquivo
-                          ? `/path-to-view/${programaData.nomeArquivo.name}`
-                          : "#"
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      disabled={!programaData?.nomeArquivo}
+                      onClick={() => handleDownload('codigoFonte')}
+                      disabled={!programaData?.codigoFontePath}
                     >
                       Visualizar Código Fonte
                       <CodeIcon />
