@@ -12,7 +12,9 @@ import {
   Query,
   Req,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { CreateProgramaInputDto } from "./dto/create/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
@@ -37,6 +39,8 @@ import { Role } from "../roles/roles.enum";
 import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
 import { UsuarioService } from "../usuario/usuario.service";
 import { IMultipartFile } from "./interfaces/IMultpartFile.interface";
+import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express/multer";
+import { diskStorage } from "multer";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -77,18 +81,34 @@ export class ProgramaController {
     }
   }
 
-  @Post("/cadastrar")
+  @Post('/cadastrar')
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Cadastra um novo programa" })
-  @ApiBody({ type: CreateProgramaInputDto }) // Anotação para informar ao Swagger sobre o DTO usado no corpo da requisição
-  @ApiCreatedResponse({ description: "Operação bem-sucedida", type: Programa })
+  @ApiOperation({ summary: 'Cadastra um novo programa' })
+  @ApiBody({ type: CreateProgramaInputDto })
+  @ApiCreatedResponse({ description: 'Operação bem-sucedida', type: Programa })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'documentoConfidencialidade', maxCount: 1 },
+      { name: 'codigoFonte', maxCount: 1 },
+    ], {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          callback(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop());
+        },
+      }),
+    }),
+  )
   async create(
     @Body() formData: CreateProgramaInputDto,
-    @Headers() headers: Record<string, string>
+    @Headers() headers: Record<string, string>,
+    @UploadedFiles() files: { documentoConfidencialidade?: Express.Multer.File[], codigoFonte?: Express.Multer.File[] },
   ) {
-    this.logger.log("Fazendo cadastro de programa: " + formData);
+    console.log("Aqui chegando no backend: ", formData);
+    
+    // Criar a instância do programa com base nos dados recebidos
     const programaData = new Programa();
-
     programaData.titulo = formData.titulo;
     programaData.descricao = formData.descricao;
     programaData.solucaoProblemaDesc = formData.solucaoProblemaDesc;
@@ -103,14 +123,33 @@ export class ProgramaController {
     programaData.vinculoInstitucional = formData.vinculoInstitucional;
     programaData.fasePublicacao = formData.fasePublicacao;
     programaData.status = formData.status;
-    programaData.nomeArquivo = formData.nomeArquivo;
     programaData.autores = formData.autores;
 
-    // Salva os dados do programa no banco de dados
-    const novoPrograma = await this.programaService.criar(
-      programaData,
-      programaData.autores
-    );
+    // Salva os dados do programa no banco de dados e obtém o ID do novo programa
+    const novoPrograma = await this.programaService.criar(programaData, programaData.autores);
+    
+    const programaId = novoPrograma._id; // Supondo que o ID do programa está acessível aqui
+
+    // Renomear e mover os arquivos
+    if (files.documentoConfidencialidade) {
+      const docConfidencialidade = files.documentoConfidencialidade[0];
+      const docConfidencialidadeExtensao = path.extname(docConfidencialidade.originalname); // Obter a extensão do arquivo original
+      const newDocConfidencialidadePath = path.join(__dirname, '..', '..', 'uploads', 'documentosConfidencialidade', `${programaId}-documentoConfidencialidade${docConfidencialidadeExtensao}`);
+      fs.renameSync(docConfidencialidade.path, newDocConfidencialidadePath);
+      novoPrograma.documentoConfidencialidadePath = newDocConfidencialidadePath;
+    }
+    
+    if (files.codigoFonte) {
+      const codigoFonte = files.codigoFonte[0];
+      const codigoFonteExtensao = path.extname(codigoFonte.originalname); // Obter a extensão do arquivo original
+      const newCodigoFontePath = path.join(__dirname, '..', '..', 'uploads', 'codigoFonte', `${programaId}-codigoFonte${codigoFonteExtensao}`);
+      fs.renameSync(codigoFonte.path, newCodigoFontePath);
+      novoPrograma.codigoFontePath = newCodigoFontePath;
+    }
+
+    // Atualizar o programa com os caminhos dos arquivos
+    await this.programaService.atualizar(novoPrograma._id.toString(), novoPrograma);
+
     return novoPrograma;
   }
 

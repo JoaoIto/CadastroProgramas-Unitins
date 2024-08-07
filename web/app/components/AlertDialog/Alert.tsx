@@ -4,16 +4,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import {
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Grid, IconButton, TextField, Typography } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { postProgramaComArquivos } from "@/app/service/programa/post/postProgramaComArquivos";
+import { useRouter } from "next/navigation";
 
 interface AlertDialogProps {
   token: string;
@@ -43,6 +39,13 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+
+  const router = useRouter();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const [nomeDocumento, setNomeDocumento] = useState<File | null>(null);
   const [page, setPage] = useState(0);
 
@@ -50,28 +53,35 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   const handlePrevPage = () => setPage((prevPage) => prevPage - 1);
 
   const handleConfirm = async () => {
+    if (!nomeDocumento) {
+      setAlertOpen(true);
+      setAlertSeverity("error");
+      setAlertMessage("Por favor, adicione o documento de confidencialidade antes de confirmar.");
+      return;
+    }
+
     if (formData) {
       const formDataWithFile = new FormData();
-      
+
       // Adiciona todos os campos do formData
       Object.entries(formData).forEach(([key, value]) => {
         formDataWithFile.append(key, value);
       });
-      
+
       // Adiciona o arquivo, se existir
       if (nomeDocumento) {
-        formDataWithFile.append("arquivoConfidencialidade", nomeDocumento);
+        formDataWithFile.append("documentoConfidencialidade", nomeDocumento);
       }
-      
+
       // Passa o FormData para a função de confirmação
       onConfirm(formDataWithFile);
-  
+
       // Log para verificar o conteúdo do FormData
       console.log("Data depois dos dois arquivos:");
-      
+
       // Cria um objeto para armazenar as entradas do FormData
       const formDataEntries: { [key: string]: any } = {};
-  
+
       formDataWithFile.forEach((value, key) => {
         if (value instanceof File) {
           formDataEntries[key] = {
@@ -83,12 +93,21 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
           formDataEntries[key] = value;
         }
       });
-  
+
       // Mostra o objeto como JSON
       console.log("FormData como JSON:", JSON.stringify(formDataEntries, null, 2));
+      setAlertOpen(true);
+      setAlertSeverity("success");
+      setAlertMessage("A solicitação foi enviada com sucesso!");
+
       await postProgramaComArquivos(formDataWithFile, token);
+
+      router.push('/');
+      setTimeout(() => {
+        window.location.reload(); // Recarrega a página após 1 segundo
+      }, 1000);
     }
-  };  
+  };
 
   return (
     <Dialog open={open} onClose={onCancel}>
@@ -201,7 +220,12 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
             Próximo
           </Button>
         ) : (
-          <Button onClick={handleConfirm} className="bg-azulEscuro text-white hover:bg-azulEscuro" autoFocus>
+          <Button
+            onClick={handleConfirm}
+            className="bg-azulEscuro text-white hover:bg-azulEscuro"
+            autoFocus
+            disabled={!nomeDocumento} // Desabilita o botão se o documento não estiver selecionado
+          >
             Confirmar
           </Button>
         )}

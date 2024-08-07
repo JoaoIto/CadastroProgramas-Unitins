@@ -73,6 +73,19 @@ class ApiUtils {
         await ApiUtils.performRequest<void>(endpoint, options);
     }
 
+    static async postFormData(endpoint: string, formData: FormData, token: string): Promise<void> {
+        console.log("Aqui chegando na api utils de enviar: ", formData);
+        const options: RequestInit = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        };
+    
+        await ApiUtils.performRequest<void>(endpoint, options);
+    }
+
     static async patch<T>(
         endpoint: string,
         data: object | FormData,

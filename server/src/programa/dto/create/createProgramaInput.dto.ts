@@ -15,7 +15,6 @@ export class CreateProgramaInputDto {
     @IsNotEmpty({ each: true, message: 'Cada ID de autor deve ser um ObjectId válido!' })
     autores: mongoose.Types.ObjectId[];
 
-
     @ApiProperty({ type: String, example: 'Descrição do Programa' })
     @IsString()
     @IsNotEmpty({ message: 'A descrição não pode estar vazia!' })
@@ -80,7 +79,11 @@ export class CreateProgramaInputDto {
     @IsEnum(ProgramaStatus, { message: 'O status deve ser um dos status válidos!' })
     status: ProgramaStatus;
 
-    @ApiProperty({ type: 'string', format: 'binary', example: 'nome_do_arquivo.extensao' })
+    @ApiProperty({ type: 'string', format: 'binary', example: 'documento_confidencialidade.pdf' })
+    @IsNotEmpty({ message: 'O documento de confidencialidade é obrigatório!' })
+    documentoConfidencialidade: any; // Campo para o arquivo de confidencialidade
+
+    @ApiProperty({ type: 'string', format: 'binary', example: 'codigo_fonte.zip' })
     @IsOptional()
-    nomeArquivo?: string;
+    codigoFonte?: any;
 }

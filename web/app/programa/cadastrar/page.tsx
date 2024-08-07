@@ -55,7 +55,10 @@ const schema = z.object({
   revelacaoDesc: z.string().optional(),
   revelacaoPublicaDesc: z.string().optional(),
   linkCodigoFonte: z.string().optional(),
-  arquivoCodigoFonte: z.instanceof(File).optional(),
+  codigoFonte: z.instanceof(File).optional(),
+  documentoConfidencialidade: z.instanceof(File).refine(file => file instanceof File, {
+    message: "Documento de confidencialidade é obrigatório"
+  }),
   autores: z
     .array(
       z.object({
@@ -136,7 +139,7 @@ export default function NovaSolicitacao() {
     ILinguagem[]
   >([]);
 
-  const [arquivoCodigoFonte, setArquivoCodigoFonte] = useState<File | null>(
+  const [codigoFonte, setCodigoFonte] = useState<File | null>(
     null
   );
 
@@ -167,7 +170,7 @@ export default function NovaSolicitacao() {
       revelacaoDesc: "",
       revelacaoPublicaDesc: "",
       linkCodigoFonte: "",
-      arquivoCodigoFonte: undefined,
+      codigoFonte: undefined,
       autores: [],
     },
   });
@@ -177,16 +180,17 @@ export default function NovaSolicitacao() {
     if (!isLoading && profile) {
       const nome = profile.nome || "";
       const matricula = profile.matricula || "";
-      setAutores([{ nome, matricula }]);
-      setValue("autores", [{ nome, matricula }]);
+      const autorData = [{ nome, matricula, id: profile._id || "" }];
+setAutores(autorData);
+setValue("autores", autorData);
     }
   }, [profile, isLoading, setValue]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setArquivoCodigoFonte(file);
-      setValue("arquivoCodigoFonte", file);
+      setCodigoFonte(file);
+      setValue("codigoFonte", file);
     }
   };
 
@@ -238,7 +242,7 @@ export default function NovaSolicitacao() {
         const formValues = getValues();
         // Formata o campo autores
         formValues.autores = formValues.autores
-          .map((autor) => autor.nome)
+          .map((autor) => autor.id)
           .join(", ");
 
         console.log("Form values before confirmation:", formValues);
@@ -255,27 +259,6 @@ export default function NovaSolicitacao() {
   };
 
   useEffect(() => {
-    const fetchUsuarioId = async () => {
-      try {
-        const id = await getUsuarioId(token);
-        if (typeof id === "string") {
-          setAutores((prevAutores) => [
-            ...prevAutores,
-            { nome: "", matricula: "", id },
-          ]);
-          setValue("autores", [
-            ...(Array.isArray(getValues("autores"))
-              ? getValues("autores")
-              : []),
-            { nome: "", matricula: "", id },
-          ]);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar o ID do usuário:", error);
-      }
-    };
-
-    fetchUsuarioId();
     getLinguagensAll(token)
       .then((response) => {
         setLinguagensDisponiveis(response || []);
@@ -283,18 +266,23 @@ export default function NovaSolicitacao() {
       .catch((error) => {
         console.error("Erro ao buscar linguagens:", error);
       });
-  }, [token, setAutores, setValue, getValues]);
+  }, [profile, isLoading, setValue, token]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    const formDataWithFile = { ...data, arquivoCodigoFonte };
-    console.log("Form data before confirmation:", data);
-    setFormData(data);
+    const formDataWithFile = {
+      ...data,
+      codigoFonte,
+      autores: data.autores.map((autor) => autor.id)
+    };
+    console.log("Form data before confirmation:", formDataWithFile);
+    setFormData(formDataWithFile);
     setShowConfirmationModal(true);
   });
 
   const adicionarAutor = () => {
-    setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "" }]);
-    setValue("autores", [...getValues("autores"), { nome: "", matricula: "" }]);
+    // Adiciona um novo autor com campos vazios, incluindo o ID se necessário
+    setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "", id: "" }]);
+    setValue("autores", [...getValues("autores"), { nome: "", matricula: "", id: "" }]);
   };
 
   const handleAutorChange = (
@@ -329,6 +317,7 @@ export default function NovaSolicitacao() {
     const autorData = await getByMatricula(token, matricula);
     if (autorData) {
       handleAutorChange(index, "nome", autorData.nome);
+      handleAutorChange(index, "id", autorData.id);
       // Preencher outros campos do autor se necessário
     } else {
       alert("Autor não encontrado.");
@@ -359,9 +348,9 @@ export default function NovaSolicitacao() {
     formData.append("descricao", data.descricao);
     formData.append("solucaoProblemaDesc", data.solucaoProblemaDesc);
     formData.append("linguagens", data.linguagens);
-    formData.append("autores", JSON.stringify(data.autores));
-    if (insercaoOpcao === "arquivo" && arquivoCodigoFonte) {
-      formData.append("codigoFonte", arquivoCodigoFonte);
+    formData.append("autores", JSON.stringify([data.autores] || []));
+    if (insercaoOpcao === "arquivo" && codigoFonte) {
+      formData.append("codigoFonte", codigoFonte);
     } else if (insercaoOpcao === "link") {
       formData.append("codigoFonteLink", linkCodigoFonte);
     }
@@ -634,7 +623,7 @@ export default function NovaSolicitacao() {
                     error={!!errors.fasePublicacao}
                     helperText={errors.fasePublicacao?.message}
                   >
-                    {["Tese", "Artigo", "TCC", "Outro"].map((option) => (
+                    {["TESE", "ARTIGO", "TCC", "OUTRO"].map((option) => (
                       <MenuItem key={option} value={option}>
                         {option}
                       </MenuItem>
@@ -750,8 +739,8 @@ export default function NovaSolicitacao() {
                     variant="contained"
                     component="label"
                   >
-                    {arquivoCodigoFonte ? (
-                      arquivoCodigoFonte.name
+                    {codigoFonte ? (
+                      codigoFonte.name
                     ) : (
                       <>
                         Adicione o documento aqui <UploadFileIcon />
@@ -761,22 +750,22 @@ export default function NovaSolicitacao() {
                       type="file"
                       hidden
                       onChange={(e) =>
-                        handleFileChange(e, setArquivoCodigoFonte)
+                        handleFileChange(e, setCodigoFonte)
                       }
                     />
                   </Button>
 
-                  {arquivoCodigoFonte && (
+                  {codigoFonte && (
                     <TextField
                       className="w-[100%]"
                       label="Documento Selecionado"
                       variant="standard"
-                      value={arquivoCodigoFonte.name}
+                      value={codigoFonte.name}
                       disabled
                       InputProps={{
                         endAdornment: (
                           <IconButton
-                            onClick={() => setArquivoCodigoFonte(null)}
+                            onClick={() => setCodigoFonte(null)}
                             edge="end"
                             aria-label="delete"
                           >

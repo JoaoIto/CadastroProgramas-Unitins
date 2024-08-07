@@ -61,6 +61,13 @@ export class Programa {
 
     @Prop({type: String, required: false})
     nomeArquivo: string;
+
+    @Prop({ type: String, default: null })
+    documentoConfidencialidadePath: string;
+
+    @Prop({ type: String, default: null })
+    codigoFontePath: string;
+    
 }
 
 export const ProgramaSchema = SchemaFactory.createForClass(Programa);
