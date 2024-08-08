@@ -17,6 +17,7 @@ import ExplanationModal from "@/app/components/Modal";
 import FileUploadField from "@/app/components/FileUploadField";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import { enviarProcesso } from "@/app/service/programa/admin/patch/enviarProcesso";
+import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 
 interface FormData {
   boleto: File | null;
@@ -28,7 +29,7 @@ interface FormData {
 
 const ProcessoPage: React.FC = () => {
   const token = getStorageItem();
-  const programaId = sessionStorage.getItem('programaid')
+  const programaId = tokenService.getProgramaId();
 
   const { control, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {

@@ -20,7 +20,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { Response } from 'express';
+import { Response } from "express";
 import { CreateProgramaInputDto } from "./dto/create/createProgramaInput.dto";
 import { ProgramaService } from "./programa.service";
 import { UpdateProgramaInputDto } from "./dto/update/atualizarPrograma.dto";
@@ -45,7 +45,10 @@ import { Role } from "../roles/roles.enum";
 import { UsuarioProgramaService } from "../usuario-programa/usuario-programa.service";
 import { UsuarioService } from "../usuario/usuario.service";
 import { IMultipartFile } from "./interfaces/IMultpartFile.interface";
-import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express/multer";
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from "@nestjs/platform-express/multer";
 import { diskStorage } from "multer";
 import { join } from "path";
 import { ProcessoProgramaInputDto } from "./dto/processo/processoPrograma.dto";
@@ -89,32 +92,47 @@ export class ProgramaController {
     }
   }
 
-  @Post('/cadastrar')
+  @Post("/cadastrar")
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cadastra um novo programa' })
+  @ApiOperation({ summary: "Cadastra um novo programa" })
   @ApiBody({ type: CreateProgramaInputDto })
-  @ApiCreatedResponse({ description: 'Operação bem-sucedida', type: Programa })
+  @ApiCreatedResponse({ description: "Operação bem-sucedida", type: Programa })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'documentoConfidencialidade', maxCount: 1 },
-      { name: 'codigoFonte', maxCount: 1 },
-    ], {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          callback(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop());
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: "documentoConfidencialidade", maxCount: 1 },
+        { name: "codigoFonte", maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: "./uploads",
+          filename: (req, file, callback) => {
+            const uniqueSuffix =
+              Date.now() + "-" + Math.round(Math.random() * 1e9);
+            callback(
+              null,
+              file.fieldname +
+                "-" +
+                uniqueSuffix +
+                "." +
+                file.originalname.split(".").pop()
+            );
+          },
+        }),
+      }
+    )
   )
   async create(
     @Body() formData: CreateProgramaInputDto,
     @Headers() headers: Record<string, string>,
-    @UploadedFiles() files: { documentoConfidencialidade?: Express.Multer.File[], codigoFonte?: Express.Multer.File[] },
+    @UploadedFiles()
+    files: {
+      documentoConfidencialidade?: Express.Multer.File[];
+      codigoFonte?: Express.Multer.File[];
+    }
   ) {
     console.log("Aqui chegando no backend: ", formData);
-    
+
     // Criar a instância do programa com base nos dados recebidos
     const programaData = new Programa();
     programaData.titulo = formData.titulo;
@@ -134,66 +152,106 @@ export class ProgramaController {
     programaData.autores = formData.autores;
 
     // Salva os dados do programa no banco de dados e obtém o ID do novo programa
-    const novoPrograma = await this.programaService.criar(programaData, programaData.autores);
-    
+    const novoPrograma = await this.programaService.criar(
+      programaData,
+      programaData.autores
+    );
+
     const programaId = novoPrograma._id; // Supondo que o ID do programa está acessível aqui
 
     // Renomear e mover os arquivos
     if (files.documentoConfidencialidade) {
       const docConfidencialidade = files.documentoConfidencialidade[0];
-      const docConfidencialidadeExtensao = path.extname(docConfidencialidade.originalname); // Obter a extensão do arquivo original
-      const newDocConfidencialidadePath = path.join(__dirname, '..', '..', 'uploads', 'documentosConfidencialidade', `${programaId}-documentoConfidencialidade${docConfidencialidadeExtensao}`);
+      const docConfidencialidadeExtensao = path.extname(
+        docConfidencialidade.originalname
+      ); // Obter a extensão do arquivo original
+      const newDocConfidencialidadePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "documentosConfidencialidade",
+        `${programaId}-documentoConfidencialidade${docConfidencialidadeExtensao}`
+      );
       fs.renameSync(docConfidencialidade.path, newDocConfidencialidadePath);
       novoPrograma.documentoConfidencialidadePath = newDocConfidencialidadePath;
     }
-    
+
     if (files.codigoFonte) {
       const codigoFonte = files.codigoFonte[0];
       const codigoFonteExtensao = path.extname(codigoFonte.originalname); // Obter a extensão do arquivo original
-      const newCodigoFontePath = path.join(__dirname, '..', '..', 'uploads', 'codigoFonte', `${programaId}-codigoFonte${codigoFonteExtensao}`);
+      const newCodigoFontePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "codigoFonte",
+        `${programaId}-codigoFonte${codigoFonteExtensao}`
+      );
       fs.renameSync(codigoFonte.path, newCodigoFontePath);
       novoPrograma.codigoFontePath = newCodigoFontePath;
     }
 
     // Atualizar o programa com os caminhos dos arquivos
-    await this.programaService.atualizar(novoPrograma._id.toString(), novoPrograma);
+    await this.programaService.atualizar(
+      novoPrograma._id.toString(),
+      novoPrograma
+    );
 
     return novoPrograma;
   }
 
-  @Patch('/processo/:id')
+  @Patch("/processo/:id")
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Anexa os documentos para um programa existente no processo de aprovação' })
+  @ApiOperation({
+    summary:
+      "Anexa os documentos para um programa existente no processo de aprovação",
+  })
   @ApiBody({ type: ProcessoProgramaInputDto })
-  @ApiOkResponse({ description: 'Programa atualizado com sucesso', type: Programa })
+  @ApiOkResponse({
+    description: "Programa atualizado com sucesso",
+    type: Programa,
+  })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'boleto', maxCount: 1 },
-      { name: 'veracidade', maxCount: 1 },
-      { name: 'certificadoRegistro', maxCount: 1 },
-    ], {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          callback(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop());
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: "boleto", maxCount: 1 },
+        { name: "veracidade", maxCount: 1 },
+        { name: "certificadoRegistro", maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: "./uploads",
+          filename: (req, file, callback) => {
+            const uniqueSuffix =
+              Date.now() + "-" + Math.round(Math.random() * 1e9);
+            callback(
+              null,
+              file.fieldname +
+                "-" +
+                uniqueSuffix +
+                "." +
+                file.originalname.split(".").pop()
+            );
+          },
+        }),
+      }
+    )
   )
   async update(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateData: ProcessoProgramaInputDto,
-    @UploadedFiles() files: {
+    @UploadedFiles()
+    files: {
       boleto?: Express.Multer.File[];
       veracidade?: Express.Multer.File[];
       certificadoRegistro?: Express.Multer.File[];
-    },
+    }
   ) {
     const programa = await this.programaService.consultar(id);
 
     if (!programa) {
-      throw new NotFoundException('Programa não encontrado');
+      throw new NotFoundException("Programa não encontrado");
     }
 
     // Atualizar campos do programa
@@ -208,29 +266,55 @@ export class ProgramaController {
     if (files.boleto) {
       const boletoFile = files.boleto[0];
       const boletoExtensao = path.extname(boletoFile.originalname);
-      const newBoletoPath = path.join(__dirname, '..', '..', 'uploads', 'boleto', `${id}-boleto${boletoExtensao}`);
+      const newBoletoPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "boleto",
+        `${id}-boleto${boletoExtensao}`
+      );
       fs.renameSync(boletoFile.path, newBoletoPath);
       programa.boletoPath = newBoletoPath;
     }
-    
+
     if (files.veracidade) {
       const veracidadeFile = files.veracidade[0];
       const veracidadeExtensao = path.extname(veracidadeFile.originalname);
-      const newVeracidadePath = path.join(__dirname, '..', '..', 'uploads', 'veracidade', `${id}-veracidade${veracidadeExtensao}`);
+      const newVeracidadePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "veracidade",
+        `${id}-veracidade${veracidadeExtensao}`
+      );
       fs.renameSync(veracidadeFile.path, newVeracidadePath);
       programa.veracidadePath = newVeracidadePath;
     }
 
     if (files.certificadoRegistro) {
       const certificadoRegistroFile = files.certificadoRegistro[0];
-      const certificadoRegistroExtensao = path.extname(certificadoRegistroFile.originalname);
-      const newCertificadoRegistroPath = path.join(__dirname, '..', '..', 'uploads', 'certificadoRegistro', `${id}-certificadoRegistro${certificadoRegistroExtensao}`);
+      const certificadoRegistroExtensao = path.extname(
+        certificadoRegistroFile.originalname
+      );
+      const newCertificadoRegistroPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "certificadoRegistro",
+        `${id}-certificadoRegistro${certificadoRegistroExtensao}`
+      );
       fs.renameSync(certificadoRegistroFile.path, newCertificadoRegistroPath);
       programa.certificadoRegistroPath = newCertificadoRegistroPath;
     }
 
     // Atualizar o programa no banco de dados
-    const programaAtualizado = await this.programaService.atualizar(id, programa);
+    const programaAtualizado = await this.programaService.atualizar(
+      id,
+      programa
+    );
 
     return programaAtualizado;
   }
@@ -294,7 +378,10 @@ export class ProgramaController {
     type: Number,
     description: "Quantidade de itens por página",
   })
-  @ApiResponse({ status: 200, description: "Lista de programas enviados paginada" })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de programas enviados paginada",
+  })
   async getProgramasEnviados(
     @Req() req,
     @Query("page") page = 1,
@@ -302,14 +389,16 @@ export class ProgramaController {
   ): Promise<{ data: Programa[]; total: number; page: number; limit: number }> {
     try {
       this.logger.log("Retornando os programas enviados para admin");
-      const { data, total } = await this.programaService.getProgramasEnviados(page, limit);
+      const { data, total } = await this.programaService.getProgramasEnviados(
+        page,
+        limit
+      );
       return { data, total, page, limit };
     } catch (error) {
       this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
       throw error;
     }
   }
-  
 
   @Get("/enviados/usuario")
   @UseGuards(JwtAuthGuard)
@@ -330,7 +419,10 @@ export class ProgramaController {
     type: Number,
     description: "Quantidade de itens por página",
   })
-  @ApiResponse({ status: 200, description: "Lista de programas enviados paginada" })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de programas enviados paginada",
+  })
   async getProgramasEnviadosByUser(
     @Req() req,
     @Query("page") page = 1,
@@ -339,61 +431,73 @@ export class ProgramaController {
     try {
       this.logger.log("Retornando os programas enviados pelos usuários");
       const userId = req.user._id;
-      const { data, total } = await this.programaService.getProgramasEnviadosByUser(userId, page, limit);
+      const { data, total } =
+        await this.programaService.getProgramasEnviadosByUser(
+          userId,
+          page,
+          limit
+        );
       return { data, total, page, limit };
     } catch (error) {
       this.logger.error(`Erro ao buscar programas enviados: ${error.message}`);
       throw error;
     }
-  }  
-
+  }
 
   @Get("/em-analise")
-@UseGuards(JwtAuthGuard)
-@Roles(Role.Admin)
-@ApiBearerAuth()
-@ApiOperation({ summary: "Retornando os programas em analise pelo admin" })
-async getProgramasEmAnalise(
-  @Req() req,
-  @Query('page') page: number = 1,
-  @Query('limit') limit: number = 10,
-): Promise<{ data: Programa[]; total: number }> {
-  try {
-    this.logger.log("Retornando os programas em analise pelo admin");
-    const { data, total } = await this.programaService.getProgramasEmAnalise(page, limit);
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Retornando os programas em analise pelo admin" })
+  async getProgramasEmAnalise(
+    @Req() req,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10
+  ): Promise<{ data: Programa[]; total: number }> {
+    try {
+      this.logger.log("Retornando os programas em analise pelo admin");
+      const { data, total } = await this.programaService.getProgramasEmAnalise(
+        page,
+        limit
+      );
 
-    return { data, total };
-  } catch (error) {
-    this.logger.error(`Erro ao buscar programas em analise: ${error.message}`);
-    throw error;
+      return { data, total };
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar programas em analise: ${error.message}`
+      );
+      throw error;
+    }
   }
-}
 
+  @Get("/porUsuario")
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.User)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Retorna os programas do usuário logado" })
+  async getProgramasByUser(@Req() req): Promise<Programa[]> {
+    try {
+      this.logger.log("Retornando os programas do usuário logado");
+      const usuarioCpf = req.user.cpf;
+      this.logger.log(`CPF do usuário logado: ${usuarioCpf}`);
 
-  @Get('/porUsuario')
-@UseGuards(JwtAuthGuard)
-@Roles(Role.Admin, Role.User)
-@ApiBearerAuth()
-@ApiOperation({ summary: 'Retorna os programas do usuário logado' })
-async getProgramasByUser(@Req() req): Promise<Programa[]> {
-  try {
-    this.logger.log("Retornando os programas do usuário logado");
-    const usuarioCpf = req.user.cpf;
-    this.logger.log(`CPF do usuário logado: ${usuarioCpf}`);
+      const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
+      this.logger.log(`Usuário encontrado: ${JSON.stringify(usuario)}`);
 
-    const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
-    this.logger.log(`Usuário encontrado: ${JSON.stringify(usuario)}`);
+      this.logger.log("Fazendo a busca dos dados de programas do usuario");
+      const programas = await this.programaService.getProgramasPorUsuarioId(
+        usuario._id
+      );
 
-    this.logger.log("Fazendo a busca dos dados de programas do usuario");
-    const programas = await this.programaService.getProgramasPorUsuarioId(usuario._id);
-
-    this.logger.log(`Programas retornados: ${JSON.stringify(programas)}`);
-    return programas;
-  } catch (error) {
-    this.logger.error(`Erro ao buscar programas do usuário: ${error.message}`);
-    throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
+      this.logger.log(`Programas retornados: ${JSON.stringify(programas)}`);
+      return programas;
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar programas do usuário: ${error.message}`
+      );
+      throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
+    }
   }
-}
   @Get("/pages")
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.User)
@@ -421,17 +525,24 @@ async getProgramasByUser(@Req() req): Promise<Programa[]> {
       this.logger.log("Retornando os programas do usuário logado");
       const usuarioCpf = req.user.cpf;
       this.logger.log(`CPF do usuário logado: ${usuarioCpf}`);
-  
+
       const usuario = await this.usuarioService.consultarByCpf(usuarioCpf);
       this.logger.log(`Usuário encontrado: ${JSON.stringify(usuario)}`);
-  
+
       this.logger.log("Fazendo a busca dos dados de programas do usuario");
-      const { data, total } = await this.programaService.getProgramasPorUsuarioIdPaginado(usuario._id, page, limit);
-  
+      const { data, total } =
+        await this.programaService.getProgramasPorUsuarioIdPaginado(
+          usuario._id,
+          page,
+          limit
+        );
+
       //this.logger.log(`Programas retornados: ${JSON.stringify(programas)}`);
       return { data, total, page: 1, limit: 5 };
     } catch (error) {
-      this.logger.error(`Erro ao buscar programas do usuário: ${error.message}`);
+      this.logger.error(
+        `Erro ao buscar programas do usuário: ${error.message}`
+      );
       throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
     }
   }
@@ -451,45 +562,57 @@ async getProgramasByUser(@Req() req): Promise<Programa[]> {
     return programaPromise;
   }
 
-  @Get('/download/:tipo/:id')
-@Header('Content-Type', 'application/octet-stream')
-@ApiBearerAuth()
-@Roles(Role.Admin, Role.User)
-@ApiOperation({
-  summary: 'Fazendo download dos arquivos do programa',
-})
-async downloadFile(
-  @Param('tipo') tipo: string,
-  @Param('id') id: string,
-  @Res() res: Response,
-) {
-  const programa = await this.programaService.consultar(id);
-  if (!programa) {
-    res.status(HttpStatus.NOT_FOUND).json({ message: 'Programa não encontrado' });
-    return;
-  }
-
-  let filePath: string;
-  if (tipo === 'codigoFonte') {
-    filePath = programa.codigoFontePath;
-  } else if (tipo === 'documentoConfidencialidade') {
-    filePath = programa.documentoConfidencialidadePath;
-  } else {
-    res.status(HttpStatus.BAD_REQUEST).json({ message: 'Tipo de arquivo inválido' });
-    return;
-  }
-
-  // Verifica se o filePath é absoluto, caso contrário, junta com a pasta uploads
-  const absoluteFilePath = filePath.startsWith(process.cwd())
-    ? filePath
-    : join(process.cwd(), 'uploads', filePath);
-
-  res.download(absoluteFilePath, (err) => {
-    if (err) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Erro ao baixar o arquivo' });
+  @Get("/download/:tipo/:id")
+  @Header("Content-Type", "application/octet-stream")
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.User)
+  @ApiOperation({
+    summary: "Fazendo download dos arquivos do programa",
+  })
+  async downloadFile(
+    @Param("tipo") tipo: string,
+    @Param("id") id: string,
+    @Res() res: Response
+  ) {
+    const programa = await this.programaService.consultar(id);
+    if (!programa) {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: "Programa não encontrado" });
+      return;
     }
-  });
-}
+
+    let filePath: string;
+    if (tipo === "codigoFonte") {
+      filePath = programa.codigoFontePath;
+    } else if (tipo === "documentoConfidencialidade") {
+      filePath = programa.documentoConfidencialidadePath;
+    } else if (tipo === "certificadoRegistro") {
+      filePath = programa.certificadoRegistroPath;
+    } else if (tipo === "boleto") {
+      filePath = programa.boletoPath;
+    } else if (tipo === "veracidade") {
+      filePath = programa.veracidadePath;
+    } else {
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: "Tipo de arquivo inválido" });
+      return;
+    }
+
+    // Verifica se o filePath é absoluto, caso contrário, junta com a pasta uploads
+    const absoluteFilePath = filePath.startsWith(process.cwd())
+      ? filePath
+      : join(process.cwd(), "uploads", filePath);
+
+    res.download(absoluteFilePath, (err) => {
+      if (err) {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ message: "Erro ao baixar o arquivo" });
+      }
+    });
+  }
 
   @Get("/:uuid")
   @Roles(Role.Admin)

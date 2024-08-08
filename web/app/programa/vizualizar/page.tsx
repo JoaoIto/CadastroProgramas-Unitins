@@ -54,6 +54,10 @@ const VizualizarSolicitacao = () => {
     router.push(`/programa/editar`);
   };
 
+  const handleArquivos = () => {
+    router.push(`/programa/vizualizar/arquivos`);
+  };
+
   const handleProcesso = () => {
     router.push(`/admin/programa/processo`);
   };
@@ -250,6 +254,16 @@ const VizualizarSolicitacao = () => {
                 )}
               </Grid>
             </Grid>
+          </Grid>
+          <Grid item xs={12} md={6}>
+          <h2 className="text-2xl font-medium mb-4">Arquivos do Programa:</h2>
+          <Button
+                variant="outlined"
+                className=" w-1/3"
+                onClick={handleArquivos}
+              >
+                Vizualizar arquivos
+              </Button>
           </Grid>
           <Grid className="w-full justify-evenly flex">
             <Grid container className="flex flex-col w-full" mt={2}>

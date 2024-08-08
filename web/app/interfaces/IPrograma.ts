@@ -18,6 +18,11 @@ interface IPrograma {
     revelacaoPublicaDesc: string | null,
     nomeArquivo: File | null;
     autores: string[]
-    documentoConfidencialidadePath: string
-    codigoFontePath: string;
+    documentoConfidencialidadePath: string | null
+    codigoFontePath: string | null;
+    boletoPath: string | null;
+    veracidadePath: string | null;
+    certificadoRegistroPath: string | null;
+    rpi: string | null;
+    protocoloINPI: string | null;
 }
