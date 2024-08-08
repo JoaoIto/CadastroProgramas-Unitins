@@ -18,14 +18,14 @@ import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [programaData, setProgramaData] = useState<IPrograma | null>(null); 
+  const [programaData, setProgramaData] = useState<IPrograma | null>(null);
   const [mostrarDescricao, setMostrarDescricao] = useState<boolean>(true);
   const [mostrarSolucao, setMostrarSolucao] = useState<boolean>(true);
   const [mostrarMercado, setMostrarMercado] = useState<boolean>(true);
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
-  const { profile, isLoading: isProfileLoading } = useUserPayload(); 
+  const { profile, isLoading: isProfileLoading } = useUserPayload();
   const isAdmin = profile.perfil === "admin";
 
   useEffect(() => {
@@ -157,10 +157,7 @@ const VizualizarSolicitacao = () => {
                       disabled
                       InputProps={{
                         endAdornment: (
-                          <IconButton
-                            edge="end"
-                            aria-label="view"
-                          >
+                          <IconButton edge="end" aria-label="view">
                             <VisibilityOutlinedIcon />
                           </IconButton>
                         ),
@@ -172,7 +169,7 @@ const VizualizarSolicitacao = () => {
                       variant="outlined"
                       color="primary"
                       fullWidth
-                      onClick={() => handleDownload('codigoFonte')}
+                      onClick={() => handleDownload("codigoFonte")}
                       disabled={!programaData?.codigoFontePath}
                     >
                       Visualizar Código Fonte
@@ -256,32 +253,36 @@ const VizualizarSolicitacao = () => {
             </Grid>
           </Grid>
           <Grid item xs={12} md={6}>
-          <h2 className="text-2xl font-medium mb-4">Arquivos do Programa:</h2>
-          <Button
-                variant="outlined"
-                className=" w-1/3"
-                onClick={handleArquivos}
-              >
-                Vizualizar arquivos
-              </Button>
+            <h2 className="text-2xl font-medium mb-4">Arquivos do Programa:</h2>
+            <Button
+              variant="outlined"
+              className=" w-1/3"
+              onClick={handleArquivos}
+            >
+              Vizualizar arquivos
+            </Button>
           </Grid>
           <Grid className="w-full justify-evenly flex">
             <Grid container className="flex flex-col w-full" mt={2}>
-              <Typography variant="body1">
-                Deseja editar essa solicitação?
-              </Typography>
-              <Button
-                variant="outlined"
-                className=" w-1/3"
-                onClick={handleEdit}
-              >
-                Editar
-              </Button>
+              {(isAdmin || programaData?.status === "RASCUNHO") && (
+                <>
+                  <Typography variant="body1">
+                    Deseja editar essa solicitação?
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    className="w-1/3"
+                    onClick={handleEdit}
+                  >
+                    Editar
+                  </Button>
+                </>
+              )}
             </Grid>
             {isAdmin && ( // Verificação se o usuário é admin
               <Grid container className="flex flex-col self-end w-full" mt={2}>
                 <Typography variant="body1">
-                  Deseja prossseguir com a solicitação?
+                  Deseja prosseguir com a solicitação?
                 </Typography>
                 <Button
                   variant="contained"
