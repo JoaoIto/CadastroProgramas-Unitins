@@ -7,6 +7,7 @@ import {
   Headers,
   HttpStatus,
   Logger,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -31,6 +32,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -46,6 +48,7 @@ import { IMultipartFile } from "./interfaces/IMultpartFile.interface";
 import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express/multer";
 import { diskStorage } from "multer";
 import { join } from "path";
+import { ProcessoProgramaInputDto } from "./dto/processo/processoPrograma.dto";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -156,6 +159,80 @@ export class ProgramaController {
     await this.programaService.atualizar(novoPrograma._id.toString(), novoPrograma);
 
     return novoPrograma;
+  }
+
+  @Patch('/processo/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Anexa os documentos para um programa existente no processo de aprovação' })
+  @ApiBody({ type: ProcessoProgramaInputDto })
+  @ApiOkResponse({ description: 'Programa atualizado com sucesso', type: Programa })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'boleto', maxCount: 1 },
+      { name: 'veracidade', maxCount: 1 },
+      { name: 'certificadoRegistro', maxCount: 1 },
+    ], {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          callback(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop());
+        },
+      }),
+    }),
+  )
+  async update(
+    @Param('id') id: string,
+    @Body() updateData: ProcessoProgramaInputDto,
+    @UploadedFiles() files: {
+      boleto?: Express.Multer.File[];
+      veracidade?: Express.Multer.File[];
+      certificadoRegistro?: Express.Multer.File[];
+    },
+  ) {
+    const programa = await this.programaService.consultar(id);
+
+    if (!programa) {
+      throw new NotFoundException('Programa não encontrado');
+    }
+
+    // Atualizar campos do programa
+    if (updateData.protocoloINPI) {
+      programa.protocoloINPI = updateData.protocoloINPI;
+    }
+    if (updateData.rpi) {
+      programa.rpi = updateData.rpi;
+    }
+
+    // Renomear e mover os arquivos se eles foram enviados
+    if (files.boleto) {
+      const boletoFile = files.boleto[0];
+      const boletoExtensao = path.extname(boletoFile.originalname);
+      const newBoletoPath = path.join(__dirname, '..', '..', 'uploads', 'boleto', `${id}-boleto${boletoExtensao}`);
+      fs.renameSync(boletoFile.path, newBoletoPath);
+      programa.boletoPath = newBoletoPath;
+    }
+    
+    if (files.veracidade) {
+      const veracidadeFile = files.veracidade[0];
+      const veracidadeExtensao = path.extname(veracidadeFile.originalname);
+      const newVeracidadePath = path.join(__dirname, '..', '..', 'uploads', 'veracidade', `${id}-veracidade${veracidadeExtensao}`);
+      fs.renameSync(veracidadeFile.path, newVeracidadePath);
+      programa.veracidadePath = newVeracidadePath;
+    }
+
+    if (files.certificadoRegistro) {
+      const certificadoRegistroFile = files.certificadoRegistro[0];
+      const certificadoRegistroExtensao = path.extname(certificadoRegistroFile.originalname);
+      const newCertificadoRegistroPath = path.join(__dirname, '..', '..', 'uploads', 'certificadoRegistro', `${id}-certificadoRegistro${certificadoRegistroExtensao}`);
+      fs.renameSync(certificadoRegistroFile.path, newCertificadoRegistroPath);
+      programa.certificadoRegistroPath = newCertificadoRegistroPath;
+    }
+
+    // Atualizar o programa no banco de dados
+    const programaAtualizado = await this.programaService.atualizar(id, programa);
+
+    return programaAtualizado;
   }
 
   @Get()

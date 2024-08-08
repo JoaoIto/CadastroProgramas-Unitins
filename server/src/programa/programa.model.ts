@@ -68,6 +68,20 @@ export class Programa {
     @Prop({ type: String, default: null })
     codigoFontePath: string;
     
+    @Prop({ type: String, default: null })
+  boletoPath: string;
+
+  @Prop({ type: String, default: null })
+  veracidadePath: string;
+
+  @Prop({ type: String, default: null })
+  certificadoRegistroPath: string;
+
+  @Prop({ type: String, default: null })
+  protocoloINPI: string;
+
+  @Prop({ type: String, default: null })
+  rpi: string;
 }
 
 export const ProgramaSchema = SchemaFactory.createForClass(Programa);

@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import ExplanationModal from "@/app/components/Modal";
 import FileUploadField from "@/app/components/FileUploadField";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
+import { enviarProcesso } from "@/app/service/programa/admin/patch/enviarProcesso";
 
 interface FormData {
   boleto: File | null;
@@ -25,6 +27,9 @@ interface FormData {
 }
 
 const ProcessoPage: React.FC = () => {
+  const token = getStorageItem();
+  const programaId = sessionStorage.getItem('programaid')
+
   const { control, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       boleto: null,
@@ -61,9 +66,19 @@ const ProcessoPage: React.FC = () => {
     "Preste atenção ao preencher todas as etapas! Clique em 'Confirmar' para prosseguir."
   ];
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-    // Lógica de envio do formulário
+  const onSubmit = async (data: FormData) => {
+    const formData = new FormData();
+    if (data.boleto) formData.append('boleto', data.boleto);
+    if (data.veracidade) formData.append('veracidade', data.veracidade);
+    formData.append('rpi', data.rpi);
+    if (data.certificadoRegistro) formData.append('certificadoRegistro', data.certificadoRegistro);
+    formData.append('protocoloINPI', data.protocoloINPI);
+
+    try {
+      const response = await enviarProcesso(token, formData, programaId ?? '');
+    } catch (error) {
+      console.error('Erro ao enviar formulário', error);
+    }
   };
 
   const handleNext = () => {
