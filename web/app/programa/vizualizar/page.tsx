@@ -15,6 +15,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -259,7 +260,7 @@ const VizualizarSolicitacao = () => {
               className=" w-1/3"
               onClick={handleArquivos}
             >
-              Vizualizar arquivos
+              Vizualizar arquivos <ArchiveOutlinedIcon/>
             </Button>
           </Grid>
           <Grid className="w-full justify-evenly flex">
