@@ -37,6 +37,7 @@ import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll
 import { PorcentagemAutores } from "@/app/components/PorcentagemAutores";
 import AlertDialog from "@/app/components/AlertDialog/Alert";
 import { getByMatricula } from "@/app/service/perfil/get/getByMatricula";
+import { getByCPF } from "@/app/service/perfil/get/getByCPF";
 
 // Validação com Zod
 const schema = z.object({
@@ -180,7 +181,8 @@ export default function NovaSolicitacao() {
     if (!isLoading && profile) {
       const nome = profile.nome || "";
       const matricula = profile.matricula || "";
-      const autorData = [{ nome, matricula, id: profile._id || "" }];
+      const cpf = profile.cpf || "";
+      const autorData = [{ nome, matricula, cpf,  id: profile._id || "" }];
 setAutores(autorData);
 setValue("autores", autorData);
     }
@@ -324,6 +326,24 @@ setValue("autores", autorData);
     }
   };
 
+  const buscarAutorByCPF = async (index: number) => {
+    // Lógica para buscar o autor na plataforma usando nome ou matrícula
+    const CPF = autores[index].cpf;
+    if (!CPF) {
+      alert("Por favor, insira uma matrícula para buscar.");
+      return;
+    }
+
+    const autorData = await getByCPF(token, CPF);
+    if (autorData) {
+      handleAutorChange(index, "nome", autorData.nome);
+      handleAutorChange(index, "id", autorData.id);
+      // Preencher outros campos do autor se necessário
+    } else {
+      alert("Autor não encontrado.");
+    }
+  };
+
   const handlePorcentagemChange = (index: number, value: number) => {
     const novosAutores = [...autores];
     novosAutores[index].porcentagem = value;
@@ -406,18 +426,18 @@ setValue("autores", autorData);
                 <Grid item xs={5}>
                   <TextField
                     required
-                    label={`Matrícula do Autor ${index + 1}: `}
+                    label={`CPF do Autor ${index + 1}: `}
                     fullWidth
-                    value={autor.matricula}
+                    value={autor.cpf}
                     onChange={(e) =>
-                      handleAutorChange(index, "matricula", e.target.value)
+                      handleAutorChange(index, "cpf", e.target.value)
                     }
-                    error={!!errors.autores?.[index]?.matricula}
-                    helperText={errors.autores?.[index]?.matricula?.message}
+                    error={!!errors.autores?.[index]?.cpf}
+                    helperText={errors.autores?.[index]?.cpf?.message}
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button variant="outlined" onClick={() => buscarAutor(index)}>
+                  <Button variant="outlined" onClick={() => buscarAutorByCPF(index)}>
                     Pesquisar
                   </Button>
                 </Grid>
