@@ -6,6 +6,7 @@ import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { useRouter } from "next/navigation";
 import AlertMessage from "../AlertMessage";
 import AssignmentLateIcon from '@mui/icons-material/AssignmentLate';
+
 export function Sidebar() {
   const router = useRouter();
   const { profile, isLoading } = useUserPayload();
@@ -20,7 +21,8 @@ export function Sidebar() {
   const isAdmin = profile.perfil === "admin";
 
   const routerProgramas = () => {
-    setAlertMessage("Redirecionando para seus programas enviados...");
+    const message = isAdmin ? "Redirecionando para programas pendentes..." : "Redirecionando para seus programas enviados...";
+    setAlertMessage(message);
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
@@ -35,15 +37,20 @@ export function Sidebar() {
     }, 2000);
   };  
 
-  const routerProgramasEmAnalise = () => {
-    setAlertMessage("Redirecionando para seus programas em análise...");
+  const routerProgramasEmAcompanhamento = () => {
+    const message = isAdmin ? "Redirecionando para programas em acompanhamento..." : "Redirecionando para seus programas em análise...";
+    setAlertMessage(message);
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
-      router.push('/admin/programa/em-analise');
+      if (isAdmin) {
+        router.push('/admin/programa/em-analise');
+      } else {
+        router.push('/admin/programa/em-analise');
+      }
       setTimeout(() => {
-      window.location.reload(); 
-      }, 500)// Recarrega a página após o redirecionamento
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
     }, 2000);
   };
 
@@ -54,8 +61,8 @@ export function Sidebar() {
     setTimeout(() => {
       router.push('/');
       setTimeout(() => {
-      window.location.reload(); 
-      }, 500)// Recarrega a página após o redirecionamento
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
     }, 2000);
   };
 
@@ -91,15 +98,15 @@ export function Sidebar() {
               <ListItemIcon>
                 <SendIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="italic" primary="Enviados" />
+              <ListItemText className="italic" primary={isAdmin ? "Pendentes" : "Enviados"} />
             </ListItemButton>
             {isAdmin && (
-              <ListItemButton onClick={routerProgramasEmAnalise}>
-              <ListItemIcon>
-                <AssignmentLateIcon sx={{ color: 'white' }} />
-              </ListItemIcon>
-              <ListItemText className="italic" primary="Em Análise" />
-            </ListItemButton>
+              <ListItemButton onClick={routerProgramasEmAcompanhamento}>
+                <ListItemIcon>
+                  <AssignmentLateIcon sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText className="italic" primary="Em Acompanhamento" />
+              </ListItemButton>
             )}
           </List>
         </nav>
