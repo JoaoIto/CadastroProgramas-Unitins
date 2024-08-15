@@ -60,27 +60,31 @@ export class AuthController {
   }
 
   @Get('/log-user')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Retorna o usuário logado' })
-  @ApiResponse({ status: 200 })
-  async returnLogUser(@Req() req): Promise<Usuario> {
-    this.logger.log("Retornando o usuario logado")
-    this.logger.log(req.user)
-    const cpf =  req.user.cpf;
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@ApiOperation({ summary: 'Retorna o usuário logado' })
+@ApiResponse({ status: 200 })
+async returnLogUser(@Req() req): Promise<Usuario> {
+    this.logger.log("Retornando o usuario logado");
+    this.logger.log(req.user);
+    const cpf = req.user.cpf;
     const usuario = await this.usuarioService.consultarByCpf(cpf);
     this.logger.log(`Usuario retornado: ${usuario}`);
+
     return usuario;
-  }
+}
 
   @Get('/log-user/payload')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Retorna o payload do usuário logado' })
-  @ApiResponse({ status: 200 })
-  async returnPayloadLogUser(@Req() req): Promise<Usuario> {
-    this.logger.log("Retornando o payload de usuario logado")
-    this.logger.log(req.user)
-    return req.user;
-  }
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@ApiOperation({ summary: 'Retorna o payload do usuário logado' })
+@ApiResponse({ status: 200 })
+async returnPayloadLogUser(@Req() req): Promise<Usuario> {
+    this.logger.log("Retornando o payload de usuario logado");
+    this.logger.log(req.user);
+
+    const usuario = req.user as Usuario;
+    return usuario;
+}
+
 }

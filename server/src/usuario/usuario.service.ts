@@ -1,11 +1,13 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable, Logger} from '@nestjs/common';
 import {UsuarioRepository} from "./usuario.repository";
-import {Usuario} from "./usuario.model";
+import {Usuario, UsuarioDocument} from "./usuario.model";
 import { CreateUsuarioInputDto } from './dto/create/createUsuario.dto';
 import { CadastroDTO } from './dto/cadastro.dto';
+import { verificarCamposIncompletos } from 'src/middleware/usuario/functions/verifyKeysUser';
 
 @Injectable()
 export class UsuarioService{
+    private readonly logger = new Logger(UsuarioService.name);
     constructor(private usuarioRepository: UsuarioRepository) {}
 
     async create(user: CreateUsuarioInputDto): Promise<Usuario>{
@@ -28,15 +30,38 @@ export class UsuarioService{
         return this.usuarioRepository.redefinirSenha(cpf, senha)
     }
     async consultar(uuid): Promise<Usuario> {
-        return this.usuarioRepository.findById(uuid);
+        const usuario = await this.usuarioRepository.findById(uuid);
+    
+        if (usuario) {
+            const camposIncompletos = verificarCamposIncompletos(usuario);
+            this.logger.log('Campos incompletos: ' + camposIncompletos.join(', '));
+            usuario.camposIncompletos = camposIncompletos
+        }
+    
+        return usuario;
     }
 
     async consultarMatricula(matricula): Promise<Usuario> {
-        return this.usuarioRepository.findByMatricula(matricula);
+        const usuario = await this.usuarioRepository.findByMatricula(matricula);
+    
+        if (usuario) {
+            const camposIncompletos = verificarCamposIncompletos(usuario);
+            this.logger.log('Campos incompletos: ' + camposIncompletos.join(', '));
+            usuario.camposIncompletos = camposIncompletos
+        }
+    
+        return usuario;
     }
-
-    async consultarByCpf(cpf): Promise<Usuario> {
-        return this.usuarioRepository.findByCpf(cpf);
+    async consultarByCpf(cpf: string): Promise<Usuario> {
+        const usuario = await this.usuarioRepository.findByCpf(cpf);
+    
+        if (usuario) {
+            const camposIncompletos = verificarCamposIncompletos(usuario);
+            this.logger.log('Campos incompletos: ' + camposIncompletos.join(', '));
+            usuario.camposIncompletos = camposIncompletos
+        }
+    
+        return usuario;
     }
 
     async login(login): Promise<Usuario> {

@@ -68,7 +68,7 @@ import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
     }
 
     @ApiBearerAuth()
-    @Roles(Role.Admin)
+    @Roles(Role.Admin, Role.User)
     @ApiOperation({ summary: 'Faz a busca dos dados do usuario pelo cpf dele' })
     @Get('/cpf/:cpf')
     consultarByCpf(@Param("cpf") cpf: string) {

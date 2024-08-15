@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "../roles/roles.enum";
 import { EnderecoDTO } from './dto/cadastro.dto';
 
@@ -8,29 +7,32 @@ export type UsuarioDocument = Usuario & Document;
 
 @Schema({ collection: 'usuario' })
 export class Usuario {
-    @Prop({ type: mongoose.Schema.Types.ObjectId})
-     _id: mongoose.Types.ObjectId;
+    @Prop({ type: mongoose.Schema.Types.ObjectId })
+    _id: mongoose.Types.ObjectId;
 
     @Prop({ required: true, default: Role.User })
-     perfil: Role;
+    perfil: Role;
 
     @Prop({ required: true, default: 'usuarioTeste' })
-     nome: string;
+    nome: string;
 
     @Prop({ required: true })
-     cpf: string;
-
-     @Prop({ required: true })
-     rg: string;
+    cpf: string;
 
     @Prop({ required: true })
-     senha: string;
+    rg: string;
 
-    @Prop({ required: true, default: '1112324232' })
+    @Prop({ required: true })
+    senha: string;
+
+    @Prop()
     matricula: string;
 
-    @Prop({default: 'rua 1, bairro teste'})
+    @Prop({ required: true })
     endereco: EnderecoDTO;
+
+    @Prop({ type: [String], default: [] })
+    camposIncompletos: string[];
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
