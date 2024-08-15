@@ -10,11 +10,13 @@ import { RolesGuard } from "./roles/roles.guard";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { LinguagemModule } from './linguagens/linguagem.module';
+import { InstituicaoModule } from './instituicao/instituicao.module';
 @Module({
   imports: [
       ProgramaModule,
       UsuarioModule,
       LinguagemModule,
+      InstituicaoModule,
       UsuarioProgramaModule,
       AuthModule,
       JwtModule,
