@@ -38,6 +38,7 @@ import { PorcentagemAutores } from "@/app/components/PorcentagemAutores";
 import AlertDialog from "@/app/components/AlertDialog/Alert";
 import { getByMatricula } from "@/app/service/perfil/get/getByMatricula";
 import { getByCPF } from "@/app/service/perfil/get/getByCPF";
+import AlertMessage from "@/app/components/AlertMessage";
 
 // Validação com Zod
 const schema = z.object({
@@ -79,6 +80,11 @@ export default function NovaSolicitacao() {
   const router = useRouter();
   const { profile, isLoading } = useUser();
   const token = getStorageItem();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const [activeStep, setActiveStep] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
@@ -183,6 +189,11 @@ export default function NovaSolicitacao() {
       const matricula = profile.matricula || "";
       const cpf = profile.cpf || "";
       const autorData = [{ nome, matricula, cpf,  id: profile._id || "" }];
+      if(profile.camposIncompletos?.length == 0){
+        setAlertSeverity("error");
+        setAlertMessage("Complete os campos restantes para prosseguir!")
+        setAlertOpen(true);
+      }
 setAutores(autorData);
 setValue("autores", autorData);
     }
@@ -405,6 +416,12 @@ setValue("autores", autorData);
                 </Step>
               ))}
             </Stepper>
+            <AlertMessage
+        open={alertOpen}
+        message={alertMessage}
+        severity={alertSeverity}
+        onClose={() => setAlertOpen(false)}
+      />
             <Typography className="text-2xl font-medium">
               INFORMAÇÕES DOS AUTORES
             </Typography>
