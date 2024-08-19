@@ -4,13 +4,10 @@ import { useForm, Controller } from "react-hook-form";
 import {
   Grid,
   Button,
-  TextField,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
   Select,
   MenuItem,
+  TextField,
   SelectChangeEvent,
 } from "@mui/material";
 import ExplanationModal from "@/app/components/Modal";
@@ -22,9 +19,10 @@ import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 interface FormData {
   boleto: File | null;
   veracidade: File | null;
-  rpi: string;
   certificadoRegistro: File | null;
-  protocoloINPI: string;
+  protocoloINPI: File | null;
+  hash: string;
+  hashType: string;
 }
 
 const ProcessoPage: React.FC = () => {
@@ -35,71 +33,62 @@ const ProcessoPage: React.FC = () => {
     defaultValues: {
       boleto: null,
       veracidade: null,
-      rpi: "",
       certificadoRegistro: null,
-      protocoloINPI: "",
+      protocoloINPI: null,
+      hash: "",
+      hashType: "",
     },
   });
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const [activeStep, setActiveStep] = useState<number>(0);
 
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [openModal, setOpenModal] = useState<boolean>(true);
 
   const [fileNames, setFileNames] = useState({
     boleto: "",
     veracidade: "",
     certificadoRegistro: "",
+    protocoloINPI: "",
   });
 
   const pages = [
     "Boleto",
     "Documento de Veracidade",
-    "RPI",
     "Certificado de Registro",
     "Protocolo INPI",
+    "Código Hash",
   ];
 
+  const hashTypes = ["SHA-256", "MD5", "SHA-1"];
+
   const modalPages = [
-    "Bem-vindo à página de Processo de Solicitação. Aqui você irá completar os passos necessários conseguir aprovar uma solicitação de registro",
+    "Bem-vindo à página de Processo de Solicitação. Aqui você irá completar os passos necessários para conseguir aprovar uma solicitação de registro.",
     "Certifique-se de preencher todos os campos obrigatórios e anexar os documentos necessários em cada etapa.",
     "Ao completar todas as etapas, você poderá enviar seus documentos de devolução para o aluno submetedor.",
     "Todas as etapas, mesmo que não todas, assim que submetidas, são avisadas ao usuário e registradas por data!",
-    "Preste atenção ao preencher todas as etapas! Clique em 'Confirmar' para prosseguir."
+    "Preste atenção ao preencher todas as etapas! Clique em 'Confirmar' para prosseguir.",
   ];
 
   const onSubmit = async (data: FormData) => {
     const formData = new FormData();
-    if (data.boleto) formData.append('boleto', data.boleto);
-    if (data.veracidade) formData.append('veracidade', data.veracidade);
-    formData.append('rpi', data.rpi);
-    if (data.certificadoRegistro) formData.append('certificadoRegistro', data.certificadoRegistro);
-    formData.append('protocoloINPI', data.protocoloINPI);
+    if (data.boleto) formData.append("boleto", data.boleto);
+    if (data.veracidade) formData.append("veracidade", data.veracidade);
+    if (data.certificadoRegistro)
+      formData.append("certificadoRegistro", data.certificadoRegistro);
+    if (data.protocoloINPI)
+      formData.append("protocoloINPI", data.protocoloINPI);
+    formData.append("hash", data.hash);
+    formData.append("hashType", data.hashType);
 
     try {
-      const response = await enviarProcesso(token, formData, programaId ?? '');
+      const response = await enviarProcesso(token, formData, programaId ?? "");
     } catch (error) {
-      console.error('Erro ao enviar formulário', error);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < pages.length - 1) {
-      setCurrentPage(currentPage + 1);
-      setActiveStep(activeStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-      setActiveStep(activeStep - 1);
+      console.error("Erro ao enviar formulário", error);
     }
   };
 
   const handlePageSelect = (event: SelectChangeEvent<number>) => {
     const selectedPage = event.target.value as number;
     setCurrentPage(selectedPage);
-    setActiveStep(selectedPage);
   };
 
   const handleCloseModal = () => {
@@ -121,8 +110,13 @@ const ProcessoPage: React.FC = () => {
       case "Boleto":
         return (
           <div>
-            <Typography variant="body2">Aqui deve ser inserido o boleto de pagamento da solicitação no INPI: </Typography>
-            <Typography className="text-vermelho">Insira o documento no campo abaixo: </Typography>
+            <Typography variant="body2">
+              Aqui deve ser inserido o boleto de pagamento da solicitação no
+              INPI:
+            </Typography>
+            <Typography className="text-vermelho">
+              Insira o documento no campo abaixo:
+            </Typography>
             <FileUploadField
               label="Boleto"
               fileName={fileNames.boleto}
@@ -134,55 +128,84 @@ const ProcessoPage: React.FC = () => {
       case "Documento de Veracidade":
         return (
           <div>
-            <Typography variant="body2">Aqui deve ser inserido o Documento de veracidade da solicitação: </Typography>
-            <Typography className="text-vermelho">Insira o documento no campo abaixo: </Typography>
-          <FileUploadField
-            label="Documento de Veracidade"
-            fileName={fileNames.veracidade}
-            onFileChange={handleFileChange("veracidade")}
-            onClear={handleFileClear("veracidade")}
-          />
-          </div>
-        );
-      case "RPI":
-        return (
-          <div>
-             <Typography variant="body2">Aqui deve ser inserido o número de registro RPI</Typography>
-            <Typography className="text-vermelho">Insira o número no campo abaixo: </Typography>
-          <Controller
-            name="rpi"
-            control={control}
-            render={({ field }) => (
-              <TextField {...field} label="RPI" fullWidth />
-            )}
-          />
+            <Typography variant="body2">
+              Aqui deve ser inserido o Documento de Veracidade da solicitação:
+            </Typography>
+            <Typography className="text-vermelho">
+              Insira o documento no campo abaixo:
+            </Typography>
+            <FileUploadField
+              label="Documento de Veracidade"
+              fileName={fileNames.veracidade}
+              onFileChange={handleFileChange("veracidade")}
+              onClear={handleFileClear("veracidade")}
+            />
           </div>
         );
       case "Certificado de Registro":
         return (
           <div>
-            <Typography variant="body2">Aqui deve ser documento do certificado de registro INPI</Typography>
-            <Typography className="text-vermelho">Insira o documento no campo abaixo: </Typography>
-          <FileUploadField
-            label="Certificado de Registro"
-            fileName={fileNames.certificadoRegistro}
-            onFileChange={handleFileChange("certificadoRegistro")}
-            onClear={handleFileClear("certificadoRegistro")}
-          />
+            <Typography variant="body2">
+              Aqui deve ser inserido o documento do Certificado de Registro INPI:
+            </Typography>
+            <Typography className="text-vermelho">
+              Insira o documento no campo abaixo:
+            </Typography>
+            <FileUploadField
+              label="Certificado de Registro"
+              fileName={fileNames.certificadoRegistro}
+              onFileChange={handleFileChange("certificadoRegistro")}
+              onClear={handleFileClear("certificadoRegistro")}
+            />
           </div>
         );
       case "Protocolo INPI":
         return (
           <div>
-          <Typography variant="body2">Aqui deve ser inserido o número de registro já no INPI</Typography>
-          <Typography className="text-vermelho">Insira o número no campo abaixo: </Typography>
-          <Controller
-            name="protocoloINPI"
-            control={control}
-            render={({ field }) => (
-              <TextField {...field} label="Protocolo INPI" fullWidth />
-            )}
-          />
+            <Typography variant="body2">
+              Aqui deve ser inserido o documento do Protocolo INPI:
+            </Typography>
+            <Typography className="text-vermelho">
+              Insira o documento no campo abaixo:
+            </Typography>
+            <FileUploadField
+              label="Protocolo INPI"
+              fileName={fileNames.protocoloINPI}
+              onFileChange={handleFileChange("protocoloINPI")}
+              onClear={handleFileClear("protocoloINPI")}
+            />
+          </div>
+        );
+      case "Código Hash":
+        return (
+          <div>
+            <Typography variant="body2">Insira o código hash gerado:</Typography>
+            <Typography className="text-vermelho">
+              Insira o código no campo abaixo:
+            </Typography>
+            <Controller
+              name="hash"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} label="Código Hash" fullWidth />
+              )}
+            />
+            <Typography variant="body2" className="mt-4">
+              Selecione o tipo de hash:
+            </Typography>
+            <Controller
+              name="hashType"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} label="Tipo de Hash" fullWidth>
+                  {hashTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
           </div>
         );
       default:
@@ -202,13 +225,6 @@ const ProcessoPage: React.FC = () => {
         <Typography variant="h6" className="mb-4">
           {pages[currentPage]}
         </Typography>
-        <Stepper activeStep={activeStep} className="w-full mt-4">
-          {pages.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
         <Grid container direction="column" spacing={2}>
           <Grid item xs={12}>
             <Select value={currentPage} onChange={handlePageSelect} fullWidth>
@@ -226,35 +242,27 @@ const ProcessoPage: React.FC = () => {
             <Button
               variant="outlined"
               color="primary"
-              onClick={handleBack}
+              onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
             >
               Voltar
             </Button>
-            {currentPage === pages.length - 1 ? (
-              <Button
-                variant="contained"
-                className="bg-azulEscuro"
-                type="submit"
-              >
-                Enviar
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                className="bg-azulEscuro"
-                onClick={handleNext}
-              >
-                Avançar
-              </Button>
-            )}
+            <Button
+  variant="contained"
+  className="bg-azulEscuro"
+  type="button"
+  onClick={handleSubmit(onSubmit)}  // Adicionar envio ao avançar
+>
+  {currentPage === pages.length - 1 ? "Salvar" : "Salvar"}
+</Button>
+
           </Grid>
         </Grid>
       </form>
       <ExplanationModal
         open={openModal}
-        pages={modalPages}
         onClose={handleCloseModal}
+        pages={modalPages}
       />
     </div>
   );
