@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Grid,
@@ -16,6 +16,7 @@ import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorag
 import { enviarProcesso } from "@/app/service/programa/admin/patch/enviarProcesso";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 import AlertMessage from "@/app/components/AlertMessage";
+import { getProgramaById } from "@/app/service/programa/getById/getById";
 
 interface FormData {
   boleto: File | null;
@@ -30,6 +31,7 @@ const ProcessoPage: React.FC = () => {
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
   const [alertOpen, setAlertOpen] = useState(false);
+  const [programa, setPrograma] = useState<IPrograma | null>(null);
 const [alertMessage, setAlertMessage] = useState<string | null>(null);
 const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
 
@@ -73,14 +75,53 @@ const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success
     "Preste atenção ao preencher todas as etapas! Clique em 'Confirmar' para prosseguir.",
   ];
 
+  useEffect(() => {
+    const fetchPrograma = async () => {
+      try {
+        const programaData = await getProgramaById(token, programaId ?? "");
+        if (programaData) {
+          setPrograma(programaData);
+          setFileNames({
+            boleto: programaData.boletoPath ? "Boleto já enviado" : "",
+            veracidade: programaData.veracidadePath ? "Veracidade já enviado" : "",
+            certificadoRegistro: programaData.certificadoRegistroPath
+              ? "Certificado já enviado"
+              : "",
+            protocoloINPI: programaData.protocoloINPIPath
+              ? "Protocolo INPI já enviado"
+              : "",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar o programa", error);
+      }
+    };
+
+    fetchPrograma();
+  }, [token, programaId]);
+
   const onSubmit = async (data: FormData) => {
+    const programa = await getProgramaById(token, programaId ?? "");
+    let etapaConcluida = false;
+
     const formData = new FormData();
-    if (data.boleto) formData.append("boleto", data.boleto);
-    if (data.veracidade) formData.append("veracidade", data.veracidade);
-    if (data.certificadoRegistro)
+
+    if (data.boleto && !programa?.boletoPath) {
+      etapaConcluida = true;
+      formData.append("boleto", data.boleto);
+    }
+    if (data.veracidade && !programa?.veracidadePath) {
+      etapaConcluida = true;
+      formData.append("veracidade", data.veracidade);
+    }
+    if (data.certificadoRegistro && !programa?.certificadoRegistroPath){
+      etapaConcluida = true;
       formData.append("certificadoRegistro", data.certificadoRegistro);
-    if (data.protocoloINPI)
+    }
+    if (data.protocoloINPI && !programa?.protocoloINPIPath){
+      etapaConcluida = true;
       formData.append("protocoloINPI", data.protocoloINPI);
+    }
     formData.append("hash", data.hash);
     formData.append("hashType", data.hashType);
   
@@ -216,6 +257,12 @@ const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success
                   ))}
                 </Select>
               )}
+            />
+            <FileUploadField
+              label="Hash"
+              fileName={pr.boleto}
+              onFileChange={handleFileChange("boleto")}
+              onClear={handleFileClear("boleto")}
             />
           </div>
         );
