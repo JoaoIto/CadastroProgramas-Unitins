@@ -22,8 +22,13 @@ export class ProcessoProgramaInputDto {
     @IsNotEmpty({ message: 'O documento de veracidade é obrigatório!' })
     veracidade?: any;
 
+    @ApiProperty({ type: String, example: '596b61fac6' })
+    @IsString()
+    @IsNotEmpty({ message: 'O código hash é obrigatório!' })
+    hash: string;
+
     @ApiProperty({ type: String, example: 'SHA-256' })
     @IsString()
     @IsNotEmpty({ message: 'O código hash é obrigatório!' })
-    codigoHash: string;
+    hashType: string;
 }

@@ -268,8 +268,10 @@ async update(
     programa.rpiPath = updateData.rpi;
     statusAlterado = true;
   }
-  if (updateData.codigoHash) {
-    programa.codigoHash = updateData.codigoHash;
+  if (updateData.hash) {
+    this.logger.log("Código hash enviado!");
+    programa.hash = updateData.hash;
+    programa.hashType = updateData.hashType;
   }
 
   // Renomear e mover os arquivos se eles foram enviados

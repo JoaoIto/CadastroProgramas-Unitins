@@ -4,7 +4,7 @@ export async function enviarProcesso(token: string, data: FormData, programaId: 
   try {
     const response = await ApiUtils.patch(`/programa/processo/${programaId}`, data, token);
     
-    if (response.ok) {
+    if (response) {
       console.log('Formulário enviado com sucesso');
       return response;
     } else {

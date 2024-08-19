@@ -84,7 +84,10 @@ export class Programa {
     rpiPath: string;
 
     @Prop({ type: String, required: true })
-    codigoHash: string;
+    hash: string;
+
+    @Prop({ type: String, required: true })
+    hashType: string;
 }
 
 export const ProgramaSchema = SchemaFactory.createForClass(Programa);
