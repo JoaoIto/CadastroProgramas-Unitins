@@ -15,6 +15,7 @@ import FileUploadField from "@/app/components/FileUploadField";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import { enviarProcesso } from "@/app/service/programa/admin/patch/enviarProcesso";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
+import AlertMessage from "@/app/components/AlertMessage";
 
 interface FormData {
   boleto: File | null;
@@ -28,6 +29,10 @@ interface FormData {
 const ProcessoPage: React.FC = () => {
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
+  const [alertOpen, setAlertOpen] = useState(false);
+const [alertMessage, setAlertMessage] = useState<string | null>(null);
+const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
+
 
   const { control, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
@@ -78,13 +83,19 @@ const ProcessoPage: React.FC = () => {
       formData.append("protocoloINPI", data.protocoloINPI);
     formData.append("hash", data.hash);
     formData.append("hashType", data.hashType);
-
+  
     try {
       const response = await enviarProcesso(token, formData, programaId ?? "");
+      setAlertSeverity("success");
+      setAlertMessage("Documento enviado com sucesso!");
     } catch (error) {
       console.error("Erro ao enviar formulário", error);
+      setAlertSeverity("error");
+      setAlertMessage("Erro ao enviar o documento.");
+    } finally {
+      setAlertOpen(true);
     }
-  };
+  };  
 
   const handlePageSelect = (event: SelectChangeEvent<number>) => {
     const selectedPage = event.target.value as number;
@@ -259,6 +270,13 @@ const ProcessoPage: React.FC = () => {
           </Grid>
         </Grid>
       </form>
+      <AlertMessage
+  open={alertOpen}
+  message={alertMessage}
+  severity={alertSeverity}
+  onClose={() => setAlertOpen(false)}
+/>
+
       <ExplanationModal
         open={openModal}
         onClose={handleCloseModal}
