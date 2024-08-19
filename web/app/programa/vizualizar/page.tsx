@@ -15,7 +15,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -132,6 +132,23 @@ const VizualizarSolicitacao = () => {
                   }}
                 />
               </Grid>
+              {isAdmin && (
+                <Grid item xs={20}>
+                  <Grid item xs={12}>
+                   <Typography className="font-semibold my-2">Código hash: {programaData?.hashType}</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Código hash"
+                      value={programaData?.hash || "N/A"}
+                      fullWidth
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <h2 className="text-xl font-medium mb-2">Linguagens:</h2>
                 <div className="flex flex-wrap gap-2">
@@ -149,6 +166,7 @@ const VizualizarSolicitacao = () => {
               </Grid>
               <Grid item xs={12}>
                 <Grid container alignItems="center" spacing={2}>
+                  {programaData?.codigoFontePath && (
                   <Grid item xs={12}>
                     <TextField
                       className="w-[100%]"
@@ -165,6 +183,7 @@ const VizualizarSolicitacao = () => {
                       }}
                     />
                   </Grid>
+                  )}
                   <Grid item xs={12} md={4}>
                     <Button
                       variant="outlined"
@@ -260,7 +279,7 @@ const VizualizarSolicitacao = () => {
               className=" w-1/3"
               onClick={handleArquivos}
             >
-              Vizualizar arquivos <ArchiveOutlinedIcon/>
+              Vizualizar arquivos <ArchiveOutlinedIcon />
             </Button>
           </Grid>
           <Grid className="w-full justify-evenly flex">

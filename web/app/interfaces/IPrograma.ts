@@ -23,6 +23,8 @@ interface IPrograma {
     boletoPath: string | null;
     veracidadePath: string | null;
     certificadoRegistroPath: string | null;
-    rpi: string | null;
-    protocoloINPI: string | null;
+    rpiPath: string | null;
+    protocoloINPIPath: string | null;
+    hash: string | null;
+    hashType: string | null;
 }
