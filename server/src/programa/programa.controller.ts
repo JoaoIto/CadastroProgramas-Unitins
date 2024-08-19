@@ -217,6 +217,8 @@ export class ProgramaController {
       { name: "boleto", maxCount: 1 },
       { name: "veracidade", maxCount: 1 },
       { name: "certificadoRegistro", maxCount: 1 },
+      { name: "protocoloINPI", maxCount: 1 },
+      { name: "rpi", maxCount: 1 },
     ],
     {
       storage: diskStorage({
@@ -245,6 +247,8 @@ async update(
     boleto?: Express.Multer.File[];
     veracidade?: Express.Multer.File[];
     certificadoRegistro?: Express.Multer.File[];
+    protocoloINPI?: Express.Multer.File[];
+    rpi?: Express.Multer.File[];
   }
 ) {
   const programa = await this.programaService.consultar(id);
@@ -257,12 +261,15 @@ async update(
   let statusAlterado = false;
   
   if (updateData.protocoloINPI) {
-    programa.protocoloINPI = updateData.protocoloINPI;
+    programa.protocoloINPIPath = updateData.protocoloINPI;
     statusAlterado = true;
   }
   if (updateData.rpi) {
-    programa.rpi = updateData.rpi;
+    programa.rpiPath = updateData.rpi;
     statusAlterado = true;
+  }
+  if (updateData.codigoHash) {
+    programa.codigoHash = updateData.codigoHash;
   }
 
   // Renomear e mover os arquivos se eles foram enviados
@@ -314,16 +321,45 @@ async update(
     statusAlterado = true;
   }
 
-  // Atualiza o status do programa para "EM_ANALISE" se qualquer arquivo foi anexado ou uma string foi atualizada
+  if (files.protocoloINPI) {
+    const protocoloINPIFile = files.protocoloINPI[0];
+    const protocoloINPIExtensao = path.extname(protocoloINPIFile.originalname);
+    const newProtocoloINPIPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "uploads",
+      "protocoloINPI",
+      `${id}-protocoloINPI${protocoloINPIExtensao}`
+    );
+    fs.renameSync(protocoloINPIFile.path, newProtocoloINPIPath);
+    programa.protocoloINPIPath = newProtocoloINPIPath;
+    statusAlterado = true;
+  }
+
+  if (files.rpi) {
+    const rpiFile = files.rpi[0];
+    const rpiExtensao = path.extname(rpiFile.originalname);
+    const newRpiPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "uploads",
+      "rpi",
+      `${id}-rpi${rpiExtensao}`
+    );
+    fs.renameSync(rpiFile.path, newRpiPath);
+    programa.rpiPath = newRpiPath;
+    statusAlterado = true;
+  }
+
   if (statusAlterado) {
     programa.status = ProgramaStatus.EM_ANALISE;
   }
 
-  // Atualizar o programa no banco de dados
-  const programaAtualizado = await this.programaService.atualizar(id, programa);
-
-  return programaAtualizado;
+  return await this.programaService.atualizar(id, programa);
 }
+
 
 
   @Get()

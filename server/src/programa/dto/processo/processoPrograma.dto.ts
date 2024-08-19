@@ -1,13 +1,14 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-export class ProcessoProgramaInputDto {
-    @ApiProperty({ type: String, example: 'RPI, número do RPI' })
-    @IsString()
-    rpi: string;
 
-    @ApiProperty({ type: String, example: 'Protocolo do INPI, número do protocolo' })
-    @IsString()
-    protocoloINPI: string;
+export class ProcessoProgramaInputDto {
+    @ApiProperty({ type: 'string', format: 'binary', example: 'rpi.pdf' })
+    @IsNotEmpty({ message: 'O RPI é obrigatório!' })
+    rpi: any;
+
+    @ApiProperty({ type: 'string', format: 'binary', example: 'protocoloINPI.pdf' })
+    @IsNotEmpty({ message: 'O protocolo do INPI é obrigatório!' })
+    protocoloINPI: any;
 
     @ApiProperty({ type: 'string', format: 'binary', example: 'boleto.pdf' })
     @IsNotEmpty({ message: 'O boleto é obrigatório!' })
@@ -21,4 +22,8 @@ export class ProcessoProgramaInputDto {
     @IsNotEmpty({ message: 'O documento de veracidade é obrigatório!' })
     veracidade?: any;
 
+    @ApiProperty({ type: String, example: 'SHA-256' })
+    @IsString()
+    @IsNotEmpty({ message: 'O código hash é obrigatório!' })
+    codigoHash: string;
 }
