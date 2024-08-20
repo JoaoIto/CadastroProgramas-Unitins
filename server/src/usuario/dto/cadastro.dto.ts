@@ -34,7 +34,7 @@ export class CadastroDTO {
   @IsNotEmpty({ message: "O RG não pode estar vazio!" })
   rg: string;
 
-  @ApiProperty({ type: EnderecoDTO })
+  @ApiProperty({ required: false, type: EnderecoDTO })
   endereco: EnderecoDTO;
 
   @ApiProperty({ type: String, example: "minhaSenha123" })
@@ -42,8 +42,12 @@ export class CadastroDTO {
   @IsNotEmpty({ message: "A senha não pode estar vazia!" })
   senha: string;
 
-  @ApiProperty({ type: String, example: "123456789" })
+  @ApiProperty({ type: String, example: "email@emailExample.com" })
   @IsString()
-  @IsNotEmpty({ message: "A matrícula não pode estar vazia!" })
+  @IsNotEmpty({ message: "O email não pode estar vazio!" })
+  email: string;
+
+  @ApiProperty({ required: false, type: String, example: "123456789" })
+  @IsString()
   matricula: string;
 }

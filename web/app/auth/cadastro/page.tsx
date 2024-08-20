@@ -1,12 +1,11 @@
 "use client";
 import { useState } from "react";
 import { z } from "zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Button,
-  Grid,
   TextField,
   Typography,
   Container,
@@ -17,16 +16,8 @@ import {
   StepLabel,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import AlertMessage from "@/app/components/AlertMessage"; // Importa o componente
+import AlertMessage from "@/app/components/AlertMessage";
 import { postUserCadastro } from "@/app/service/auth/postRegister";
-
-const enderecoSchema = z.object({
-  rua: z.string().nonempty("Rua é obrigatória"),
-  bairro: z.string().nonempty("Bairro é obrigatório"),
-  cep: z.string().refine((value) => /^\d{8}$/.test(value), {
-    message: "CEP deve ter 8 dígitos",
-  }),
-});
 
 const novoUsuarioSchema = z.object({
   nome: z.string().nonempty("Nome é obrigatório"),
@@ -36,9 +27,8 @@ const novoUsuarioSchema = z.object({
   rg: z.string().refine((value) => /^\d{7}$/.test(value), {
     message: "RG deve ter 7 dígitos",
   }),
-  endereco: enderecoSchema,
   senha: z.string().min(4, "Mínimo de 4 caracteres"),
-  matricula: z.string().nonempty("Matrícula é obrigatória"),
+  email: z.string().email().nonempty("Email é obrigatória"),
 });
 
 export type NovoUsuario = z.infer<typeof novoUsuarioSchema>;
@@ -60,7 +50,7 @@ export default function CadastroPage() {
   const [severity, setSeverity] = useState<"success" | "error">("success");
   const [activeStep, setActiveStep] = useState(0);
 
-  const steps = ["Dados Pessoais", "Endereço", "Senha e Matrícula"];
+  const steps = ["Dados Pessoais", "Email e senha"];
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
@@ -68,20 +58,17 @@ export default function CadastroPage() {
   };
 
   const handleNext = async () => {
-    let isValid = false;
+    let isValidStep = false;
     switch (activeStep) {
       case 0:
-        isValid = await trigger(["nome", "cpf", "rg"]);
+        isValidStep = await trigger(["nome", "cpf", "rg"]);
         break;
       case 1:
-        isValid = await trigger(["endereco.rua", "endereco.bairro", "endereco.cep"]);
-        break;
-      case 2:
-        isValid = await trigger(["senha", "matricula"]);
+        isValidStep = await trigger(["senha", "email"]);
         break;
     }
 
-    if (isValid) {
+    if (isValidStep) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
@@ -91,16 +78,10 @@ export default function CadastroPage() {
   };
 
   async function onSubmit(data: NovoUsuario) {
+    console.log(data);
+    
     try {
-      const payload = {
-        ...data,
-        endereco: {
-          rua: data.endereco.rua,
-          bairro: data.endereco.bairro,
-          cep: data.endereco.cep,
-        },
-      };
-      await postUserCadastro(payload);
+      await postUserCadastro(data);
       setMessage("Cadastro bem-sucedido!");
       setSeverity("success");
       setSnackbarOpen(true);
@@ -177,48 +158,13 @@ export default function CadastroPage() {
           <>
             <TextField
               margin="normal"
-              placeholder="Insira sua rua: "
+              placeholder="Insira seu melhor email: "
               required
               fullWidth
-              label="Rua"
-              {...register("endereco.rua")}
-              error={!!errors.endereco?.rua}
-              helperText={errors.endereco?.rua?.message}
-            />
-            <TextField
-              margin="normal"
-              placeholder="Insira seu bairro: "
-              required
-              fullWidth
-              label="Bairro"
-              {...register("endereco.bairro")}
-              error={!!errors.endereco?.bairro}
-              helperText={errors.endereco?.bairro?.message}
-            />
-            <TextField
-              margin="normal"
-              placeholder="Insira seu CEP: "
-              required
-              fullWidth
-              label="CEP"
-              {...register("endereco.cep")}
-              error={!!errors.endereco?.cep}
-              helperText={errors.endereco?.cep?.message}
-            />
-          </>
-        );
-      case 2:
-        return (
-          <>
-            <TextField
-              margin="normal"
-              placeholder="Insira sua matrícula: "
-              required
-              fullWidth
-              label="Matrícula"
-              {...register("matricula")}
-              error={!!errors.matricula}
-              helperText={errors.matricula?.message}
+              label="Email"
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
             <TextField
               margin="normal"

@@ -13,11 +13,14 @@ export class Usuario {
     @Prop({ required: true, default: Role.User })
     perfil: Role;
 
-    @Prop({ required: true, default: 'usuarioTeste' })
+    @Prop({ required: true, example: 'usuarioTeste' })
     nome: string;
 
     @Prop({ required: true })
     cpf: string;
+
+    @Prop({ required: true, example: 'email@exampleEmail.com' })
+    email: string;
 
     @Prop({ required: true })
     rg: string;
@@ -28,7 +31,7 @@ export class Usuario {
     @Prop()
     matricula: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     endereco: EnderecoDTO;
 
     @Prop({ type: [String], default: [] })
