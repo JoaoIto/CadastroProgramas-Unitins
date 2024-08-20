@@ -6,9 +6,9 @@ import Title from "../components/Title/title";
 import { CardProgram } from "../components/CardPrograma/Card";
 import AlertMessage from "../components/AlertMessage";
 import Pagination from "@mui/material/Pagination";
-import { getProgramasEnviadosPaginado } from "../service/programa/admin/getEnviados/getEnviadosPaginado";
-import { Typography } from "@mui/material";
 import { ProgramCountCard } from "../components/CardPrograma/cardCounter";
+import { getProgramasAdminPaginado } from "../service/programa/admin/getPaginate/getProgramasAdminPaginado";
+import { IPrograma } from "../interfaces/IPrograma";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
@@ -25,7 +25,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProgramas = async () => {
       try {
-        const response = await getProgramasEnviadosPaginado(token, currentPage, PAGE_LIMIT);
+        const response = await getProgramasAdminPaginado(token, currentPage, PAGE_LIMIT);
         if (response) {
           const { data = [], total = 0 } = response;
           setProgramas(data);
