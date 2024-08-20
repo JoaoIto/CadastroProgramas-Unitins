@@ -5,4 +5,5 @@ interface Perfil {
     nome: string;
     rg: string;
     matricula: string;
+    camposIncompletos: string[];
 }
