@@ -7,4 +7,5 @@ export enum ProgramaStatus {
     REPROVADO = 'REPROVADO',
     CANCELADO = 'CANCELADO',
     EM_ANALISE = 'EM_ANALISE',
+    EM_AJUSTES = "EM_AJUSTES",
 }

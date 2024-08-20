@@ -9,6 +9,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CardActions from '@mui/material/CardActions';
 import { useRouter } from 'next/navigation';
 import { tokenService } from '@/app/Utils/Cookies/tokenStorage';
+import { getStatusStyles } from './getStatusStyles';
+import { IPrograma } from '@/app/interfaces/IPrograma';
+import { Grid } from '@mui/material';
 
 interface CardProgramProps {
     programa: IPrograma;
@@ -28,6 +31,8 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
         router.push(`/programa/vizualizar`);
     };
 
+    const statusStyles = getStatusStyles(programa.status);
+
     return (
         <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl m-4">
             <CardContent className="p-4">
@@ -39,8 +44,20 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                         <Chip color='primary' key={index} label={linguagem} variant="outlined" />
                     ))}
                 </div>
+                <Grid className='flex flex-col'>
+                <Chip
+                    label={programa.status}
+                    variant="outlined"
+                    style={{
+                        borderColor: statusStyles.borderColor,
+                        backgroundColor: statusStyles.backgroundColor,
+                        color: statusStyles.color,
+                        fontWeight: 'bold',
+                        padding: '4px 8px',
+                    }}
+                />
                 <Typography variant="caption">
-                Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
+                    Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
                 </Typography>
                 <CardActions>
                     <Button
@@ -66,6 +83,7 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                         </Button>
                     )}
                 </div>
+                </Grid>
             </CardContent>
         </Card>
     );
