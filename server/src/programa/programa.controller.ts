@@ -52,6 +52,7 @@ import {
 import { diskStorage } from "multer";
 import { join } from "path";
 import { ProcessoProgramaInputDto } from "./dto/processo/processoPrograma.dto";
+import { UpdateProgramaJustificativaDto } from "./dto/processo/UpdateJustificativa.dto";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -543,6 +544,47 @@ async update(
       throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
     }
   }
+
+  @Get("/pages/admin")
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Retorna os programas paginados para o usuário" })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Número da página",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Quantidade de itens por página",
+  })
+  @ApiResponse({ status: 200, description: "Lista de programas paginada" })
+  async getProgramasPaginate(
+    @Req() req,
+    @Query("page") page = 1,
+    @Query("limit") limit = 5
+  ): Promise<{ data: Programa[]; total: number; page: number; limit: number }> {
+    try {
+      this.logger.log("Fazendo a busca dos dados de programas");
+      const { data, total } =
+        await this.programaService.getProgramasPaginado(
+          page,
+          limit
+        );
+
+      //this.logger.log(`Programas retornados: ${JSON.stringify(programas)}`);
+      return { data, total, page: 1, limit: 5 };
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar programas do usuário: ${error.message}`
+      );
+      throw error; // Certifique-se de propagar o erro para que ele seja tratado corretamente pelo NestJS
+    }
+  }
   @Get("/pages")
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.User)
@@ -696,7 +738,7 @@ async update(
     return this.programaService.consultarByAprovados(ProgramaStatus.APROVADO);
   }
 
-  @Put("/porUsuario/:id")
+ /*  @Put("/porUsuario/:id")
   @Roles(Role.Admin, Role.User)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Atualizando programa pelo id dele" })
@@ -721,9 +763,29 @@ async update(
     programaEditado.nomeArquivo = updateData.nomeArquivo;
 
     return this.programaService.atualizar(id, programaEditado);
-  }
+  } */
 
-  @Put("/:uuid")
+    @Put("/:uuid/justificativa")
+    @Roles(Role.Admin)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: "Anexar justificativa e mudar status do programa" })
+    @ApiBody({ type: UpdateProgramaJustificativaDto })
+    @ApiCreatedResponse({ description: "Operação bem-sucedida" })
+    async anexarJustificativa(
+      @Param("uuid") uuid: string,
+      @Body("justificativa") justificativa: string, // Aqui utilizamos @Body para pegar a justificativa do corpo da requisição
+    ) {
+      const programa = await this.programaService.consultar(uuid);
+      this.logger.log("A justificativa de reprova é: " + justificativa);
+      
+      programa.justificativa = justificativa;
+      programa.status = ProgramaStatus.EM_AJUSTES;
+    
+      return this.programaService.atualizar(uuid, programa);
+    }
+    
+
+/*   @Put("/:uuid")
   @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Atualizando programa pelo uuid dele" })
@@ -748,7 +810,7 @@ async update(
     programaEditado.nomeArquivo = updateData.nomeArquivo;
 
     return this.programaService.atualizar(uuid, programaEditado);
-  }
+  } */
 
   @Delete("/:uuid")
   @Roles(Role.Admin)

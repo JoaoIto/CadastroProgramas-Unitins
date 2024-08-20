@@ -162,6 +162,36 @@ export class ProgramaRepository {
   
     return { data, total };
   }
+
+  async findProgramasPaginado(page: number, limit: number): Promise<{ data: Programa[], total: number }> {
+    
+    const validPage = page < 1 ? 1 : page;
+    
+    // Calcular o valor de skip
+    const skip = (validPage - 1) * limit; 
+    
+    // Adicionar logs para verificar valores
+    this.logger.log(`Página solicitada: ${page}`);
+    this.logger.log(`Limite por página: ${limit}`);
+    this.logger.log(`Valor de skip: ${skip}`);
+    
+    // Buscar dados com paginação
+    const [data, total] = await Promise.all([
+      this.programa.find().skip(skip).limit(limit).exec(),
+      this.programa.countDocuments().exec()
+    ]);
+  
+    // Adicionar logs para verificar resultados
+    if (data.length === 0) {
+      this.logger.log(`Nenhum programa encontrado para a página ${page} com limite ${limit}`);
+    } else {
+      this.logger.log(`Programas encontrados para a página ${page} com limite ${limit}: ${data.length}`);
+    }
+  
+    this.logger.log(`Total de programas encontrados: ${total}`);
+  
+    return { data, total };
+  }
   
 
   /* async findByUsuarioIdPaginado(

@@ -1,7 +1,10 @@
-interface IPrograma {
+import { ProgramaStatus } from "../enum/programa-status.enum";
+
+export interface IPrograma {
     _id: string;
     usuarioId: string;
     titulo: string;
+    justificativa: string | null;
     descricao: string;
     solucaoProblemaDesc: string;
     linguagens: string[];
@@ -11,7 +14,7 @@ interface IPrograma {
     vinculoUnitins: boolean;
     vinculoInstitucional: string | null;
     fasePublicacao: string;
-    status: string;
+    status: ProgramaStatus;
     outrasObrasDesc: string | null,
     fonteFinanciamentoDesc: string | null,
     revelacaoDesc: string | null,

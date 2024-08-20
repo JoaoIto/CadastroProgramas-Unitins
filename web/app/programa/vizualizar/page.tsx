@@ -10,12 +10,21 @@ import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 import { getProgramaById } from "@/app/service/programa/getById/getById";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
-import { IconButton, Typography } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CodeIcon from "@mui/icons-material/Code";
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import { IPrograma } from "@/app/interfaces/IPrograma";
+import { enviarJustificativa } from "@/app/service/programa/admin/justificativa/enviarJustificativa";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +32,11 @@ const VizualizarSolicitacao = () => {
   const [mostrarDescricao, setMostrarDescricao] = useState<boolean>(true);
   const [mostrarSolucao, setMostrarSolucao] = useState<boolean>(true);
   const [mostrarMercado, setMostrarMercado] = useState<boolean>(true);
+  const [open, setOpen] = useState<boolean>(false);
+  const [justificativa, setJustificativa] = useState<string>("");
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
@@ -50,6 +64,25 @@ const VizualizarSolicitacao = () => {
       fetchProgramaData();
     }
   }, [programaId, token]);
+
+  // Funções para abrir e fechar o modal
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // Função para enviar a justificativa
+  const handleSubmitJustificativa = async () => {
+    try {
+      const response = await enviarJustificativa(token, justificativa, programaId);
+      setAlertSeverity("success");
+      setAlertMessage('Justificativa enviada com sucesso');
+    } catch (error) {
+      setAlertSeverity("error");
+      setAlertMessage('Erro ao enviar justificativa');
+    } finally {
+      setAlertOpen(true);
+    }
+  };
+
 
   const handleEdit = () => {
     router.push(`/programa/editar`);
@@ -132,10 +165,26 @@ const VizualizarSolicitacao = () => {
                   }}
                 />
               </Grid>
-              {isAdmin && (
+              {isAdmin && programaData?.justificativa &&(
                 <Grid item xs={20}>
                   <Grid item xs={12}>
-                   <Typography className="font-semibold my-2">Código hash: {programaData?.hashType}</Typography>
+                    <TextField
+                      label="Justificativa"
+                      value={programaData?.justificativa}
+                      fullWidth
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+              {isAdmin &&  programaData?.hashType && programaData.hash && (
+                <Grid item xs={20}>
+                  <Grid item xs={12}>
+                    <Typography className="font-semibold my-2">
+                      Código hash: {programaData?.hashType}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
@@ -167,22 +216,22 @@ const VizualizarSolicitacao = () => {
               <Grid item xs={12}>
                 <Grid container alignItems="center" spacing={2}>
                   {programaData?.codigoFontePath && (
-                  <Grid item xs={12}>
-                    <TextField
-                      className="w-[100%]"
-                      label="Nome do Arquivo"
-                      variant="standard"
-                      value={programaData?.codigoFontePath || "N/A"} // Use o nome do arquivo se disponível
-                      disabled
-                      InputProps={{
-                        endAdornment: (
-                          <IconButton edge="end" aria-label="view">
-                            <VisibilityOutlinedIcon />
-                          </IconButton>
-                        ),
-                      }}
-                    />
-                  </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        className="w-[100%]"
+                        label="Nome do Arquivo"
+                        variant="standard"
+                        value={programaData?.codigoFontePath || "N/A"} // Use o nome do arquivo se disponível
+                        disabled
+                        InputProps={{
+                          endAdornment: (
+                            <IconButton edge="end" aria-label="view">
+                              <VisibilityOutlinedIcon />
+                            </IconButton>
+                          ),
+                        }}
+                      />
+                    </Grid>
                   )}
                   <Grid item xs={12} md={4}>
                     <Button
@@ -299,6 +348,20 @@ const VizualizarSolicitacao = () => {
                 </>
               )}
             </Grid>
+            {isAdmin && (
+              <Grid container className="flex flex-col self-end w-full" mt={2}>
+                <Typography variant="body1">
+                  Deseja rejeitar essa solicitação?
+                </Typography>
+                <Button
+                  variant="contained"
+                  className="bg-vermelho w-1/3"
+                  onClick={handleOpen}
+                >
+                  Rejeitar
+                </Button>
+              </Grid>
+            )}
             {isAdmin && ( // Verificação se o usuário é admin
               <Grid container className="flex flex-col self-end w-full" mt={2}>
                 <Typography variant="body1">
@@ -313,7 +376,36 @@ const VizualizarSolicitacao = () => {
                 </Button>
               </Grid>
             )}
+           
           </Grid>
+          <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+            <DialogTitle>Justificativa</DialogTitle>
+            
+            <DialogContent>
+            <Typography>Aqui será enviado uma justificativa do por quê a solicitação foi rejeitada: </Typography>
+              <TextField
+                required
+                label="Justificativa"
+                multiline
+                rows={4}
+                value={justificativa}
+                onChange={(e) => setJustificativa(e.target.value)}
+                fullWidth
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="error">
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmitJustificativa}
+                className="bg-azulEscuro"
+                variant="contained"
+              >
+                Enviar
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Grid>
       </div>
     </div>

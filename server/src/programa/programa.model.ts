@@ -59,8 +59,8 @@ export class Programa {
     @Prop({type: String, required: true, enum: ProgramaStatus, default: ProgramaStatus.RASCUNHO })
     status: ProgramaStatus;
 
-    @Prop({type: String, required: false})
-    nomeArquivo: string;
+    @Prop({ type: String, default: null })
+    justificativa: string;
 
     @Prop({ type: String, default: null })
     documentoConfidencialidadePath: string;
