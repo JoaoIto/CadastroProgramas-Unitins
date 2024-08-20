@@ -25,6 +25,7 @@ import { downloadFile } from "@/app/service/programa/admin/dowload/dowloadFile";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import { IPrograma } from "@/app/interfaces/IPrograma";
 import { enviarJustificativa } from "@/app/service/programa/admin/justificativa/enviarJustificativa";
+import { ProgramaStatus } from "@/app/enum/programa-status.enum";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -165,7 +166,7 @@ const VizualizarSolicitacao = () => {
                   }}
                 />
               </Grid>
-              {isAdmin && programaData?.justificativa &&(
+              {isAdmin && programaData?.justificativa || programaData?.status === ProgramaStatus.EM_AJUSTES && programaData?.justificativa &&(
                 <Grid item xs={20}>
                   <Grid item xs={12}>
                     <TextField
@@ -333,7 +334,7 @@ const VizualizarSolicitacao = () => {
           </Grid>
           <Grid className="w-full justify-evenly flex">
             <Grid container className="flex flex-col w-full" mt={2}>
-              {(isAdmin || programaData?.status === "RASCUNHO") && (
+              {(isAdmin || programaData?.status === ProgramaStatus.RASCUNHO || programaData?.status === ProgramaStatus.EM_AJUSTES) && (
                 <>
                   <Typography variant="body1">
                     Deseja editar essa solicitação?
