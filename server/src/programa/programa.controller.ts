@@ -52,7 +52,6 @@ import {
 import { diskStorage } from "multer";
 import { join } from "path";
 import { ProcessoProgramaInputDto } from "./dto/processo/processoPrograma.dto";
-import { UpdateProgramaJustificativaDto } from "./dto/processo/UpdateJustificativa.dto";
 
 @ApiTags("programa")
 @Controller("/programa")
@@ -516,6 +515,32 @@ async update(
     }
   }
 
+  @Get("/em-ajustes")
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Retornando os programas em analise pelo admin" })
+  async getProgramasEmAjustes(
+    @Req() req,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10
+  ): Promise<{ data: Programa[]; total: number }> {
+    try {
+      this.logger.log("Retornando os programas em analise pelo admin");
+      const { data, total } = await this.programaService.getProgramasEmAjustes(
+        page,
+        limit
+      );
+
+      return { data, total };
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar programas em analise: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
   @Get("/porUsuario")
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.User)
@@ -769,7 +794,6 @@ async update(
     @Roles(Role.Admin)
     @ApiBearerAuth()
     @ApiOperation({ summary: "Anexar justificativa e mudar status do programa" })
-    @ApiBody({ type: UpdateProgramaJustificativaDto })
     @ApiCreatedResponse({ description: "Operação bem-sucedida" })
     async anexarJustificativa(
       @Param("uuid") uuid: string,

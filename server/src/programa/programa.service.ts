@@ -59,6 +59,10 @@ export class ProgramaService {
     async getProgramasEmAnalise(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
         return this.programaRepository.findProgramasEmAnalise(page, limit);
       }
+
+      async getProgramasEmAjustes(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
+        return this.programaRepository.findProgramasEmAjustes(page, limit);
+      }
       
 
     async getProgramasPorIds(programaIds: string[]) {

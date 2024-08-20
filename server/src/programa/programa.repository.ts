@@ -104,6 +104,25 @@ export class ProgramaRepository {
       throw error;
     }
   }
+
+  async findProgramasEmAjustes(page: number, limit: number): Promise<{ data: Programa[]; total: number }> {
+    try {
+      const offset = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.programa
+          .find({ status: ProgramaStatus.EM_AJUSTES })
+          .skip(offset)
+          .limit(limit)
+          .exec(),
+        this.programa.countDocuments({ status: ProgramaStatus.EM_AJUSTES }),
+      ]);
+      this.logger.log(`Programas retornados: ${data.length}`);
+      return { data, total };
+    } catch (error) {
+      this.logger.error("Erro ao buscar programas", error);
+      throw error;
+    }
+  }
   
 
   async findByStatus(status: ProgramaStatus): Promise<Programa[]> {

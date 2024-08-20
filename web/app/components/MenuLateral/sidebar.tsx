@@ -5,8 +5,8 @@ import { List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from 
 import { useUserPayload } from "@/app/hooks/user/userPayload";
 import { useRouter } from "next/navigation";
 import AlertMessage from "../AlertMessage";
-import AssignmentLateIcon from '@mui/icons-material/AssignmentLate';
-
+import AssignmentIcon from '@mui/icons-material/AssignmentLate';
+import BuildIcon from '@mui/icons-material/Build';
 export function Sidebar() {
   const router = useRouter();
   const { profile, isLoading } = useUserPayload();
@@ -31,9 +31,6 @@ export function Sidebar() {
       } else {
         router.push('/programa/listar');
       }
-      setTimeout(() => {
-        window.location.reload();
-      }, 500); // Recarrega a página após o redirecionamento
     }, 2000);
   };  
 
@@ -43,14 +40,18 @@ export function Sidebar() {
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
-      if (isAdmin) {
         router.push('/admin/programa/em-analise');
-      } else {
-        router.push('/admin/programa/em-analise');
-      }
-      setTimeout(() => {
-        window.location.reload();
-      }, 500); // Recarrega a página após o redirecionamento
+    }, 2000);
+  };
+
+  const routerProgramasEmAjustes = () => {
+    const message = "Redirecionando para programas em ajustes pelo usuário...";
+    setAlertMessage(message);
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+        router.push('/admin/programa/em-ajustes');
+        router.push('/admin/programa/em-ajustes');
     }, 2000);
   };
 
@@ -103,9 +104,17 @@ export function Sidebar() {
             {isAdmin && (
               <ListItemButton onClick={routerProgramasEmAcompanhamento}>
                 <ListItemIcon>
-                  <AssignmentLateIcon sx={{ color: 'white' }} />
+                  <AssignmentIcon sx={{ color: 'white' }} />
                 </ListItemIcon>
-                <ListItemText className="italic" primary="Em Acompanhamento" />
+                <ListItemText primary="Em Acompanhamento" />
+              </ListItemButton>
+            )}
+            {isAdmin && (
+              <ListItemButton onClick={routerProgramasEmAjustes}>
+                <ListItemIcon>
+                  <BuildIcon sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary="Em Ajustes" />
               </ListItemButton>
             )}
           </List>
