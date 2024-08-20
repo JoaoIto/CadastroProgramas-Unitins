@@ -7,6 +7,7 @@ import { ProgramCountCard } from "@/app/components/CardPrograma/cardCounter";
 import Pagination from "@mui/material/Pagination";
 import AlertMessage from "@/app/components/AlertMessage";
 import { getProgramasEmAnalisePaginado } from "@/app/service/programa/admin/getEmAnalise/getEmAnalisePaginado";
+import { IPrograma } from "@/app/interfaces/IPrograma";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
