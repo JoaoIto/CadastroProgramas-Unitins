@@ -1,5 +1,5 @@
 import { getStorageItem } from '@/app/functions/storage/getStorageItem/getStorageItem';
-import { getById } from '@/app/service/perfil/get/getById';
+import { getByIdForName } from '@/app/service/perfil/get/getByIdForName';
 import { useState, useEffect } from 'react';
 
 export const useUserById = (userId: string) => {
@@ -10,7 +10,7 @@ export const useUserById = (userId: string) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await getById(token, userId);
+        const data = await getByIdForName(token, userId);
         setUser(data);
       } catch (error) {
         console.error('Error fetching user:', error);

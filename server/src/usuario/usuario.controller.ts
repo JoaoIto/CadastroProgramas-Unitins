@@ -50,6 +50,15 @@ import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
     }
 
     @ApiBearerAuth()
+    @Roles(Role.Admin, Role.User)
+    @ApiOperation({ summary: 'Faz a busca dos dados do usuario pelo uuid dele' })
+    @Get('/consultaAutor/:uuid')
+    consultarNome(@Param("uuid") uuid: string) {
+        this.logger.log('Fazendo a busca dos dados do usuario com o uuid: ' + uuid)
+        return this.usuarioService.consultar(uuid);
+    }
+
+    @ApiBearerAuth()
     @Roles(Role.Admin)
     @ApiOperation({ summary: 'Faz a busca dos dados do usuario pelo uuid dele' })
     @Get('/:uuid')
