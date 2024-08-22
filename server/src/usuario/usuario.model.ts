@@ -25,14 +25,38 @@ export class Usuario {
     @Prop({ required: true })
     rg: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, default: '1234' })
     senha: string;
 
-    @Prop()
+    @Prop({ default: null })
     matricula: string;
 
-    @Prop({ required: false })
+    @Prop({ required: false, default: null })
+    telefone: string;
+
+    @Prop({ required: false, default: null })
     endereco: EnderecoDTO;
+
+    @Prop({ required: false, default: null })
+    bairro: string;
+
+    @Prop({ required: false, default: null })
+    cep: string;
+
+    @Prop({ required: false, default: null })
+    dataNascimento: string;
+
+    @Prop({ required: false, default: null })
+    orgaoEmissor: string;
+
+    @Prop({ required: false, default: null })
+    profissao: string;
+
+    @Prop({ required: false, default: null })
+    cidade: string;
+
+    @Prop({ required: false, default: null })
+    estado: string;
 
     @Prop({ type: [String], default: [] })
     camposIncompletos: string[];

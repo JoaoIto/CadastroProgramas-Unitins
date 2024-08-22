@@ -1,9 +1,11 @@
-import { Injectable, Logger} from '@nestjs/common';
+import { ConflictException, Injectable, Logger} from '@nestjs/common';
 import {UsuarioRepository} from "./usuario.repository";
 import {Usuario, UsuarioDocument} from "./usuario.model";
 import { CreateUsuarioInputDto } from './dto/create/createUsuario.dto';
 import { CadastroDTO } from './dto/cadastro.dto';
 import { verificarCamposIncompletos } from 'src/middleware/usuario/functions/verifyKeysUser';
+import { CreateAutorInputDto } from './dto/create/createAutor.dto';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class UsuarioService{
@@ -12,6 +14,24 @@ export class UsuarioService{
 
     async create(user: CreateUsuarioInputDto): Promise<Usuario>{
         return this.usuarioRepository.create(user);
+    }
+
+    async createAutor(createAutorInputDto: CreateAutorInputDto): Promise<Usuario> {
+        const { cpf } = createAutorInputDto;
+    
+        // Verifica se o CPF já existe
+        const existingUsuario = await this.usuarioRepository.findByCpf(cpf);
+        if (existingUsuario) {
+          this.updateAutor(existingUsuario._id, createAutorInputDto);
+          throw new ConflictException('O CPF do autor já está cadastrado, pesquise pelo CPF para ter os dados!');
+        }
+    
+        // Se o CPF não existe, cria um novo autor
+        return this.usuarioRepository.createAutor(createAutorInputDto);
+      }
+      private async updateAutor(usuarioId: mongoose.Types.ObjectId, updateData: CreateAutorInputDto): Promise<Usuario> {
+        // Atualiza o autor existente com os novos dados
+        return this.usuarioRepository.updateAutor(usuarioId, updateData);
     }
 
     async register(user: CadastroDTO): Promise<Usuario>{

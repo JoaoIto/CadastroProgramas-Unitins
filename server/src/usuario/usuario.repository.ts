@@ -4,6 +4,8 @@ import mongoose, {Model} from "mongoose";
 import {Usuario} from "./usuario.model";
 import { LoginDTO } from "./dto/login.dto";
 import { HashService } from "../hash/hash.service";
+import { CreateAutorInputDto } from "./dto/create/createAutor.dto";
+import { Role } from "src/roles/roles.enum";
 
 @Injectable()
 export class UsuarioRepository {
@@ -21,6 +23,52 @@ export class UsuarioRepository {
         this.logger.log('Usuario criado', usuarioCriado)
         return usuarioCriado.save();
     }
+
+    async createAutor(autorData: CreateAutorInputDto): Promise<Usuario> {
+        const senhaPadrao = '1234';
+        const senhaHash = this.hashService.getHashSenha(senhaPadrao);
+    
+        // Crie um novo objeto Usuario e preencha com os dados de autorData
+        const usuarioData: Partial<Usuario> = {
+            nome: autorData.nome,
+            cpf: autorData.cpf,
+            rg: autorData.rg,
+            email: autorData.email ?? '',
+            matricula: autorData.matricula ?? '',
+            telefone: autorData.telefone ?? '',
+            endereco: autorData.endereco ?? { rua: '', bairro: '', cep: '' },
+            bairro: autorData.bairro ?? '',
+            cep: autorData.cep ?? '',
+            dataNascimento: autorData.dataNascimento ?? '',
+            orgaoEmissor: autorData.orgaoEmissor ?? '',
+            profissao: autorData.profissao ?? '',
+            cidade: autorData.cidade ?? '',
+            estado: autorData.estado ?? '',
+            perfil: Role.User,
+            senha: senhaHash,
+            camposIncompletos: autorData.camposIncompletos ?? [],
+        };
+    
+        // Cria um novo documento de usuário
+        const usuarioCriado = new this.usuario(usuarioData);
+        usuarioCriado._id = new mongoose.Types.ObjectId();
+    
+        this.logger.log('Senha hash: ' + senhaHash);
+        this.logger.log('Usuario criado', usuarioCriado);
+    
+        // Salva o usuário no banco de dados e retorna o resultado
+        return usuarioCriado.save();
+    }    
+
+    // Atualiza um autor existente com os novos dados
+    async updateAutor(usuarioId: mongoose.Types.ObjectId, updateData: CreateAutorInputDto): Promise<Usuario> {
+        // Define os dados a serem atualizados
+        const updatedData = { ...updateData };
+
+        // Atualiza o documento de usuário
+        return this.usuario.findByIdAndUpdate(usuarioId, updatedData, { new: true }).exec();
+    }
+    
     async findAll(): Promise<Usuario[]> {
         return this.usuario.find().exec();
     }

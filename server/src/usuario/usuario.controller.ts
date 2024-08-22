@@ -8,6 +8,7 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../roles/roles.guard";
 import { CreateUsuarioInputDto } from "./dto/create/createUsuario.dto";
 import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
+import { CreateAutorInputDto } from "./dto/create/createAutor.dto";
 
 @ApiTags('usuario')
 @Controller('/usuario')
@@ -27,6 +28,16 @@ import { UpdateUsuarioInputDto } from "./dto/update/updateUsuario.dto";
         this.logger.log('Criando um novo usuário.');
         return this.usuarioService.create(createUsuarioInputDto);
     }
+
+    @Roles(Role.Admin, Role.User)
+@Post('/cadastrar/autor')
+@ApiBearerAuth()
+@ApiOperation({ summary: 'Cria um novo autor' })
+@ApiCreatedResponse({ description: 'Autor criado com sucesso.' })
+criarNovoAutor(@Body() createAutorInputDto: CreateAutorInputDto) {
+    this.logger.log('Criando um novo autor.');
+    return this.usuarioService.createAutor(createAutorInputDto);
+}
     
     @Roles(Role.Admin, Role.User)
     @UseGuards(JwtAuthGuard, RolesGuard)

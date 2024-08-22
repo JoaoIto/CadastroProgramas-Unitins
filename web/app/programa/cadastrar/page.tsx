@@ -39,8 +39,44 @@ import AlertDialog from "@/app/components/AlertDialog/Alert";
 import { getByMatricula } from "@/app/service/perfil/get/getByMatricula";
 import { getByCPF } from "@/app/service/perfil/get/getByCPF";
 import AlertMessage from "@/app/components/AlertMessage";
+import { postNovoAutor } from "@/app/service/perfil/post/postUser";
+import { ConfirmationModal } from "@/app/components/Modal/ConfirmationModal";
 
 // Validação com Zod
+const autorSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  cpf: z.string()
+    .min(11, "CPF deve ter 11 dígitos")
+    .max(11, "CPF deve ter 11 dígitos")
+    .regex(/^\d{11}$/, "CPF inválido. Deve conter apenas números."),
+  telefone: z.string()
+    .min(10, "Telefone deve ter no mínimo 10 dígitos")
+    .regex(/^\d+$/, "Telefone inválido. Deve conter apenas números."),
+  rg: z.string()
+    .min(7, "RG deve ter no mínimo 7 dígitos")
+    .max(14, "RG deve ter no máximo 14 dígitos")
+    .regex(/^\d+$/, "RG inválido. Deve conter apenas números."),
+  email: z.string().email("Email inválido"),
+  endereco: z.string().min(1, "Endereço é obrigatório"),
+  bairro: z.string().min(1, "Bairro é obrigatório"),
+  cep: z.string()
+    .min(8, "CEP deve ter 8 dígitos")
+    .max(8, "CEP deve ter 8 dígitos")
+    .regex(/^\d{8}$/, "CEP inválido. Deve conter apenas números."),
+  dataNascimento: z.string()
+    .min(1, "Data de Nascimento é obrigatória")
+    .regex(/^\d{2}-\d{2}-\d{4}$/, "Data de Nascimento inválida. Deve estar no formato DD-MM-YYYY HH:mm:ss"),
+  orgaoEmissor: z.string().min(1, "Orgão Emissor é obrigatório"),
+  profissao: z.string().min(1, "Profissão é obrigatória"),
+  cidade: z.string().min(1, "Cidade é obrigatória"),
+  estado: z.string().min(1, "Estado é obrigatório"),
+  matricula: z.string().optional(),
+  porcentagem: z.number()
+    .int("Porcentagem deve ser um número inteiro")
+    .min(0, "Porcentagem não pode ser negativa")
+    .max(30, "Porcentagem deve ser menor que 30")
+});
+
 const schema = z.object({
   titulo: z.string().min(1, { message: "Campo obrigatório" }),
   descricao: z.string().min(1, { message: "Campo obrigatório" }),
@@ -62,17 +98,11 @@ const schema = z.object({
     message: "Documento de confidencialidade é obrigatório"
   }),
   autores: z
-    .array(
-      z.object({
-        nome: z.string().min(1, { message: "Nome é obrigatório" }),
-        matricula: z.string().min(1, { message: "Matrícula é obrigatória" }),
-        cpf: z.string().optional(),
-        nomeCompleto: z.string().optional(),
-        id: z.string().optional(),
-      })
-    )
+    .array(autorSchema)
     .nonempty({ message: "Pelo menos um autor é necessário" }),
 });
+
+
 
 type FormData = z.infer<typeof schema>;
 
@@ -87,6 +117,7 @@ export default function NovaSolicitacao() {
   );
   const [activeStep, setActiveStep] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [autoresModal, setAutoresModal] = useState(false);
 
   const handleCancel = () => {
     setShowConfirmationModal(false);
@@ -188,7 +219,7 @@ export default function NovaSolicitacao() {
       const nome = profile.nome || "";
       const matricula = profile.matricula || "";
       const cpf = profile.cpf || "";
-      const autorData = [{ nome, matricula, cpf,  id: profile._id || "" }];
+      const autorData = [{ nome, matricula, cpf,  _id: profile._id || "" }];
       if(profile.camposIncompletos?.length == 0){
         setAlertSeverity("error");
         setAlertMessage("Complete os campos restantes para prosseguir!")
@@ -208,11 +239,51 @@ setValue("autores", autorData);
   };
 
   // Lógica de navegação
+  const validateField = async (fieldName: string): Promise<boolean> => {
+    const result = await trigger(fieldName);
+    console.log(`${fieldName} é válido: ${result}`);
+    return result;
+  };
+  
+  const validateAutores = async (): Promise<boolean> => {
+    let isValid = true;
+    const formValues = getValues();
+    const autores = formValues.autores || [];
+    
+    for (let i = 0; i < autores.length; i++) {
+      const autor = autores[i];
+      console.log(`Validando autor ${i}`);
+      isValid = isValid && (await validateField(`autores.${i}.nome`));
+      isValid = isValid && (await validateField(`autores.${i}.cpf`));
+      isValid = isValid && (await validateField(`autores.${i}.telefone`));
+      isValid = isValid && (await validateField(`autores.${i}.rg`));
+      isValid = isValid && (await validateField(`autores.${i}.email`));
+      isValid = isValid && (await validateField(`autores.${i}.endereco`));
+      isValid = isValid && (await validateField(`autores.${i}.bairro`));
+      isValid = isValid && (await validateField(`autores.${i}.cep`));
+      isValid = isValid && (await validateField(`autores.${i}.dataNascimento`));
+      isValid = isValid && (await validateField(`autores.${i}.orgaoEmissor`));
+      isValid = isValid && (await validateField(`autores.${i}.profissao`));
+      isValid = isValid && (await validateField(`autores.${i}.cidade`));
+      isValid = isValid && (await validateField(`autores.${i}.estado`));
+    }
+    
+    return isValid;
+  };
+  
   const handleNext = async () => {
     let isValid = false;
     switch (activeStep) {
       case 0:
         isValid = await trigger(["autores", "vinculoUnitins"]);
+        isValid = await validateAutores();
+        console.log("Página um é válida: ", isValid);
+        if(isValid) {
+          const formValues = getValues();
+        setFormData(formValues);
+          setFormData(formValues);
+          setAutoresModal(true);
+        }
         break;
       case 1:
         type FormFieldNames =
@@ -232,14 +303,13 @@ setValue("autores", autorData);
           "descricaoMercado",
           "dataCriacaoPrograma",
         ];
-
+  
         if (insercaoOpcao === "arquivo") {
           fieldsToValidate.push("nomeArquivo");
         } else if (insercaoOpcao === "link") {
           fieldsToValidate.push("linkCodigoFonte");
         }
-
-        // Passa os nomes dos campos individualmente para o trigger
+  
         isValid = await trigger(fieldsToValidate);
         break;
       case 2:
@@ -249,9 +319,16 @@ setValue("autores", autorData);
         isValid = await trigger(["revelacaoDesc", "revelacaoPublicaDesc"]);
         break;
     }
-
+  
     if (isValid) {
-      if (activeStep >= steps.length - 1) {
+      if (activeStep === 0) {
+        const formValues = getValues();
+        console.log("Form values before confirmation:", formValues);
+        setFormData(formValues);
+        setAutoresModal(true);
+      } else {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      } if (activeStep >= steps.length - 1) {
         const formValues = getValues();
         // Formata o campo autores
         formValues.autores = formValues.autores
@@ -261,10 +338,23 @@ setValue("autores", autorData);
         console.log("Form values before confirmation:", formValues);
         setFormData(formValues);
         setShowConfirmationModal(true);
-      } else {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
       }
     }
+  };
+  
+  const handleConfirmAutores = async () => {
+    const formValues = getValues();
+    console.log("Form values before confirmation:", formValues);
+  
+    const autores = formValues.autores || [];
+    for (let i = 0; i < autores.length; i++) {
+      const autor = autores[i];
+      await postNovoAutor(token, autor);
+    }
+    
+    setFormData(formValues);
+    setAutoresModal(false);
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
@@ -285,23 +375,53 @@ setValue("autores", autorData);
     const formDataWithFile = {
       ...data,
       codigoFonte,
-      autores: data.autores.map((autor) => autor.id)
+      autores: data.autores.map((autor) => autor._id)
     };
     console.log("Form data before confirmation:", formDataWithFile);
     setFormData(formDataWithFile);
     setShowConfirmationModal(true);
   });
 
-  const adicionarAutor = () => {
-    // Adiciona um novo autor com campos vazios, incluindo o ID se necessário
-    setAutores((prevAutores) => [...prevAutores, { nome: "", matricula: "", id: "" }]);
-    setValue("autores", [...getValues("autores"), { nome: "", matricula: "", id: "" }]);
-  };
+  // Função auxiliar para criar um novo autor
+const criarNovoAutor = (): IAutor => ({
+  nome: "",
+  cpf: "",
+  telefone: "",
+  rg: "",
+  email: "",
+  endereco: "",
+  bairro: "",
+  cep: "",
+  dataNascimento: "",
+  orgaoEmissor: "",
+  profissao: "",
+  cidade: "",
+  estado: "",
+  _id: "",
+  matricula: "",
+  porcentagem: 0
+});
 
+const adicionarAutor = () => {
+  // Adiciona o autor no estado local
+  setAutores((prevAutores: IAutor[]) => [
+    ...prevAutores,
+    criarNovoAutor()
+  ]);
+
+  // Atualiza o campo 'autores' no formulário
+  const autoresAtualizados: IAutor[] = [
+    ...(getValues("autores") || []), // Tipagem explícita para garantir que é um array
+    criarNovoAutor()
+  ];
+
+  setValue("autores", autoresAtualizados);
+};
+  
   const handleAutorChange = (
     index: number,
-    field: keyof FormData["autores"][number],
-    value: string
+    field: keyof IAutor,
+    value: string | number
   ) => {
     setAutores((prevAutores) => {
       const newAutores = [...prevAutores];
@@ -310,7 +430,7 @@ setValue("autores", autorData);
       return newAutores;
     });
   };
-
+  
   const removerAutor = (index: number) => {
     setAutores((prevAutores) => {
       const newAutores = prevAutores.filter((_, i) => i !== index);
@@ -318,42 +438,36 @@ setValue("autores", autorData);
       return newAutores;
     });
   };
-
-  const buscarAutor = async (index: number) => {
-    // Lógica para buscar o autor na plataforma usando nome ou matrícula
-    const matricula = autores[index].matricula;
-    if (!matricula) {
-      alert("Por favor, insira uma matrícula para buscar.");
-      return;
-    }
-
-    const autorData = await getByMatricula(token, matricula);
-    if (autorData) {
-      handleAutorChange(index, "nome", autorData.nome);
-      handleAutorChange(index, "id", autorData.id);
-      // Preencher outros campos do autor se necessário
-    } else {
-      alert("Autor não encontrado.");
-    }
-  };
-
+  
   const buscarAutorByCPF = async (index: number) => {
-    // Lógica para buscar o autor na plataforma usando nome ou matrícula
     const CPF = autores[index].cpf;
     if (!CPF) {
-      alert("Por favor, insira uma matrícula para buscar.");
-      return;
+        alert("Por favor, insira um CPF para buscar.");
+        return;
     }
 
     const autorData = await getByCPF(token, CPF);
+    console.log("Autor que retorna da requisição: ", autorData);
+    
     if (autorData) {
-      handleAutorChange(index, "nome", autorData.nome);
-      handleAutorChange(index, "id", autorData.id);
-      // Preencher outros campos do autor se necessário
+        // Utilize o operador de coalescência nula (??) para lidar com valores undefined
+        handleAutorChange(index, "nome", autorData.nome ?? "");
+        handleAutorChange(index, "_id", autorData._id ?? "");
+        handleAutorChange(index, "telefone", autorData.telefone ?? "");
+        handleAutorChange(index, "rg", autorData.rg ?? "");
+        handleAutorChange(index, "email", autorData.email ?? "");
+        handleAutorChange(index, "endereco", autorData.endereco ?? "");
+        handleAutorChange(index, "bairro", autorData.bairro ?? "");
+        handleAutorChange(index, "cep", autorData.cep ?? "");
+        handleAutorChange(index, "dataNascimento", autorData.dataNascimento ?? "");
+        handleAutorChange(index, "orgaoEmissor", autorData.orgaoEmissor ?? "");
+        handleAutorChange(index, "profissao", autorData.profissao ?? "");
+        handleAutorChange(index, "cidade", autorData.cidade ?? "");
+        handleAutorChange(index, "estado", autorData.estado ?? "");
     } else {
-      alert("Autor não encontrado.");
-    }
-  };
+        alert("Autor não encontrado.");
+    }    
+};
 
   const handlePorcentagemChange = (index: number, value: number) => {
     const novosAutores = [...autores];
@@ -426,39 +540,156 @@ setValue("autores", autorData);
               INFORMAÇÕES DOS AUTORES
             </Typography>
             {autores.map((autor, index) => (
-              <Grid container spacing={2} key={index}>
-                <Grid item xs={5}>
-                  <TextField
-                    required
-                    label={`Nome Completo do Autor ${index + 1}: `}
-                    fullWidth
-                    value={autor.nome}
-                    onChange={(e) =>
-                      handleAutorChange(index, "nome", e.target.value)
-                    }
-                    error={!!errors.autores?.[index]?.nome}
-                    helperText={errors.autores?.[index]?.nome?.message}
-                  />
-                </Grid>
-                <Grid item xs={5}>
-                  <TextField
-                    required
-                    label={`CPF do Autor ${index + 1}: `}
-                    fullWidth
-                    value={autor.cpf}
-                    onChange={(e) =>
-                      handleAutorChange(index, "cpf", e.target.value)
-                    }
-                    error={!!errors.autores?.[index]?.cpf}
-                    helperText={errors.autores?.[index]?.cpf?.message}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <Button variant="outlined" onClick={() => buscarAutorByCPF(index)}>
-                    Pesquisar
-                  </Button>
-                </Grid>
-                <Grid item xs={2}>
+  <Grid container spacing={2} key={index}>
+    <Grid item xs={5}>
+      <TextField
+        required
+        label={`Nome Completo do Autor ${index + 1}: `}
+        fullWidth
+        value={autor.nome}
+        onChange={(e) => handleAutorChange(index, "nome", e.target.value)}
+        error={!!errors.autores?.[index]?.nome}
+        helperText={errors.autores?.[index]?.nome?.message}
+      />
+    </Grid>
+    <Grid item xs={5}>
+      <TextField
+        required
+        label={`CPF do Autor ${index + 1}: `}
+        fullWidth
+        value={autor.cpf}
+        onChange={(e) => handleAutorChange(index, "cpf", e.target.value)}
+        error={!!errors.autores?.[index]?.cpf}
+        helperText={errors.autores?.[index]?.cpf?.message}
+      />
+    </Grid>
+    <Grid item xs={2}>
+      <Button variant="outlined" onClick={() => buscarAutorByCPF(index)}>
+        Pesquisar
+      </Button>
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Telefone"
+        fullWidth
+        value={autor.telefone}
+        onChange={(e) => handleAutorChange(index, "telefone", e.target.value)}
+        error={!!errors.autores?.[index]?.telefone}
+        helperText={errors.autores?.[index]?.telefone?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="RG"
+        fullWidth
+        value={autor.rg}
+        onChange={(e) => handleAutorChange(index, "rg", e.target.value)}
+        error={!!errors.autores?.[index]?.rg}
+        helperText={errors.autores?.[index]?.rg?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Email"
+        fullWidth
+        value={autor.email}
+        onChange={(e) => handleAutorChange(index, "email", e.target.value)}
+        error={!!errors.autores?.[index]?.email}
+        helperText={errors.autores?.[index]?.email?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Endereço"
+        fullWidth
+        value={autor.endereco}
+        onChange={(e) => handleAutorChange(index, "endereco", e.target.value)}
+        error={!!errors.autores?.[index]?.endereco}
+        helperText={errors.autores?.[index]?.endereco?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Bairro"
+        fullWidth
+        value={autor.bairro}
+        onChange={(e) => handleAutorChange(index, "bairro", e.target.value)}
+        error={!!errors.autores?.[index]?.bairro}
+        helperText={errors.autores?.[index]?.bairro?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="CEP"
+        fullWidth
+        value={autor.cep}
+        onChange={(e) => handleAutorChange(index, "cep", e.target.value)}
+        error={!!errors.autores?.[index]?.cep}
+        helperText={errors.autores?.[index]?.cep?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Data de Nascimento"
+        fullWidth
+        value={autor.dataNascimento}
+        onChange={(e) => handleAutorChange(index, "dataNascimento", e.target.value)}
+        error={!!errors.autores?.[index]?.dataNascimento}
+        helperText={errors.autores?.[index]?.dataNascimento?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Orgão Emissor"
+        fullWidth
+        value={autor.orgaoEmissor}
+        onChange={(e) => handleAutorChange(index, "orgaoEmissor", e.target.value)}
+        error={!!errors.autores?.[index]?.orgaoEmissor}
+        helperText={errors.autores?.[index]?.orgaoEmissor?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Profissão"
+        fullWidth
+        value={autor.profissao}
+        onChange={(e) => handleAutorChange(index, "profissao", e.target.value)}
+        error={!!errors.autores?.[index]?.profissao}
+        helperText={errors.autores?.[index]?.profissao?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Cidade"
+        fullWidth
+        value={autor.cidade}
+        onChange={(e) => handleAutorChange(index, "cidade", e.target.value)}
+        error={!!errors.autores?.[index]?.cidade}
+        helperText={errors.autores?.[index]?.cidade?.message}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField
+        required
+        label="Estado"
+        fullWidth
+        value={autor.estado}
+        onChange={(e) => handleAutorChange(index, "estado", e.target.value)}
+        error={!!errors.autores?.[index]?.estado}
+        helperText={errors.autores?.[index]?.estado?.message}
+      />
+    </Grid>
+    <Grid item xs={2}>
                   <IconButton
                     color="error"
                     onClick={() => removerAutor(index)}
@@ -467,20 +698,19 @@ setValue("autores", autorData);
                     <DeleteIcon />
                   </IconButton>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    type="number"
-                    label="Porcentagem de Contribuição (%): "
-                    fullWidth
-                    value={autores[index].porcentagem || 0}
-                    helperText="Você deve inserir a porcentagem de participação do autor neste programa"
-                    onChange={(e) =>
-                      handlePorcentagemChange(index, parseFloat(e.target.value))
-                    }
-                  />
-                </Grid>
-              </Grid>
-            ))}
+    <Grid item xs={12}>
+      <TextField
+        type="number"
+        label="Porcentagem de Contribuição (%): "
+        fullWidth
+        value={autor.porcentagem || 0}
+        helperText="Você deve inserir a porcentagem de participação do autor neste programa"
+        onChange={(e) => handlePorcentagemChange(index, parseFloat(e.target.value))}
+      />
+    </Grid>
+  </Grid>
+))}
+
             <Button
               className="mt-4"
               variant="outlined"
@@ -1094,6 +1324,14 @@ setValue("autores", autorData);
         onConfirm={handleSubmit(onSubmit)} // Esta função deve chamar handleSubmit(onSubmit)
         onCancel={handleCancel}
       />
+      <ConfirmationModal
+  open={autoresModal}
+  onClose={() => setAutoresModal(false)}
+  onConfirm={handleConfirmAutores}  // Passa a função de confirmação aqui
+  title="Confirmação"
+  message="Você deseja confirmar a adição desses autores?"
+/>
+
     </div>
   );
 }

@@ -63,6 +63,9 @@ export class Programa {
     justificativa: string;
 
     @Prop({ type: String, default: null })
+    justificativaEdicao: string;
+
+    @Prop({ type: String, default: null })
     documentoConfidencialidadePath: string;
 
     @Prop({ type: String, default: null })
