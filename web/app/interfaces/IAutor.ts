@@ -8,6 +8,10 @@ interface IAutor {
   endereco?: string;
   bairro?: string;
   cep?: string;
+  vinculoUnitins: boolean;
+  vinculoUnitinsDesc: string;
+  nomeInstituicao: string;
+  vinculoIntituicao: string;
   dataNascimento?: string;
   orgaoEmissor?: string;
   profissao?: string;
