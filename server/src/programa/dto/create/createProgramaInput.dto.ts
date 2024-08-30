@@ -60,17 +60,7 @@ export class CreateProgramaInputDto {
     @IsDateString()
     @IsNotEmpty({ message: 'A data de criação do programa não pode estar vazia!' })
     dataCriacaoPrograma: Date;
-
-    @ApiProperty({ type: Boolean, example: true })
-    @IsBoolean()
-    @IsNotEmpty({ message: 'O vínculo com a Unitins deve ser informado!' })
-    vinculoUnitins: boolean;
-
-    @ApiProperty({ type: String, example: 'Descrição do vínculo institucional' })
-    @IsOptional()
-    @IsString()
-    vinculoInstitucional?: string;
-
+    
     @ApiProperty({ type: String, enum: ProgramaFase, example: ProgramaFase.ARTIGO })
     @IsEnum(ProgramaFase, { message: 'A fase de publicação deve ser uma das fases válidas!' })
     fasePublicacao: ProgramaFase;

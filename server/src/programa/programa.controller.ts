@@ -145,8 +145,6 @@ export class ProgramaController {
     programaData.revelacaoPublicaDesc = formData.revelacaoPublicaDesc;
     programaData.descricaoMercado = formData.descricaoMercado;
     programaData.dataCriacaoPrograma = formData.dataCriacaoPrograma;
-    programaData.vinculoUnitins = formData.vinculoUnitins;
-    programaData.vinculoInstitucional = formData.vinculoInstitucional;
     programaData.fasePublicacao = formData.fasePublicacao;
     programaData.status = formData.status;
     programaData.autores = formData.autores;

@@ -58,6 +58,18 @@ export class Usuario {
     @Prop({ required: false, default: null })
     estado: string;
 
+    @Prop({ required: true })
+    vinculoUnitins: boolean;
+
+    @Prop({ required: true })
+    vinculoUnitinsDesc: string;
+
+    @Prop({ required: true })
+    nomeInstituicao: string;
+
+    @Prop({default: null})
+    vinculoInstituicao: string;
+
     @Prop({ type: [String], default: [] })
     camposIncompletos: string[];
 }

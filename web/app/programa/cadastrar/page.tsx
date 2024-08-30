@@ -36,7 +36,6 @@ import { useUser } from "@/app/hooks/user/userGet";
 import { getLinguagensAll } from "@/app/service/linguagem/getAll/getLinguagemAll";
 import { PorcentagemAutores } from "@/app/components/PorcentagemAutores";
 import AlertDialog from "@/app/components/AlertDialog/Alert";
-import { getByMatricula } from "@/app/service/perfil/get/getByMatricula";
 import { getByCPF } from "@/app/service/perfil/get/getByCPF";
 import AlertMessage from "@/app/components/AlertMessage";
 import { postNovoAutor } from "@/app/service/perfil/post/postUser";
@@ -45,36 +44,49 @@ import { ConfirmationModal } from "@/app/components/Modal/ConfirmationModal";
 // Validação com Zod
 const autorSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  cpf: z.string()
+  cpf: z
+    .string()
     .min(11, "CPF deve ter 11 dígitos")
     .max(11, "CPF deve ter 11 dígitos")
     .regex(/^\d{11}$/, "CPF inválido. Deve conter apenas números."),
-  telefone: z.string()
+  telefone: z
+    .string()
     .min(10, "Telefone deve ter no mínimo 10 dígitos")
     .regex(/^\d+$/, "Telefone inválido. Deve conter apenas números."),
-  rg: z.string()
+  rg: z
+    .string()
     .min(7, "RG deve ter no mínimo 7 dígitos")
     .max(14, "RG deve ter no máximo 14 dígitos")
     .regex(/^\d+$/, "RG inválido. Deve conter apenas números."),
   email: z.string().email("Email inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
   bairro: z.string().min(1, "Bairro é obrigatório"),
-  cep: z.string()
+  cep: z
+    .string()
     .min(8, "CEP deve ter 8 dígitos")
     .max(8, "CEP deve ter 8 dígitos")
     .regex(/^\d{8}$/, "CEP inválido. Deve conter apenas números."),
-  dataNascimento: z.string()
+  dataNascimento: z
+    .string()
     .min(1, "Data de Nascimento é obrigatória")
-    .regex(/^\d{2}-\d{2}-\d{4}$/, "Data de Nascimento inválida. Deve estar no formato DD-MM-YYYY HH:mm:ss"),
+    .regex(
+      /^\d{2}-\d{2}-\d{4}$/,
+      "Data de Nascimento inválida. Deve estar no formato DD-MM-YYYY HH:mm:ss"
+    ),
   orgaoEmissor: z.string().min(1, "Orgão Emissor é obrigatório"),
   profissao: z.string().min(1, "Profissão é obrigatória"),
   cidade: z.string().min(1, "Cidade é obrigatória"),
   estado: z.string().min(1, "Estado é obrigatório"),
   matricula: z.string().optional(),
-  porcentagem: z.number()
+  vinculoUnitins: z.boolean(),
+  vinculoUnitinsDesc: z.string().min(1, { message: "Campo obrigatório" }),
+  nomeInstituicao: z.string().min(1, { message: "Campo obrigatório" }),
+  vinculoInstituicao: z.string().min(1, { message: "Campo obrigatório" }),
+  porcentagem: z
+    .number()
     .int("Porcentagem deve ser um número inteiro")
     .min(0, "Porcentagem não pode ser negativa")
-    .max(30, "Porcentagem deve ser menor que 30")
+    .max(30, "Porcentagem deve ser menor que 30"),
 });
 
 const schema = z.object({
@@ -84,8 +96,6 @@ const schema = z.object({
   linguagens: z.array(z.string()).nonempty({ message: "Campo obrigatório" }),
   descricaoMercado: z.string().min(1, { message: "Campo obrigatório" }),
   dataCriacaoPrograma: z.string().min(1, { message: "Campo obrigatório" }),
-  vinculoUnitins: z.boolean(),
-  nomeInstituicao: z.string().min(1, { message: "Campo obrigatório" }),
   fasePublicacao: z.string().min(1, { message: "Campo obrigatório" }),
   status: z.string().min(1, { message: "Campo obrigatório" }),
   outrasObrasDesc: z.string().optional(),
@@ -94,15 +104,15 @@ const schema = z.object({
   revelacaoPublicaDesc: z.string().optional(),
   linkCodigoFonte: z.string().optional(),
   codigoFonte: z.instanceof(File).optional(),
-  documentoConfidencialidade: z.instanceof(File).refine(file => file instanceof File, {
-    message: "Documento de confidencialidade é obrigatório"
-  }),
+  documentoConfidencialidade: z
+    .instanceof(File)
+    .refine((file) => file instanceof File, {
+      message: "Documento de confidencialidade é obrigatório",
+    }),
   autores: z
     .array(autorSchema)
     .nonempty({ message: "Pelo menos um autor é necessário" }),
 });
-
-
 
 type FormData = z.infer<typeof schema>;
 
@@ -130,7 +140,7 @@ export default function NovaSolicitacao() {
     "Fatores de Relevância e Categoria",
   ];
 
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [autores, setAutores] = useState<IAutor[]>([]);
   const [insercaoOpcao, setInsercaoOpcao] = useState<"arquivo" | "link">(
@@ -177,9 +187,7 @@ export default function NovaSolicitacao() {
     ILinguagem[]
   >([]);
 
-  const [codigoFonte, setCodigoFonte] = useState<File | null>(
-    null
-  );
+  const [codigoFonte, setCodigoFonte] = useState<File | null>(null);
 
   const [formData, setFormData] = useState<FormData | null>(null);
 
@@ -190,6 +198,9 @@ export default function NovaSolicitacao() {
     getValues,
     trigger,
     watch,
+    setError, 
+    clearErrors,
+    register,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -200,7 +211,6 @@ export default function NovaSolicitacao() {
       linguagens: [],
       descricaoMercado: "",
       dataCriacaoPrograma: "",
-      vinculoUnitins: true,
       fasePublicacao: "",
       status: "ENVIADO",
       outrasObrasDesc: "",
@@ -219,14 +229,14 @@ export default function NovaSolicitacao() {
       const nome = profile.nome || "";
       const matricula = profile.matricula || "";
       const cpf = profile.cpf || "";
-      const autorData = [{ nome, matricula, cpf,  _id: profile._id || "" }];
-      if(profile.camposIncompletos?.length == 0){
+      const autorData = [{ nome, matricula, cpf, _id: profile._id || "" }];
+      if (profile.camposIncompletos?.length == 0) {
         setAlertSeverity("error");
-        setAlertMessage("Complete os campos restantes para prosseguir!")
+        setAlertMessage("Complete os campos restantes para prosseguir!");
         setAlertOpen(true);
       }
-setAutores(autorData);
-setValue("autores", autorData);
+      setAutores(autorData);
+      setValue("autores", autorData);
     }
   }, [profile, isLoading, setValue]);
 
@@ -244,12 +254,12 @@ setValue("autores", autorData);
     console.log(`${fieldName} é válido: ${result}`);
     return result;
   };
-  
+
   const validateAutores = async (): Promise<boolean> => {
     let isValid = true;
     const formValues = getValues();
     const autores = formValues.autores || [];
-    
+
     for (let i = 0; i < autores.length; i++) {
       const autor = autores[i];
       console.log(`Validando autor ${i}`);
@@ -267,10 +277,10 @@ setValue("autores", autorData);
       isValid = isValid && (await validateField(`autores.${i}.cidade`));
       isValid = isValid && (await validateField(`autores.${i}.estado`));
     }
-    
+
     return isValid;
   };
-  
+
   const handleNext = async () => {
     let isValid = false;
     switch (activeStep) {
@@ -278,9 +288,9 @@ setValue("autores", autorData);
         isValid = await trigger(["autores", "vinculoUnitins"]);
         isValid = await validateAutores();
         console.log("Página um é válida: ", isValid);
-        if(isValid) {
+        if (isValid) {
           const formValues = getValues();
-        setFormData(formValues);
+          setFormData(formValues);
           setFormData(formValues);
           setAutoresModal(true);
         }
@@ -303,13 +313,13 @@ setValue("autores", autorData);
           "descricaoMercado",
           "dataCriacaoPrograma",
         ];
-  
+
         if (insercaoOpcao === "arquivo") {
           fieldsToValidate.push("nomeArquivo");
         } else if (insercaoOpcao === "link") {
           fieldsToValidate.push("linkCodigoFonte");
         }
-  
+
         isValid = await trigger(fieldsToValidate);
         break;
       case 2:
@@ -319,7 +329,7 @@ setValue("autores", autorData);
         isValid = await trigger(["revelacaoDesc", "revelacaoPublicaDesc"]);
         break;
     }
-  
+
     if (isValid) {
       if (activeStep === 0) {
         const formValues = getValues();
@@ -328,7 +338,8 @@ setValue("autores", autorData);
         setAutoresModal(true);
       } else {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      } if (activeStep >= steps.length - 1) {
+      }
+      if (activeStep >= steps.length - 1) {
         const formValues = getValues();
         // Formata o campo autores
         formValues.autores = formValues.autores
@@ -341,17 +352,17 @@ setValue("autores", autorData);
       }
     }
   };
-  
+
   const handleConfirmAutores = async () => {
     const formValues = getValues();
     console.log("Form values before confirmation:", formValues);
-  
+
     const autores = formValues.autores || [];
     for (let i = 0; i < autores.length; i++) {
       const autor = autores[i];
       await postNovoAutor(token, autor);
     }
-    
+
     setFormData(formValues);
     setAutoresModal(false);
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -375,7 +386,7 @@ setValue("autores", autorData);
     const formDataWithFile = {
       ...data,
       codigoFonte,
-      autores: data.autores.map((autor) => autor._id)
+      autores: data.autores.map((autor) => autor._id),
     };
     console.log("Form data before confirmation:", formDataWithFile);
     setFormData(formDataWithFile);
@@ -383,41 +394,38 @@ setValue("autores", autorData);
   });
 
   // Função auxiliar para criar um novo autor
-const criarNovoAutor = (): IAutor => ({
-  nome: "",
-  cpf: "",
-  telefone: "",
-  rg: "",
-  email: "",
-  endereco: "",
-  bairro: "",
-  cep: "",
-  dataNascimento: "",
-  orgaoEmissor: "",
-  profissao: "",
-  cidade: "",
-  estado: "",
-  _id: "",
-  matricula: "",
-  porcentagem: 0
-});
+  const criarNovoAutor = (): IAutor => ({
+    nome: "",
+    cpf: "",
+    telefone: "",
+    rg: "",
+    email: "",
+    endereco: "",
+    bairro: "",
+    cep: "",
+    dataNascimento: "",
+    orgaoEmissor: "",
+    profissao: "",
+    cidade: "",
+    estado: "",
+    _id: "",
+    matricula: "",
+    porcentagem: 0,
+  });
 
-const adicionarAutor = () => {
-  // Adiciona o autor no estado local
-  setAutores((prevAutores: IAutor[]) => [
-    ...prevAutores,
-    criarNovoAutor()
-  ]);
+  const adicionarAutor = () => {
+    // Adiciona o autor no estado local
+    setAutores((prevAutores: IAutor[]) => [...prevAutores, criarNovoAutor()]);
 
-  // Atualiza o campo 'autores' no formulário
-  const autoresAtualizados: IAutor[] = [
-    ...(getValues("autores") || []), // Tipagem explícita para garantir que é um array
-    criarNovoAutor()
-  ];
+    // Atualiza o campo 'autores' no formulário
+    const autoresAtualizados: IAutor[] = [
+      ...(getValues("autores") || []), // Tipagem explícita para garantir que é um array
+      criarNovoAutor(),
+    ];
 
-  setValue("autores", autoresAtualizados);
-};
-  
+    setValue("autores", autoresAtualizados);
+  };
+
   const handleAutorChange = (
     index: number,
     field: keyof IAutor,
@@ -430,7 +438,7 @@ const adicionarAutor = () => {
       return newAutores;
     });
   };
-  
+
   const removerAutor = (index: number) => {
     setAutores((prevAutores) => {
       const newAutores = prevAutores.filter((_, i) => i !== index);
@@ -438,37 +446,53 @@ const adicionarAutor = () => {
       return newAutores;
     });
   };
-  
+
   const buscarAutorByCPF = async (index: number) => {
     const CPF = autores[index].cpf;
     if (!CPF) {
-        alert("Por favor, insira um CPF para buscar.");
-        return;
+      alert("Por favor, insira um CPF para buscar.");
+      return;
     }
 
     const autorData = await getByCPF(token, CPF);
     console.log("Autor que retorna da requisição: ", autorData);
-    
-    if (autorData) {
-        // Utilize o operador de coalescência nula (??) para lidar com valores undefined
-        handleAutorChange(index, "nome", autorData.nome ?? "");
-        handleAutorChange(index, "_id", autorData._id ?? "");
-        handleAutorChange(index, "telefone", autorData.telefone ?? "");
-        handleAutorChange(index, "rg", autorData.rg ?? "");
-        handleAutorChange(index, "email", autorData.email ?? "");
-        handleAutorChange(index, "endereco", autorData.endereco ?? "");
-        handleAutorChange(index, "bairro", autorData.bairro ?? "");
-        handleAutorChange(index, "cep", autorData.cep ?? "");
-        handleAutorChange(index, "dataNascimento", autorData.dataNascimento ?? "");
-        handleAutorChange(index, "orgaoEmissor", autorData.orgaoEmissor ?? "");
-        handleAutorChange(index, "profissao", autorData.profissao ?? "");
-        handleAutorChange(index, "cidade", autorData.cidade ?? "");
-        handleAutorChange(index, "estado", autorData.estado ?? "");
-    } else {
-        alert("Autor não encontrado.");
-    }    
-};
 
+    if (autorData) {
+      // Utilize o operador de coalescência nula (??) para lidar com valores undefined
+      handleAutorChange(index, "nome", autorData.nome ?? "");
+      handleAutorChange(index, "_id", autorData._id ?? "");
+      handleAutorChange(index, "telefone", autorData.telefone ?? "");
+      handleAutorChange(index, "rg", autorData.rg ?? "");
+      handleAutorChange(index, "email", autorData.email ?? "");
+      handleAutorChange(index, "endereco", autorData.endereco ?? "");
+      handleAutorChange(index, "bairro", autorData.bairro ?? "");
+      handleAutorChange(index, "cep", autorData.cep ?? "");
+      handleAutorChange(
+        index,
+        "dataNascimento",
+        autorData.dataNascimento ?? ""
+      );
+      handleAutorChange(index, "orgaoEmissor", autorData.orgaoEmissor ?? "");
+      handleAutorChange(index, "profissao", autorData.profissao ?? "");
+      handleAutorChange(index, "cidade", autorData.cidade ?? "");
+      handleAutorChange(index, "estado", autorData.estado ?? "");
+    } else {
+      alert("Autor não encontrado.");
+    }
+  }
+
+  const validateCPFUnico = (index, value) => {
+    const outrosCpfs = autores.map((autor, i) => i !== index && autor.cpf);
+    const cpfDuplicado = outrosCpfs.includes(value);
+
+    if (cpfDuplicado) {
+      setAlertSeverity("error");
+      setAlertMessage("CPF já está sendo utilizado por mais de um autor");
+      setAlertOpen(true);
+      return false;
+    }
+    return true;
+  };
   const handlePorcentagemChange = (index: number, value: number) => {
     const novosAutores = [...autores];
     novosAutores[index].porcentagem = value;
@@ -479,9 +503,9 @@ const adicionarAutor = () => {
 
     if (totalPorcentagem <= 30) {
       setAutores(novosAutores);
-      setError(null);
+      setErrorMessage(null);
     } else {
-      setError("A soma das porcentagens não pode exceder 30%");
+      setErrorMessage("A soma das porcentagens não pode exceder 30%");
     }
   };
 
@@ -514,7 +538,6 @@ const adicionarAutor = () => {
   };
 
   const renderPageContent = () => {
-    const vinculoUnitins = getValues("vinculoUnitins");
     switch (activeStep) {
       case 0:
         return (
@@ -523,7 +546,7 @@ const adicionarAutor = () => {
             container
             spacing={2}
           >
-            <Stepper activeStep={activeStep} className="w-full mt-4">
+            <Stepper activeStep={activeStep} className="flex w-full m-4">
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
@@ -531,187 +554,362 @@ const adicionarAutor = () => {
               ))}
             </Stepper>
             <AlertMessage
-        open={alertOpen}
-        message={alertMessage}
-        severity={alertSeverity}
-        onClose={() => setAlertOpen(false)}
-      />
-            <Typography className="text-2xl font-medium">
+              open={alertOpen}
+              message={alertMessage}
+              severity={alertSeverity}
+              onClose={() => setAlertOpen(false)}
+            />
+            <Typography className="text-3xl font-medium m-4">
               INFORMAÇÕES DOS AUTORES
             </Typography>
             {autores.map((autor, index) => (
-  <Grid container spacing={2} key={index}>
-    <Grid item xs={5}>
-      <TextField
-        required
-        label={`Nome Completo do Autor ${index + 1}: `}
-        fullWidth
-        value={autor.nome}
-        onChange={(e) => handleAutorChange(index, "nome", e.target.value)}
-        error={!!errors.autores?.[index]?.nome}
-        helperText={errors.autores?.[index]?.nome?.message}
-      />
-    </Grid>
-    <Grid item xs={5}>
-      <TextField
-        required
-        label={`CPF do Autor ${index + 1}: `}
-        fullWidth
-        value={autor.cpf}
-        onChange={(e) => handleAutorChange(index, "cpf", e.target.value)}
-        error={!!errors.autores?.[index]?.cpf}
-        helperText={errors.autores?.[index]?.cpf?.message}
-      />
-    </Grid>
-    <Grid item xs={2}>
-      <Button variant="outlined" onClick={() => buscarAutorByCPF(index)}>
-        Pesquisar
-      </Button>
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Telefone"
-        fullWidth
-        value={autor.telefone}
-        onChange={(e) => handleAutorChange(index, "telefone", e.target.value)}
-        error={!!errors.autores?.[index]?.telefone}
-        helperText={errors.autores?.[index]?.telefone?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="RG"
-        fullWidth
-        value={autor.rg}
-        onChange={(e) => handleAutorChange(index, "rg", e.target.value)}
-        error={!!errors.autores?.[index]?.rg}
-        helperText={errors.autores?.[index]?.rg?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Email"
-        fullWidth
-        value={autor.email}
-        onChange={(e) => handleAutorChange(index, "email", e.target.value)}
-        error={!!errors.autores?.[index]?.email}
-        helperText={errors.autores?.[index]?.email?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Endereço"
-        fullWidth
-        value={autor.endereco}
-        onChange={(e) => handleAutorChange(index, "endereco", e.target.value)}
-        error={!!errors.autores?.[index]?.endereco}
-        helperText={errors.autores?.[index]?.endereco?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Bairro"
-        fullWidth
-        value={autor.bairro}
-        onChange={(e) => handleAutorChange(index, "bairro", e.target.value)}
-        error={!!errors.autores?.[index]?.bairro}
-        helperText={errors.autores?.[index]?.bairro?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="CEP"
-        fullWidth
-        value={autor.cep}
-        onChange={(e) => handleAutorChange(index, "cep", e.target.value)}
-        error={!!errors.autores?.[index]?.cep}
-        helperText={errors.autores?.[index]?.cep?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Data de Nascimento"
-        fullWidth
-        value={autor.dataNascimento}
-        onChange={(e) => handleAutorChange(index, "dataNascimento", e.target.value)}
-        error={!!errors.autores?.[index]?.dataNascimento}
-        helperText={errors.autores?.[index]?.dataNascimento?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Orgão Emissor"
-        fullWidth
-        value={autor.orgaoEmissor}
-        onChange={(e) => handleAutorChange(index, "orgaoEmissor", e.target.value)}
-        error={!!errors.autores?.[index]?.orgaoEmissor}
-        helperText={errors.autores?.[index]?.orgaoEmissor?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Profissão"
-        fullWidth
-        value={autor.profissao}
-        onChange={(e) => handleAutorChange(index, "profissao", e.target.value)}
-        error={!!errors.autores?.[index]?.profissao}
-        helperText={errors.autores?.[index]?.profissao?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Cidade"
-        fullWidth
-        value={autor.cidade}
-        onChange={(e) => handleAutorChange(index, "cidade", e.target.value)}
-        error={!!errors.autores?.[index]?.cidade}
-        helperText={errors.autores?.[index]?.cidade?.message}
-      />
-    </Grid>
-    <Grid item xs={6}>
-      <TextField
-        required
-        label="Estado"
-        fullWidth
-        value={autor.estado}
-        onChange={(e) => handleAutorChange(index, "estado", e.target.value)}
-        error={!!errors.autores?.[index]?.estado}
-        helperText={errors.autores?.[index]?.estado?.message}
-      />
-    </Grid>
-    <Grid item xs={2}>
-                  <IconButton
-                    color="error"
-                    onClick={() => removerAutor(index)}
-                    aria-label="delete"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+              <Grid container spacing={2} key={index}>
+                <Grid item xs={5}>
+                  <TextField
+                    required
+                    label={`Nome Completo do Autor ${index + 1}: `}
+                    fullWidth
+                    value={autor.nome}
+                    onChange={(e) =>
+                      handleAutorChange(index, "nome", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.nome}
+                    helperText={errors.autores?.[index]?.nome?.message}
+                  />
                 </Grid>
-    <Grid item xs={12}>
-      <TextField
-        type="number"
-        label="Porcentagem de Contribuição (%): "
-        fullWidth
-        value={autor.porcentagem || 0}
-        helperText="Você deve inserir a porcentagem de participação do autor neste programa"
-        onChange={(e) => handlePorcentagemChange(index, parseFloat(e.target.value))}
-      />
-    </Grid>
-  </Grid>
-))}
+                <Grid item xs={5}>
+                  <TextField
+                    {...register(`autores.${index}.cpf`, {
+                      required: "CPF é obrigatório",
+                      validate: (value) => validateCPFUnico(index, value)
+                    })}
+                    required
+                    label={`CPF do Autor ${index + 1}: `}
+                    fullWidth
+                    value={autor.cpf}
+                    onChange={(e) =>
+                      handleAutorChange(index, "cpf", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.cpf}
+                    helperText={errors.autores?.[index]?.cpf?.message}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => buscarAutorByCPF(index)}
+                  >
+                    Pesquisar
+                  </Button>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Telefone"
+                    fullWidth
+                    value={autor.telefone}
+                    onChange={(e) =>
+                      handleAutorChange(index, "telefone", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.telefone}
+                    helperText={errors.autores?.[index]?.telefone?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="RG"
+                    fullWidth
+                    value={autor.rg}
+                    onChange={(e) =>
+                      handleAutorChange(index, "rg", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.rg}
+                    helperText={errors.autores?.[index]?.rg?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Email"
+                    fullWidth
+                    value={autor.email}
+                    onChange={(e) =>
+                      handleAutorChange(index, "email", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.email}
+                    helperText={errors.autores?.[index]?.email?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Endereço"
+                    fullWidth
+                    value={autor.endereco}
+                    onChange={(e) =>
+                      handleAutorChange(index, "endereco", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.endereco}
+                    helperText={errors.autores?.[index]?.endereco?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Bairro"
+                    fullWidth
+                    value={autor.bairro}
+                    onChange={(e) =>
+                      handleAutorChange(index, "bairro", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.bairro}
+                    helperText={errors.autores?.[index]?.bairro?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="CEP"
+                    fullWidth
+                    value={autor.cep}
+                    onChange={(e) =>
+                      handleAutorChange(index, "cep", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.cep}
+                    helperText={errors.autores?.[index]?.cep?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Data de Nascimento"
+                    fullWidth
+                    value={autor.dataNascimento}
+                    onChange={(e) =>
+                      handleAutorChange(index, "dataNascimento", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.dataNascimento}
+                    helperText={
+                      errors.autores?.[index]?.dataNascimento?.message
+                    }
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Orgão Emissor"
+                    fullWidth
+                    value={autor.orgaoEmissor}
+                    onChange={(e) =>
+                      handleAutorChange(index, "orgaoEmissor", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.orgaoEmissor}
+                    helperText={errors.autores?.[index]?.orgaoEmissor?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Profissão"
+                    fullWidth
+                    value={autor.profissao}
+                    onChange={(e) =>
+                      handleAutorChange(index, "profissao", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.profissao}
+                    helperText={errors.autores?.[index]?.profissao?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Cidade"
+                    fullWidth
+                    value={autor.cidade}
+                    onChange={(e) =>
+                      handleAutorChange(index, "cidade", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.cidade}
+                    helperText={errors.autores?.[index]?.cidade?.message}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    required
+                    label="Estado"
+                    fullWidth
+                    value={autor.estado}
+                    onChange={(e) =>
+                      handleAutorChange(index, "estado", e.target.value)
+                    }
+                    error={!!errors.autores?.[index]?.estado}
+                    helperText={errors.autores?.[index]?.estado?.message}
+                  />
+                </Grid>
+          
+                <Grid item xs={12}>
+                  <TextField
+                    type="number"
+                    label="Porcentagem de Contribuição (%): "
+                    fullWidth
+                    value={autor.porcentagem || 0}
+                    helperText="Você deve inserir a porcentagem de participação do autor neste programa"
+                    onChange={(e) =>
+                      handlePorcentagemChange(index, parseFloat(e.target.value))
+                    }
+                  />
+                </Grid>
+                
+            {/* Radio Group Vinculo Unitins */}
+{/* Radio Group Vinculo Unitins */}
+<Grid item xs={12}>
+  <Controller
+    name={`autores[${index}].vinculoUnitins`} // Vinculando ao array de autores
+    control={control}
+    rules={{ required: "Campo obrigatório" }}
+    render={({ field }) => (
+      <FormControl component="fieldset" fullWidth>
+        <FormLabel component="legend">
+          Este autor há vínculo com a Unitins
+        </FormLabel>
+        <RadioGroup
+          row
+          {...field}
+          value={field.value === true ? "true" : "false"} // Convertendo o valor para string
+          onChange={(e) => field.onChange(e.target.value === "true")} // Convertendo de volta para booleano
+        >
+          <FormControlLabel
+            value="true"
+            control={<Radio />}
+            label="Sim"
+          />
+          <FormControlLabel
+            value="false"
+            control={<Radio />}
+            label="Não"
+          />
+        </RadioGroup>
+        {errors?.autores?.[index]?.vinculoUnitins && (
+          <FormHelperText error>
+            {errors.autores[index].vinculoUnitins.message}
+          </FormHelperText>
+        )}
+      </FormControl>
+    )}
+  />
+</Grid>
 
-            <Button
+{/* Campos adicionais quando vinculoUnitins for 'true' */}
+{watch(`autores[${index}].vinculoUnitins`) === true && (
+  <Grid item xs={12}>
+    <Controller
+      name={`autores[${index}].vinculoUnitinsDesc`} // Acessando o campo correto
+      control={control}
+      rules={{ required: "Campo obrigatório" }}
+      render={({ field }) => (
+        <FormControl component="fieldset" fullWidth>
+          <FormLabel component="legend">
+            Escolha o vínculo com a Unitins:
+          </FormLabel>
+          <RadioGroup
+            row
+            {...field}
+            onChange={(e) => field.onChange(e.target.value)}
+            value={field.value || ""}
+          >
+            <FormControlLabel
+              value="Professor"
+              control={<Radio />}
+              label="Professor"
+            />
+            <FormControlLabel
+              value="Aluno de graduação"
+              control={<Radio />}
+              label="Aluno de graduação"
+            />
+            <FormControlLabel
+              value="Aluno de especialização"
+              control={<Radio />}
+              label="Aluno de especialização"
+            />
+            <FormControlLabel
+              value="Aluno de pós-graduação"
+              control={<Radio />}
+              label="Aluno de pós-graduação"
+            />
+            <FormControlLabel
+              value="Técnico administrativo"
+              control={<Radio />}
+              label="Técnico administrativo"
+            />
+          </RadioGroup>
+          {errors?.autores?.[index]?.vinculoUnitinsDesc && (
+            <FormHelperText error>
+              {errors.autores[index].vinculoUnitinsDesc.message}
+            </FormHelperText>
+          )}
+        </FormControl>
+      )}
+    />
+  </Grid>
+)}
+
+{/* Campos adicionais quando vinculoUnitins for 'false' */}
+{watch(`autores[${index}].vinculoUnitins`) === false && (
+  <Grid item xs={12}>
+    <Controller
+      name={`autores[${index}].nomeInstituicao`} // Acessando o campo correto
+      control={control}
+      rules={{ required: "Campo obrigatório" }} // Se desejar tornar o campo obrigatório
+      render={({ field }) => (
+        <TextField
+          required
+          label="Nome da Instituição"
+          fullWidth
+          {...field}
+          error={!!errors.autores?.[index]?.nomeInstituicao}
+          helperText={
+            errors.autores?.[index]?.nomeInstituicao
+              ? errors.autores[index].nomeInstituicao.message
+              : "(Apenas preencha, se caso não fazer parte da UNITINS)"
+          }
+        />
+      )}
+    />
+    <Controller
+      name={`autores[${index}].vinculoInstituicao`} // Acessando o campo correto
+      control={control}
+      rules={{ required: "Campo obrigatório" }} // Se desejar tornar o campo obrigatório
+      render={({ field }) => (
+        <TextField
+          required
+          label="Descreva qual o vínculo que tem para com a instituição:"
+          fullWidth
+          {...field}
+          error={!!errors.autores?.[index]?.vinculoInstituicao}
+          helperText={
+            errors.autores?.[index]?.vinculoInstituicao
+              ? errors.autores[index].vinculoInstituicao.message
+              : "(Apenas preencha, se caso não fazer parte da UNITINS)"
+          }
+        />
+      )}
+    />
+  </Grid>
+)}
+
+              
+                <Grid className="flex gap-2 w-full m-4">
+                <Button
+                    color="error"
+                    variant="outlined"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => removerAutor(index)}
+                  >
+                    Remover
+                  </Button>
+<Button
               className="mt-4"
               variant="outlined"
               onClick={adicionarAutor}
@@ -719,68 +917,12 @@ const adicionarAutor = () => {
               Adicionar Autor
             </Button>
 
-            {/* Barra de Porcentagem */}
-            <PorcentagemAutores autores={autores} />
-
-            {/* Radio Group Vinculo Unitins */}
-            <Grid item xs={12}>
-              <Controller
-                name="vinculoUnitins"
-                control={control}
-                rules={{ required: "Campo obrigatório" }}
-                render={({ field }) => (
-                  <FormControl component="fieldset" fullWidth>
-                    <FormLabel component="legend">
-                      Este autor há vínculo com a Unitins
-                    </FormLabel>
-                    <RadioGroup
-                      row
-                      {...field}
-                      value={field.value === true ? "true" : "false"}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === "true")
-                      }
-                    >
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Sim"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="Não"
-                      />
-                    </RadioGroup>
-                    {errors.vinculoUnitins && (
-                      <FormHelperText error>
-                        {errors.vinculoUnitins.message}
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-
-            {/* Nome da Instituição */}
-            {watch("vinculoUnitins") === false && (
-              <Grid item xs={12}>
-                <Controller
-                  name="nomeInstituicao"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      required
-                      label="Nome da Instituição (Apenas preencha, se caso não fazer parte da UNITINS)"
-                      fullWidth
-                      {...field}
-                      error={!!errors.nomeInstituicao}
-                      helperText={errors.nomeInstituicao?.message}
-                    />
-                  )}
-                />
+            
+                  
+                </Grid>
               </Grid>
-            )}
+            ))}
+
           </Grid>
         );
       case 1:
@@ -790,14 +932,14 @@ const adicionarAutor = () => {
             container
             spacing={2}
           >
-            <Stepper activeStep={activeStep} className="w-full mt-4">
+            <Stepper activeStep={activeStep} className="flex w-full m-4">
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
-            <Typography className="text-2xl font-medium">
+            <Typography className="text-3xl font-medium m-4">
               INFORMAÇÕES DO PROGRAMA
             </Typography>
 
@@ -1016,9 +1158,7 @@ const adicionarAutor = () => {
                     <input
                       type="file"
                       hidden
-                      onChange={(e) =>
-                        handleFileChange(e, setCodigoFonte)
-                      }
+                      onChange={(e) => handleFileChange(e, setCodigoFonte)}
                     />
                   </Button>
 
@@ -1067,14 +1207,14 @@ const adicionarAutor = () => {
             container
             spacing={2}
           >
-            <Stepper activeStep={activeStep} className="w-full mt-4">
+            <Stepper activeStep={activeStep} className="flex w-full m-4">
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
-            <Typography className="text-2xl font-medium">
+            <Typography className="text-3xl font-medium m-4">
               CARACTERIZAÇÃO DO PROGRAMA
             </Typography>
             <Grid container spacing={2}>
@@ -1183,14 +1323,14 @@ const adicionarAutor = () => {
             container
             spacing={2}
           >
-            <Stepper activeStep={activeStep} className="w-full mt-4">
+            <Stepper activeStep={activeStep} className="flex w-full m-4">
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
-            <Typography className="text-2xl font-medium">
+            <Typography className="text-3xl font-medium m-4">
               FATOS DE RELEVÂNCIA E CATEGORIA
             </Typography>
             <Grid container spacing={2}>
@@ -1325,13 +1465,12 @@ const adicionarAutor = () => {
         onCancel={handleCancel}
       />
       <ConfirmationModal
-  open={autoresModal}
-  onClose={() => setAutoresModal(false)}
-  onConfirm={handleConfirmAutores}  // Passa a função de confirmação aqui
-  title="Confirmação"
-  message="Você deseja confirmar a adição desses autores?"
-/>
-
+        open={autoresModal}
+        onClose={() => setAutoresModal(false)}
+        onConfirm={handleConfirmAutores} // Passa a função de confirmação aqui
+        title="Confirmação"
+        message="Você deseja confirmar a adição desses autores?"
+      />
     </div>
   );
 }

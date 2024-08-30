@@ -12,7 +12,9 @@ export interface IPrograma {
     dataCriacaoPrograma: Date | string | null;
     dataCriacao: string;
     vinculoUnitins: boolean;
-    vinculoInstitucional: string | null;
+    vinculoUnitinsDesc: string | null;
+    nomeInstituicao: string | null;
+    vinculoInstituicao: string | null;
     fasePublicacao: string;
     status: ProgramaStatus;
     outrasObrasDesc: string | null,

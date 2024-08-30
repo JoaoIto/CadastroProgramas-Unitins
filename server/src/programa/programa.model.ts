@@ -47,12 +47,6 @@ export class Programa {
     @Prop({ required: true, default: new Date() })
     dataCriacao: Date;
 
-    @Prop({ required: true })
-    vinculoUnitins: boolean;
-
-    @Prop({default: null})
-    vinculoInstitucional: string;
-
     @Prop({type: String, enum: ProgramaFase })
     fasePublicacao: ProgramaFase;
 
