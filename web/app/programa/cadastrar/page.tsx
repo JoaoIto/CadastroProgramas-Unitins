@@ -10,12 +10,13 @@ import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { getUsuarioId } from "@/app/functions/getUsuarioId/getUsuarioId";
 import { postPrograma } from "@/app/service/programa/post/postPrograma";
 import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import SearchIcon from '@mui/icons-material/Search';
+import Tooltip from '@mui/material/Tooltip';
 
 import {
   Typography,
@@ -136,11 +137,9 @@ export default function NovaSolicitacao() {
   const steps = [
     "Informações dos Autores",
     "Informações do Programa",
-    "Caracterização do Programa",
-    "Fatores de Relevância e Categoria",
+    "Fontes e Inspirações",
+    "Revelação",
   ];
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [autores, setAutores] = useState<IAutor[]>([]);
   const [insercaoOpcao, setInsercaoOpcao] = useState<"arquivo" | "link">(
@@ -151,35 +150,20 @@ export default function NovaSolicitacao() {
     "nao"
   );
 
-  // Estado para armazenar a descrição das obras
-  const [descricaoObras, setDescricaoObras] = useState<string>("");
-
   // Estado para armazenar a opção selecionada para Fonte de Financiamento
   const [existeFonteFinanciamento, setExisteFonteFinanciamento] = useState<
     "sim" | "nao"
   >("nao");
-
-  // Estado para armazenar a descrição de fonte de financiamento
-  const [descricaoFonteFinanciamento, setDescricaoFonteFinanciamento] =
-    useState<string>("");
 
   // Estado para armazenar a opção de confissão/revelação para outras fontes
   const [confissaoOutrasFontes, setConfissaoOutrasFontes] = useState<
     "sim" | "nao"
   >("nao");
 
-  // Estado para armazenar a descrição de confissão/revelação para outras fontes
-  const [descricaoConfissaoOutrasFontes, setDescricaoConfissaoOutrasFontes] =
-    useState<string>("");
-
   // Estado para armazenar a opção de revelação pública
   const [revelacaoPublica, setRevelacaoPublica] = useState<"sim" | "nao">(
     "nao"
   );
-
-  // Estado para armazenar a descrição de revelação pública
-  const [descricaoRevelacaoPublica, setDescricaoRevelacaoPublica] =
-    useState<string>("");
 
   const [linkCodigoFonte, setLinkCodigoFonte] = useState<string>("");
 
@@ -198,8 +182,6 @@ export default function NovaSolicitacao() {
     getValues,
     trigger,
     watch,
-    setError, 
-    clearErrors,
     register,
     formState: { errors },
   } = useForm<FormData>({
@@ -291,7 +273,6 @@ export default function NovaSolicitacao() {
         if (isValid) {
           const formValues = getValues();
           setFormData(formValues);
-          setFormData(formValues);
           setAutoresModal(true);
         }
         break;
@@ -356,13 +337,28 @@ export default function NovaSolicitacao() {
   const handleConfirmAutores = async () => {
     const formValues = getValues();
     console.log("Form values before confirmation:", formValues);
-
+  
     const autores = formValues.autores || [];
     for (let i = 0; i < autores.length; i++) {
       const autor = autores[i];
-      await postNovoAutor(token, autor);
+      try {
+        const novoAutor = await postNovoAutor(token, autor);
+        // Atualiza o autor com o ID retornado
+        autores[i] = { ...autor, id: novoAutor._id };
+      } catch (error) {
+        if (error instanceof Error && (error as any).response?.status === 409) {
+          // Captura o ID do autor existente no erro 409
+          const existingUsuarioId = (error as any).response.data?.existingUsuarioId;
+          if (existingUsuarioId) {
+            // Atualiza o autor com o ID existente
+            autores[i] = { ...autor, id: existingUsuarioId };
+          }
+        } else {
+          console.error("Erro ao criar novo autor:", error);
+        }
+      }
     }
-
+  
     setFormData(formValues);
     setAutoresModal(false);
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -501,11 +497,12 @@ export default function NovaSolicitacao() {
       0
     );
 
-    if (totalPorcentagem <= 30) {
+    if (totalPorcentagem <= 30 && totalPorcentagem > 0) {
       setAutores(novosAutores);
-      setErrorMessage(null);
     } else {
-      setErrorMessage("A soma das porcentagens não pode exceder 30%");
+      setAlertSeverity("error");
+      setAlertMessage("A soma das porcentagens não pode exceder 30%")
+      setAlertOpen(true);
     }
   };
 
@@ -546,21 +543,29 @@ export default function NovaSolicitacao() {
             container
             spacing={2}
           >
-            <Stepper activeStep={activeStep} className="flex w-full m-4">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <AlertMessage
+             <AlertMessage
               open={alertOpen}
               message={alertMessage}
               severity={alertSeverity}
               onClose={() => setAlertOpen(false)}
             />
-            <Typography className="text-3xl font-medium m-4">
-              INFORMAÇÕES DOS AUTORES
+            <Stepper activeStep={activeStep} className="flex w-full m-4">
+      {steps.map((label, index) => (
+        <Step key={index}>
+          <StepLabel className={`flex flex-col items-center ${index !== activeStep ? 'text-xs sm:text-base' : ''}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-blue-300 text-white ${index === activeStep ? 'text-lg' : 'text-sm'}`}>
+              {index + 1}
+            </div>
+            <span className={`text-xs sm:text-base ${index !== activeStep ? 'hidden' : ''}`}>
+              {label}
+            </span>
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
+           
+            <Typography className="text-3xl font-medium m-4 truncate transition-opacity duration-500 opacity-100 sm:opacity-90 md:opacity-75 lg:opacity-50">
+              AUTORES
             </Typography>
             {autores.map((autor, index) => (
               <Grid container spacing={2} key={index}>
@@ -595,12 +600,16 @@ export default function NovaSolicitacao() {
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => buscarAutorByCPF(index)}
-                  >
-                    Pesquisar
-                  </Button>
+                <Button
+  variant="outlined"
+  onClick={() => buscarAutorByCPF(index)}
+  className="flex items-center gap-2"
+>
+  <Tooltip title="Pesquisar por CPF" arrow>
+    <span className="hidden md:inline sm:hidden">Pesquisar</span>
+    <SearchIcon />
+  </Tooltip>
+</Button>
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
@@ -933,14 +942,21 @@ export default function NovaSolicitacao() {
             spacing={2}
           >
             <Stepper activeStep={activeStep} className="flex w-full m-4">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+      {steps.map((label, index) => (
+        <Step key={index}>
+          <StepLabel className={`flex flex-col items-center ${index !== activeStep ? 'text-xs sm:text-base' : ''}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-blue-300 text-white ${index === activeStep ? 'text-lg' : 'text-sm'}`}>
+              {index + 1}
+            </div>
+            <span className={`text-xs sm:text-base ${index !== activeStep ? 'hidden' : ''}`}>
+              {label}
+            </span>
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
             <Typography className="text-3xl font-medium m-4">
-              INFORMAÇÕES DO PROGRAMA
+              PROGRAMA
             </Typography>
 
             {/* Título */}
@@ -1208,12 +1224,19 @@ export default function NovaSolicitacao() {
             spacing={2}
           >
             <Stepper activeStep={activeStep} className="flex w-full m-4">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+      {steps.map((label, index) => (
+        <Step key={index}>
+          <StepLabel className={`flex flex-col items-center ${index !== activeStep ? 'text-xs sm:text-base' : ''}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-blue-300 text-white ${index === activeStep ? 'text-lg' : 'text-sm'}`}>
+              {index + 1}
+            </div>
+            <span className={`text-xs sm:text-base ${index !== activeStep ? 'hidden' : ''}`}>
+              {label}
+            </span>
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
             <Typography className="text-3xl font-medium m-4">
               CARACTERIZAÇÃO DO PROGRAMA
             </Typography>
@@ -1324,12 +1347,19 @@ export default function NovaSolicitacao() {
             spacing={2}
           >
             <Stepper activeStep={activeStep} className="flex w-full m-4">
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+      {steps.map((label, index) => (
+        <Step key={index}>
+          <StepLabel className={`flex flex-col items-center ${index !== activeStep ? 'text-xs sm:text-base' : ''}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-blue-300 text-white ${index === activeStep ? 'text-lg' : 'text-sm'}`}>
+              {index + 1}
+            </div>
+            <span className={`text-xs sm:text-base ${index !== activeStep ? 'hidden' : ''}`}>
+              {label}
+            </span>
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
             <Typography className="text-3xl font-medium m-4">
               FATOS DE RELEVÂNCIA E CATEGORIA
             </Typography>
