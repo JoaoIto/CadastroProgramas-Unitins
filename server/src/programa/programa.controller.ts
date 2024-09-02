@@ -168,7 +168,7 @@ export class ProgramaController {
         "..",
         "..",
         "uploads",
-        "documentosConfidencialidade",
+        "documentoConfidencialidade",
         `${programaId}-documentoConfidencialidade${docConfidencialidadeExtensao}`
       );
       fs.renameSync(docConfidencialidade.path, newDocConfidencialidadePath);

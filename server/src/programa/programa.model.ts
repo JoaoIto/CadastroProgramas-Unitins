@@ -80,10 +80,10 @@ export class Programa {
     @Prop({ type: String, default: null })
     rpiPath: string;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, default: null })
     hash: string;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, default: null })
     hashType: string;
 }
 
