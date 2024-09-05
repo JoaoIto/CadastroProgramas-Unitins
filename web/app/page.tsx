@@ -10,6 +10,7 @@ import { getProgramasUsuarioPaginado } from "./service/programa/programaUserLoga
 import { Typography } from "@mui/material";
 import { getProgramasSearch } from "./functions/storage/getProgramaSearch";
 import { ProgramCountCard } from "./components/CardPrograma/cardCounter";
+import { IPrograma } from "./interfaces/IPrograma";
 
 const PAGE_LIMIT = 5; // Define um limite padrão para a paginação
 
