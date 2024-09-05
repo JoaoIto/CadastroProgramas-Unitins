@@ -29,6 +29,7 @@ import { ProgramaStatus } from "@/app/enum/programa-status.enum";
 import AlertMessage from "@/app/components/AlertMessage";
 import { getStatusStyles } from "@/app/components/CardPrograma/getStatusStyles";
 import JustificativaCard from "@/app/components/CardPrograma/JustificativaCard";
+import { useUsersByIds } from "@/app/hooks/user/userGetByIds";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +49,15 @@ const VizualizarSolicitacao = () => {
   const programaId = tokenService.getProgramaId();
   const { profile, isLoading: isProfileLoading } = useUserPayload();
   const isAdmin = profile.perfil === "admin";
+  const [authorIds, setAuthorIds] = useState<string[]>([]);
+  const { autores, isLoading: isAutoresLoading } = useUsersByIds(authorIds);
+
+  useEffect(() => {
+    if (programaData) {
+      // Supondo que `programaData.autores` contém os IDs dos autores
+      setAuthorIds(programaData.autores);
+    }
+  }, [programaData]);
 
   useEffect(() => {
     if (programaId) {
@@ -134,6 +144,65 @@ const VizualizarSolicitacao = () => {
         >
           {/* Dados do Programa (Esquerda) */}
           <Grid item xs={12} md={6}>
+              <Typography variant="h2" className="text-2xl font-medium mb-4">
+                Dados dos Autores
+              </Typography>
+              {isAutoresLoading ? (
+                <div>Carregando dados dos autores...</div>
+              ) : autores.length > 0 ? (
+                autores.map((autor) => (
+                  <Grid
+                    key={autor._id}
+                    container
+                    direction="column"
+                    spacing={2}
+                  >
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Nome do autor"
+                        value={autor.nome || "N/A"}
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="CPF do autor"
+                        value={autor.cpf || "N/A"}
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="RG do autor"
+                        value={autor.rg || "N/A"}
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Matrícula do autor"
+                        value={autor.matricula || "N/A"}
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                ))
+              ) : (
+                <div>Não há dados de autores disponíveis.</div>
+              )}
+
             <h2 className="text-2xl font-medium mb-4">
               Dados do Programa:{" "}
               {programaData?.status && (
@@ -188,8 +257,10 @@ const VizualizarSolicitacao = () => {
                 (programaData?.status === ProgramaStatus.EM_AJUSTES &&
                   programaData?.justificativa && (
                     <Grid item xs={12}>
-                    <JustificativaCard justificativa={programaData.justificativa} />
-                  </Grid>
+                      <JustificativaCard
+                        justificativa={programaData.justificativa}
+                      />
+                    </Grid>
                   ))}
               {isAdmin && programaData?.hashType && programaData.hash && (
                 <Grid item xs={20}>
