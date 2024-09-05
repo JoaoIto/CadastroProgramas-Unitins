@@ -4,6 +4,8 @@ Este projeto é uma iniciativa científica e de extensão da **Universidade Esta
 
 Atualmente, o processo de registro é realizado manualmente, em formato físico, o que resulta em **gargalos humanos** e pode demorar **meses** até a finalização do registro junto ao **INPI (Instituto Nacional da Propriedade Industrial)**. Esta plataforma surge como uma solução que irá facilitar tanto o **usuário externo** (que deseja registrar seu software), quanto a **equipe do NIT (Núcleo de Inovação Tecnológica)** da Unitins, que gerencia esse processo. 
 
+<img src=".github\img/printInicial.png"/>
+
 Com essa aplicação, é possível:
 - **Acompanhar o processo de registro de forma digital e transparente**.
 - **Automatizar o fluxo de trabalho da equipe do NIT**, gerenciando os documentos e facilitando a tramitação das informações.
