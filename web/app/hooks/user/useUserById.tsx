@@ -22,7 +22,7 @@ export const useUserById = (userId: string) => {
     if (userId) {
       fetchUser();
     }
-  }, [userId]);
+  }, [token, userId]);
 
   return { user, isLoading };
 };

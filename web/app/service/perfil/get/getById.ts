@@ -1,5 +1,6 @@
 import ApiUtils from "@/app/Utils/Api/apiMethods";
 
+// Rota exclusiva para admin
 export const getById = async (token: string, id: string): Promise<Perfil | null> => {
     try {
         const response = await ApiUtils.get(`/usuario/${id}`, token);

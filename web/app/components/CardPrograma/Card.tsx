@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { tokenService } from '@/app/Utils/Cookies/tokenStorage';
 import { getStatusStyles } from './getStatusStyles';
 import { IPrograma } from '@/app/interfaces/IPrograma';
-import { useUserById } from '@/app/hooks/user/useUserById';
+import { useUsersByIds } from '@/app/hooks/user/userGetByIds';
 
 interface CardProgramProps {
     programa: IPrograma;
@@ -21,7 +21,7 @@ interface CardProgramProps {
 export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
     const [mostrarDescricao, setMostrarDescricao] = useState(false);
     const router = useRouter();
-    const { user, isLoading } = useUserById(programa.usuarioId);
+    const { autores, isLoading } = useUsersByIds(programa.autores);
 
     const handleEdit = () => {
         tokenService.setProgramaId(programa._id);
@@ -39,10 +39,10 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
         <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl m-4">
             <CardContent className="p-4">
                 <Grid className='flex gap-2'>
-                <Typography variant="h5" component="div">
-                    {programa.titulo}
-                </Typography>
-                <Chip
+                    <Typography variant="h5" component="div">
+                        {programa.titulo}
+                    </Typography>
+                    <Chip
                         label={programa.status}
                         variant="outlined"
                         style={{
@@ -53,20 +53,24 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                             padding: '2px 4px',
                         }}
                     />
-                    </Grid>
+                </Grid>
+
+                {/* Exibir os autores */}
                 <Typography variant="h6">
-                        Autor: {isLoading ? 'Carregando...' : user?.nome || 'Não disponível'}
-                    </Typography>
-                    <Typography variant="caption">
-                        Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
-                    </Typography>
+                    Autor(es): {isLoading ? 'Carregando...' : autores.map(autor => autor.nome).join(', ') || 'Não disponível'}
+                </Typography>
+
+                <Typography variant="caption">
+                    Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
+                </Typography>
+
                 <div className="flex flex-wrap gap-2 my-2">
                     {programa.linguagens.map((linguagem, index) => (
                         <Chip color='primary' key={index} label={linguagem} variant="outlined" />
                     ))}
                 </div>
+
                 <Grid className='flex flex-col'>
-                    
                     <CardActions>
                         <Button
                             className="text-azulEscuro hover:text-white hover:bg-azulEscuro"
@@ -76,11 +80,13 @@ export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
                             Descrição
                         </Button>
                     </CardActions>
+
                     {mostrarDescricao && (
                         <Typography className="mt-2" variant="subtitle2">
                             {programa.descricao}
                         </Typography>
                     )}
+
                     <div className="flex gap-2 items-center mt-2">
                         <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleView}>
                             Visualizar
