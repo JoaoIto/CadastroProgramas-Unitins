@@ -44,6 +44,7 @@ import { ConfirmationModal } from "@/app/components/Modal/ConfirmationModal";
 
 // Validação com Zod
 const autorSchema = z.object({
+  _id: z.string(),
   nome: z.string().min(1, "Nome é obrigatório"),
   cpf: z
     .string()
@@ -323,9 +324,7 @@ export default function NovaSolicitacao() {
       if (activeStep >= steps.length - 1) {
         const formValues = getValues();
         // Formata o campo autores
-        formValues.autores = formValues.autores
-          .map((autor) => autor.id)
-          .join(", ");
+        formValues.autores = formValues.autores.map((autor) => autor._id);
 
         console.log("Form values before confirmation:", formValues);
         setFormData(formValues);
@@ -343,27 +342,33 @@ export default function NovaSolicitacao() {
       const autor = autores[i];
       try {
         const novoAutor = await postNovoAutor(token, autor);
-        // Atualiza o autor com o ID retornado
-        autores[i] = { ...autor, id: novoAutor._id };
-      } catch (error) {
-        if (error instanceof Error && (error as any).response?.status === 409) {
-          // Captura o ID do autor existente no erro 409
-          const existingUsuarioId = (error as any).response.data?.existingUsuarioId;
-          if (existingUsuarioId) {
-            // Atualiza o autor com o ID existente
-            autores[i] = { ...autor, id: existingUsuarioId };
-          }
+  
+        // Verifica se o autor foi criado ou se já existe
+        if ('_id' in novoAutor) {
+          // Novo autor criado com sucesso
+          autores[i] = { ...autor, id: novoAutor._id };
+          sessionStorage.setItem('autorExistente', JSON.stringify(novoAutor));
+        } else if ('existingUsuarioId' in novoAutor) {
+          // Autor já existente
+          autores[i] = { ...autor, id: novoAutor.existingUsuarioId };
+          sessionStorage.setItem('autorExistente', JSON.stringify({
+            existingUsuarioId: novoAutor.existingUsuarioId,
+            message: novoAutor.message,
+          }));
         } else {
-          console.error("Erro ao criar novo autor:", error);
+          console.warn("O retorno do novo autor não contém um ID válido.");
         }
+      } catch (error) {
+        console.error("Erro ao criar novo autor:", error);
       }
     }
   
     setFormData(formValues);
     setAutoresModal(false);
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
+  };  
+  
+  
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -377,17 +382,6 @@ export default function NovaSolicitacao() {
         console.error("Erro ao buscar linguagens:", error);
       });
   }, [profile, isLoading, setValue, token]);
-
-  const handleFormSubmit = handleSubmit((data) => {
-    const formDataWithFile = {
-      ...data,
-      codigoFonte,
-      autores: data.autores.map((autor) => autor._id),
-    };
-    console.log("Form data before confirmation:", formDataWithFile);
-    setFormData(formDataWithFile);
-    setShowConfirmationModal(true);
-  });
 
   // Função auxiliar para criar um novo autor
   const criarNovoAutor = (): IAutor => ({
@@ -489,6 +483,7 @@ export default function NovaSolicitacao() {
     }
     return true;
   };
+
   const handlePorcentagemChange = (index: number, value: number) => {
     const novosAutores = [...autores];
     novosAutores[index].porcentagem = value;
@@ -514,7 +509,7 @@ export default function NovaSolicitacao() {
     formData.append("descricao", data.descricao);
     formData.append("solucaoProblemaDesc", data.solucaoProblemaDesc);
     formData.append("linguagens", data.linguagens);
-    formData.append("autores", JSON.stringify([data.autores] || []));
+    formData.append("autores", data.autores);
     if (insercaoOpcao === "arquivo" && codigoFonte) {
       formData.append("codigoFonte", codigoFonte);
     } else if (insercaoOpcao === "link") {

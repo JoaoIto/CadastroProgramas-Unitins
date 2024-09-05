@@ -59,29 +59,36 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
       setAlertMessage("Por favor, adicione o documento de confidencialidade antes de confirmar.");
       return;
     }
-
+  
     if (formData) {
       const formDataWithFile = new FormData();
-
+  
       // Adiciona todos os campos do formData
       Object.entries(formData).forEach(([key, value]) => {
-        formDataWithFile.append(key, value);
+        if (key === "autores" && Array.isArray(value)) {
+          // Se for o campo autores, adiciona cada autor separadamente
+          value.forEach((autor) => {
+            formDataWithFile.append("autores[]", autor);
+          });
+        } else {
+          formDataWithFile.append(key, value);
+        }
       });
-
+  
       // Adiciona o arquivo, se existir
       if (nomeDocumento) {
         formDataWithFile.append("documentoConfidencialidade", nomeDocumento);
       }
-
+  
       // Passa o FormData para a função de confirmação
       onConfirm(formDataWithFile);
-
+  
       // Log para verificar o conteúdo do FormData
       console.log("Data depois dos dois arquivos:");
-
+  
       // Cria um objeto para armazenar as entradas do FormData
       const formDataEntries: { [key: string]: any } = {};
-
+  
       formDataWithFile.forEach((value, key) => {
         if (value instanceof File) {
           formDataEntries[key] = {
@@ -93,21 +100,22 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
           formDataEntries[key] = value;
         }
       });
-
+  
       // Mostra o objeto como JSON
       console.log("FormData como JSON:", JSON.stringify(formDataEntries, null, 2));
       setAlertOpen(true);
       setAlertSeverity("success");
       setAlertMessage("A solicitação foi enviada com sucesso!");
-
+  
       await postProgramaComArquivos(formDataWithFile, token);
-
+  
       router.push('/');
       setTimeout(() => {
         window.location.reload(); // Recarrega a página após 1 segundo
       }, 1000);
     }
   };
+  
 
   return (
     <Dialog open={open} onClose={onCancel}>
