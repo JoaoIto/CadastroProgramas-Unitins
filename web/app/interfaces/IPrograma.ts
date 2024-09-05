@@ -2,7 +2,6 @@ import { ProgramaStatus } from "../enum/programa-status.enum";
 
 export interface IPrograma {
     _id: string;
-    usuarioId: string;
     titulo: string;
     justificativa: string | null;
     descricao: string;

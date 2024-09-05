@@ -26,6 +26,9 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import { IPrograma } from "@/app/interfaces/IPrograma";
 import { enviarJustificativa } from "@/app/service/programa/admin/justificativa/enviarJustificativa";
 import { ProgramaStatus } from "@/app/enum/programa-status.enum";
+import AlertMessage from "@/app/components/AlertMessage";
+import { getStatusStyles } from "@/app/components/CardPrograma/getStatusStyles";
+import JustificativaCard from "@/app/components/CardPrograma/JustificativaCard";
 
 const VizualizarSolicitacao = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,9 @@ const VizualizarSolicitacao = () => {
   const [justificativa, setJustificativa] = useState<string>("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const router = useRouter();
   const token = getStorageItem();
   const programaId = tokenService.getProgramaId();
@@ -73,17 +78,22 @@ const VizualizarSolicitacao = () => {
   // Função para enviar a justificativa
   const handleSubmitJustificativa = async () => {
     try {
-      const response = await enviarJustificativa(token, justificativa, programaId);
+      const response = await enviarJustificativa(
+        token,
+        justificativa,
+        programaId
+      );
       setAlertSeverity("success");
-      setAlertMessage('Justificativa enviada com sucesso');
+      setAlertMessage("Justificativa enviada com sucesso");
+      setAlertOpen(true);
     } catch (error) {
       setAlertSeverity("error");
-      setAlertMessage('Erro ao enviar justificativa');
+      setAlertMessage("Erro ao enviar justificativa");
+      setAlertOpen(true);
     } finally {
       setAlertOpen(true);
     }
   };
-
 
   const handleEdit = () => {
     router.push(`/programa/editar`);
@@ -124,7 +134,24 @@ const VizualizarSolicitacao = () => {
         >
           {/* Dados do Programa (Esquerda) */}
           <Grid item xs={12} md={6}>
-            <h2 className="text-2xl font-medium mb-4">Dados do Programa:</h2>
+            <h2 className="text-2xl font-medium mb-4">
+              Dados do Programa:{" "}
+              {programaData?.status && (
+                <Chip
+                  label={programaData.status}
+                  variant="outlined"
+                  style={{
+                    borderColor: getStatusStyles(programaData.status)
+                      .borderColor,
+                    backgroundColor: getStatusStyles(programaData.status)
+                      .backgroundColor,
+                    color: getStatusStyles(programaData.status).color,
+                    fontWeight: "bold",
+                    padding: "2px 4px",
+                  }}
+                />
+              )}
+            </h2>
             <Grid container direction="column" spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -156,31 +183,15 @@ const VizualizarSolicitacao = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Status"
-                  value={programaData?.status || "N/A"}
-                  fullWidth
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-              </Grid>
-              {isAdmin && programaData?.justificativa || programaData?.status === ProgramaStatus.EM_AJUSTES && programaData?.justificativa &&(
-                <Grid item xs={20}>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Justificativa"
-                      value={programaData?.justificativa}
-                      fullWidth
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                    />
+
+              {(isAdmin && programaData?.justificativa) ||
+                (programaData?.status === ProgramaStatus.EM_AJUSTES &&
+                  programaData?.justificativa && (
+                    <Grid item xs={12}>
+                    <JustificativaCard justificativa={programaData.justificativa} />
                   </Grid>
-                </Grid>
-              )}
-              {isAdmin &&  programaData?.hashType && programaData.hash && (
+                  ))}
+              {isAdmin && programaData?.hashType && programaData.hash && (
                 <Grid item xs={20}>
                   <Grid item xs={12}>
                     <Typography className="font-semibold my-2">
@@ -334,7 +345,9 @@ const VizualizarSolicitacao = () => {
           </Grid>
           <Grid className="w-full justify-evenly flex">
             <Grid container className="flex flex-col w-full" mt={2}>
-              {(isAdmin || programaData?.status === ProgramaStatus.RASCUNHO || programaData?.status === ProgramaStatus.EM_AJUSTES) && (
+              {(isAdmin ||
+                programaData?.status === ProgramaStatus.RASCUNHO ||
+                programaData?.status === ProgramaStatus.EM_AJUSTES) && (
                 <>
                   <Typography variant="body1">
                     Deseja editar essa solicitação?
@@ -377,13 +390,21 @@ const VizualizarSolicitacao = () => {
                 </Button>
               </Grid>
             )}
-           
           </Grid>
+          <AlertMessage
+            open={alertOpen}
+            message={alertMessage}
+            severity={alertSeverity}
+            onClose={() => setAlertOpen(false)}
+          />
           <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
             <DialogTitle>Justificativa</DialogTitle>
-            
+
             <DialogContent>
-            <Typography>Aqui será enviado uma justificativa do por quê a solicitação foi rejeitada: </Typography>
+              <Typography>
+                Aqui será enviado uma justificativa do por quê a solicitação foi
+                rejeitada:{" "}
+              </Typography>
               <TextField
                 required
                 label="Justificativa"
