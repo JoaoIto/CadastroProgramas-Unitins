@@ -158,7 +158,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
             </Typography>
             <div className="mt-4">
               <a
-                href="/termos/Currículo%203%20(3).pdf"
+                href="/termos/Formulário de Solicitação de Registro de Programa de Computador - UNITINS.docx"
                 className="text-azulClaroGradient bg-azulEscuro p-2 rounded border-2 border-azulClaroGradient"
                 download
               >
