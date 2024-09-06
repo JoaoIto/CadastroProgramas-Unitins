@@ -93,20 +93,20 @@ export function Sidebar() {
               <ListItemIcon>
                 <HomeIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="hidden md:block" primary="Inicial" />
+              <ListItemText className="hidden md:block lg:block" primary="Inicial" />
             </ListItemButton>
             <ListItemButton onClick={routerProgramas}>
               <ListItemIcon>
                 <SendIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="hidden md:block" primary={isAdmin ? "Pendentes" : "Enviados"} />
+              <ListItemText className="hidden md:block lg:block" primary={isAdmin ? "Pendentes" : "Enviados"} />
             </ListItemButton>
             {isAdmin && (
               <ListItemButton onClick={routerProgramasEmAcompanhamento}>
                 <ListItemIcon>
                   <AssignmentIcon sx={{ color: 'white' }} />
                 </ListItemIcon>
-                <ListItemText className="hidden md:block" primary="Em Acompanhamento" />
+                <ListItemText className="hidden md:block lg:block" primary="Em Acompanhamento" />
               </ListItemButton>
             )}
             {isAdmin && (
@@ -114,7 +114,7 @@ export function Sidebar() {
                 <ListItemIcon>
                   <BuildIcon sx={{ color: 'white' }} />
                 </ListItemIcon>
-                <ListItemText className="hidden md:block" primary="Em Ajustes" />
+                <ListItemText className="hidden md:block lg:block" primary="Em Ajustes" />
               </ListItemButton>
             )}
           </List>
