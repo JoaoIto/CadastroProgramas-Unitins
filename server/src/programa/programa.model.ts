@@ -1,6 +1,7 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, {Document, ObjectId, SchemaTypes} from 'mongoose';
 import {ProgramaStatus} from "./programa-status.enum";
+import { ProgramaFase } from './programa-fase.enum';
 
 export type ProgramaDocument = Programa & Document;
 
@@ -10,26 +11,80 @@ export class Programa {
     @Prop({type: SchemaTypes.ObjectId})
     _id: mongoose.Types.ObjectId;
 
-    @Prop({ required: true })
-    nomeCompleto: string;
+    @Prop({type: [SchemaTypes.ObjectId], required: true})
+    autores: mongoose.Types.ObjectId[];
 
     @Prop({ required: true })
-    rg: string;
+    titulo: string;
 
     @Prop({ required: true })
-    cpf: string;
+    descricao: string;
 
     @Prop({ required: true })
-    dataNascimento: Date;
+    solucaoProblemaDesc: string;
 
     @Prop({ required: true })
-    estadoCivil: string;
+    linguagens: string[];
+
+    @Prop({default: null})
+    outrasObrasDesc: string;
+
+    @Prop({default: null})
+    fonteFinanciamentoDesc: string;
+
+    @Prop({default: null})
+    revelacaoDesc: string;
+
+    @Prop({default: null})
+    revelacaoPublicaDesc: string;
+
+    @Prop({ required: true })
+    descricaoMercado: string;
+
+    @Prop({ required: true })
+    dataCriacaoPrograma: Date;
+
+    @Prop({ required: true, default: new Date() })
+    dataCriacao: Date;
+
+    @Prop({type: String, enum: ProgramaFase })
+    fasePublicacao: ProgramaFase;
 
     @Prop({type: String, required: true, enum: ProgramaStatus, default: ProgramaStatus.RASCUNHO })
     status: ProgramaStatus;
 
-    @Prop({type: String, required: false})
-    nomeArquivo: string;
+    @Prop({ type: String, default: null })
+    justificativa: string;
+
+    @Prop({ type: String, default: null })
+    justificativaEdicao: string;
+
+    @Prop({ type: String, default: null })
+    documentoConfidencialidadePath: string;
+
+    @Prop({ type: String, default: null })
+    codigoFontePath: string;
+
+    @Prop({ type: String, default: null })
+    boletoPath: string;
+
+    @Prop({ type: String, default: null })
+    veracidadePath: string;
+
+    @Prop({ type: String, default: null })
+    certificadoRegistroPath: string;
+
+    @Prop({ type: String, default: null })
+    protocoloINPIPath: string;
+
+    @Prop({ type: String, default: null })
+    rpiPath: string;
+
+    @Prop({ type: String, default: null })
+    hash: string;
+
+    @Prop({ type: String, default: null })
+    hashType: string;
 }
 
 export const ProgramaSchema = SchemaFactory.createForClass(Programa);

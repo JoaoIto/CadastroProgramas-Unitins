@@ -1,15 +1,31 @@
-import {Programa} from "@/app/dashboard/page";
-
 class ApiUtils {
-    static async post(endpoint: string, data: object): Promise<void> {
-        console.log( window.sessionStorage.getItem('perfilId'));
 
+    private static baseUrl = 'http://localhost:8080';
+    static async authenticate(loginUser: ILoginUser): Promise<string | undefined> {
+        const loginEndpoint = `${(ApiUtils.baseUrl)}/auth/login`;
+
+        try {
+            const response: IResponseToken | undefined = await this.postLogin(loginEndpoint, loginUser);
+
+            // Agora você pode acessar a propriedade access_token diretamente
+            if (response) {
+                const token = response.access_token;
+                return token;
+            }
+
+        } catch (error) {
+            console.error('Erro durante a autenticação:', error);
+            throw error; // Repasse o erro para o chamador
+        }
+    }
+
+
+    static async postLogin<T>(endpoint: string, data: object): Promise<T | undefined> { 
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'usuario-id': window.sessionStorage.getItem('perfilId') || ''
                 },
                 body: JSON.stringify(data),
             });
@@ -27,75 +43,131 @@ class ApiUtils {
             console.error(error);
         }
     }
-
-
-    static async get<T>(endpoint: string): Promise<T | undefined> {
+    private static async performRequest<T>(url: string, options: RequestInit): Promise<T | undefined> {
         try {
-            const response = await fetch(endpoint);
-
+            const response = await fetch(`${ApiUtils.baseUrl}${url}`, options);
+    
             if (response.ok) {
-                const data = await response.json();
-                return data as T;
+                const result = await response.json();
+                console.log('Dados enviados com sucesso:', result);
+                return result;
             } else {
-                console.log('Erro ao buscar os dados:', response.status);
+                console.log('Erro ao enviar os dados:', response.status);
             }
         } catch (error) {
-            console.error('Erro ao buscar os dados:', error);
+            console.error(error);
         }
         return undefined;
+    }    
+
+    static async post(endpoint: string, data: object, token: string): Promise<void> {
+        const options: RequestInit = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        };
+
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 
-    static async getByUuid<T>(endpoint: string, uuid: string): Promise<T | undefined> {
-        try {
-            const response = await fetch(`${endpoint}/${uuid}`);
-
-            if (response.ok) {
-                const data = await response.json();
-                return data as T;
-            } else {
-                console.log('Erro ao buscar os dados:', response.status);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar os dados:', error);
-        }
-        return undefined;
+    static async postFormData(endpoint: string, formData: FormData, token: string): Promise<void> {
+        console.log("Aqui chegando na api utils de enviar: ", formData);
+        const options: RequestInit = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        };
+    
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 
+    static async patch<T>(
+        endpoint: string,
+        data: object | FormData,
+        token: string,
+    ): Promise<T | undefined> {
+        const headers: Record<string, string> = {
+            'Authorization': `Bearer ${token}`,
+        };
 
-    static async put(endpoint: string, data: object): Promise<void> {
-        try {
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
+        let body: BodyInit;
 
-            if (response.ok) {
-                console.log('Dados atualizados com sucesso');
-            } else {
-                console.log('Erro ao atualizar os dados:', response.status);
-            }
-        } catch (error) {
-            console.error('Erro ao atualizar os dados:', error);
+        if (data instanceof FormData) {
+            body = data;
+        } else {
+            headers['Content-Type'] = 'application/json';
+            body = JSON.stringify(data);
         }
+
+        const options: RequestInit = {
+            method: 'PATCH',
+            headers,
+            body,
+        };
+
+        return ApiUtils.performRequest<T>(endpoint, options);
     }
 
-    static async delete(endpoint: string): Promise<void> {
-        try {
-            const response = await fetch(endpoint, {
-                method: 'DELETE',
-            });
+    static async get<T>(endpoint: string, token: string): Promise<T | undefined> {
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
 
-            if (response.ok) {
-                console.log('Dados deletados com sucesso');
-            } else {
-                console.log('Erro ao deletar os dados:', response.status);
-            }
-        } catch (error) {
-            console.error('Erro ao deletar os dados:', error);
-        }
+        return ApiUtils.performRequest<T>(endpoint, options);
+    }
+
+    static async getPaginate<T>(endpoint: string, token: string, params?: { [key: string]: any }): Promise<T | undefined> {
+        const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
+        const url = `${endpoint}${queryString}`;
+    
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
+    
+        return ApiUtils.performRequest<T>(url, options);
+    }    
+        
+    static async getByUuid<T>(endpoint: string, uuid: string, token: string): Promise<T | undefined> {
+        const options: RequestInit = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
+
+        return ApiUtils.performRequest<T>(`${endpoint}/${uuid}`, options);
+    }
+
+    static async put(endpoint: string, data: object, token: string): Promise<void> {
+        const options: RequestInit = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        };
+
+        await ApiUtils.performRequest<void>(endpoint, options);
+    }
+
+    static async delete(endpoint: string, token: string): Promise<void> {
+        const options: RequestInit = {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        };
+
+        await ApiUtils.performRequest<void>(endpoint, options);
     }
 }
 

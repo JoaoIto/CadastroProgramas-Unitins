@@ -1,11 +1,22 @@
 export const APP_ROUTES = {
-    private: {
-        dashboard: '/',
-        cadastrar: '/programa/cadastrar',
-        editar: '/programa/editar',
-        listar: '/programa/listar'
+  private: {
+    user: {
+      dashboard: "/",
+      cadastrar: "/programa/cadastrar",
+      editar: "/programa/editar",
+      listar: "/programa/listar",
     },
-    public: {
-        login: 'auth/login'
-    }
-}
+    admin: {
+      dashboard: "/admin",
+      cadastrar: "/admin/programa/cadastrar",
+      processo: "/admin/programa/processo",
+      editar: "/admin/programa/editar",
+      listar: "/admin/programa/listar",
+    },
+  },
+  public: {
+    login: "/auth/login",
+    esqueceuSenha: "/auth/esqueceu-a-senha",
+    cadastrar: "/auth/cadastro",
+  },
+};

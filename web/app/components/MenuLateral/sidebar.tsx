@@ -1,40 +1,130 @@
-import React from "react";
-import Image from "next/image";
+import React, { useState } from "react";
 import HomeIcon from "@mui/icons-material/Home";
-import ListIcon from '@mui/icons-material/List';
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import UnitinsLogo from "../../../public/logoUnitins.png";
-import ButtonLinkPage from "../ButtonLinkPage/ButtonLinkPage";
+import SendIcon from '@mui/icons-material/Send';
+import { List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
+import { useUserPayload } from "@/app/hooks/user/userPayload";
+import { useRouter } from "next/navigation";
+import AlertMessage from "../AlertMessage";
+import AssignmentIcon from '@mui/icons-material/AssignmentLate';
+import BuildIcon from '@mui/icons-material/Build';
 
-export const Sidebar = () => {
-    const isSmallScreen = window.innerWidth < 870;
+export function Sidebar() {
+  const router = useRouter();
+  const { profile, isLoading } = useUserPayload();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
 
-    return (
-        <aside style={{ maxWidth: isSmallScreen ? '120px' : 'none' }} // Aplicar largura máxima em uma visualização móvel
-            className={`w-[300px] bg-blue-900 text-white flex flex-col items-center border-r-4 border-b-4 border-slate-700`}>
-            {/* Logo */}
-            {!isSmallScreen && <Image src={UnitinsLogo} alt="Unitins Logo" className="h-56 w-full"/>}
-            {/* Conteúdo da barra lateral */}
-            <ul className="flex flex-col items-center gap-10 mt-8 flex-1">
-                <li className="flex items-center space-x-2 p-2">
-                    <ButtonLinkPage href="/dashboard">
-                        <HomeIcon className="h-10 w-10" />
-                        {!isSmallScreen && <h3 className="font-medium text-lg p-4">Inicial</h3>}
-                    </ButtonLinkPage>
-                </li>
-                <li className="flex items-center space-x-2 p-2">
-                    <ButtonLinkPage href="/programa/listar">
-                        <ListIcon className="h-10 w-10" />
-                        {!isSmallScreen && <h3 className="font-medium text-lg p-4">Programas</h3>}
-                    </ButtonLinkPage>
-                </li>
-                <li className="flex items-center space-x-2 p-2">
-                    <ButtonLinkPage href="/perfil">
-                        <AccountCircleIcon className="h-10 w-10" />
-                        {!isSmallScreen && <h3 className="font-medium text-lg p-4">Perfil</h3>}
-                    </ButtonLinkPage>
-                </li>
-            </ul>
-        </aside>
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const isAdmin = profile?.perfil === "admin";
+
+  const routerProgramas = () => {
+    const message = isAdmin ? "Redirecionando para programas pendentes..." : "Redirecionando para seus programas enviados...";
+    setAlertMessage(message);
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      if (isAdmin) {
+        router.push('/admin/programa/enviados');
+      } else {
+        router.push('/programa/listar');
+      }
+    }, 2000);
+  };
+
+  const routerProgramasEmAcompanhamento = () => {
+    const message = isAdmin ? "Redirecionando para programas em acompanhamento..." : "Redirecionando para seus programas em análise...";
+    setAlertMessage(message);
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/admin/programa/em-analise');
+    }, 2000);
+  };
+
+  const routerProgramasEmAjustes = () => {
+    const message = "Redirecionando para programas em ajustes pelo usuário...";
+    setAlertMessage(message);
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/admin/programa/em-ajustes');
+    }, 2000);
+  };
+
+  const routerDashboard = () => {
+    setAlertMessage("Redirecionando para a página inicial...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push('/');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
+    }, 2000);
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
+  };
+
+  return (
+    <div>
+      <aside className="sticky top-20 left-0 h-[500px] bg-azulEscuro py-12 px-6 rounded-e-3xl shadow-lg shadow-cinzaTraco w-64 sm:w-32">
+        <nav aria-labelledby="menu-sidebar">
+          <List
+            sx={{ width: '100%', maxWidth: 360 }}
+            className="bg-azulEscuro text-[#D0D0D0] min-w-1/4"
+            component="nav"
+            subheader={
+              <ListSubheader
+                component="div"
+                id="menu-sidebar"
+                className="bg-azulEscuro text-white"
+              >
+                Menu Lateral
+              </ListSubheader>
+            }
+          >
+            <ListItemButton onClick={routerDashboard}>
+              <ListItemIcon>
+                <HomeIcon sx={{ color: 'white' }} />
+              </ListItemIcon>
+              <ListItemText className="hidden md:block" primary="Inicial" />
+            </ListItemButton>
+            <ListItemButton onClick={routerProgramas}>
+              <ListItemIcon>
+                <SendIcon sx={{ color: 'white' }} />
+              </ListItemIcon>
+              <ListItemText className="hidden md:block" primary={isAdmin ? "Pendentes" : "Enviados"} />
+            </ListItemButton>
+            {isAdmin && (
+              <ListItemButton onClick={routerProgramasEmAcompanhamento}>
+                <ListItemIcon>
+                  <AssignmentIcon sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText className="hidden md:block" primary="Em Acompanhamento" />
+              </ListItemButton>
+            )}
+            {isAdmin && (
+              <ListItemButton onClick={routerProgramasEmAjustes}>
+                <ListItemIcon>
+                  <BuildIcon sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText className="hidden md:block" primary="Em Ajustes" />
+              </ListItemButton>
+            )}
+          </List>
+        </nav>
+      </aside>
+
+      {/* AlertMessage component */}
+      <AlertMessage open={alertOpen} message={alertMessage} severity={alertSeverity} onClose={handleAlertClose} />
+    </div>
+  );
 };
+
+export default Sidebar;

@@ -1,113 +1,104 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import ButtonLinkPage from '@/app/components/ButtonLinkPage/ButtonLinkPage';
-import {ProgramaStatus} from "@/app/enum/programa-status.enum";
-import ApiUtils from '@/app/Utils/Api/apiMethods';
-import Perfil from "@/app/perfil/page";
+import Chip from '@mui/material/Chip';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CardActions from '@mui/material/CardActions';
+import Grid from '@mui/material/Grid';
+import { useRouter } from 'next/navigation';
+import { tokenService } from '@/app/Utils/Cookies/tokenStorage';
+import { getStatusStyles } from './getStatusStyles';
+import { IPrograma } from '@/app/interfaces/IPrograma';
+import { useUsersByIds } from '@/app/hooks/user/userGetByIds';
 
 interface CardProgramProps {
-  programa: Programa;
-  userId: string;
-  isOwner: boolean;
-  hasPermission?: boolean;
+    programa: IPrograma;
 }
 
-interface Programa {
-  _id: string;
-  nomeCompleto: string;
-  rg: string;
-  cpf: string;
-  dataNascimento: string;
-  estadoCivil: string;
-  status?: string;
-}
+export const CardProgram: React.FC<CardProgramProps> = ({ programa }) => {
+    const [mostrarDescricao, setMostrarDescricao] = useState(false);
+    const router = useRouter();
+    const { autores, isLoading } = useUsersByIds(programa.autores);
 
-export const CardProgram: React.FC<CardProgramProps> = ({ programa, userId, isOwner, hasPermission }) => {
-  const [perfil, setPerfil] = useState<string>('');
-
-  const handleConfirmDelete = async (uuid: string) => {
-    try {
-      window.alert("O programa selecionado será deletado!")
-      await ApiUtils.delete(`http://localhost:3333/programa/${uuid}`);
-      const updatedData = await ApiUtils.getByUuid<Perfil>(`http://localhost:3333/programa`, uuid);
-      if (!updatedData) {
-        window.open('/dashboard', '_self');
-      }
-    } catch (error) {
-      console.error('Erro ao deletar o programa:', error);
-    }
-  };
-
-  const handleCancel = async (uuid: string, data: Programa) => {
-    try {
-      if (uuid) {
-        data.status = ProgramaStatus.CANCELADO;
-        await ApiUtils.put(`http://localhost:3333/programa/${uuid}`, data);
-        window.open('/dashboard', '_self');
-      } else {
-        console.error('UUID não encontrado');
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar os dados:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchPerfil = async () => {
-      try {
-        const perfilData = await ApiUtils.getByUuid<Perfil>(`http://localhost:3333/usuario`, userId);
-
-        if (perfilData) {
-          setPerfil(perfilData.perfil);
-        }
-      } catch (error) {
-        console.error('Erro ao obter o perfil:', error);
-      }
+    const handleEdit = () => {
+        tokenService.setProgramaId(programa._id);
+        router.push(`/programa/editar`);
     };
 
-    fetchPerfil();
-  }, [userId]);
+    const handleView = () => {
+        tokenService.setProgramaId(programa._id);
+        router.push(`/programa/vizualizar`);
+    };
 
-  return (
-      <Card className="w-2/5 m-8 border-4 border-l-[10px] border-t-[10px] border-l-blue-300 border-t-blue-300 rounded-xl">
-        <CardContent className="p-4">
-          <Typography variant="h5" component="div">
-            {programa.nomeCompleto}
-          </Typography>
-          <Typography sx={{ mb: 1.5 }} color="text.secondary">
-            RG: {programa.rg}
-          </Typography>
-          <Typography variant="body2">CPF: {programa.cpf}</Typography>
-          <Typography variant="body2">
-            Data de Nascimento: {programa.dataNascimento}
-          </Typography>
-          <Typography variant="body2">Estado Civil: {programa.estadoCivil}</Typography>
-          <Typography variant="body2">Status: {programa.status}</Typography>
-          <div className="flex gap-2">
-            <Button className="bg-indigo-900 m-10" variant="contained" size="small">
-              Visualizar
-            </Button>
-            {hasPermission && hasPermission && programa.status === 'RASCUNHO' && (
-                <div>
-                  <ButtonLinkPage href="/programa/editar" uuid={programa._id}>Editar</ButtonLinkPage>
-                  <button className="text-white bg-red-800 p-2 rounded font-Inter"
-                          color="primary"
-                          onClick={() => handleConfirmDelete(programa._id)}>
-                    Deletar
-                  </button>
-                </div>
-            )}
+    const statusStyles = getStatusStyles(programa.status);
 
-            {hasPermission && hasPermission && programa.status === 'ENVIADO' && (
-                <div>
-                  <button onClick={() => handleCancel}>Cancelar</button>
+    return (
+        <Card className="w-full border-l-8 border-l-azulEscuroGradient shadow-md shadow-cinzaTraco rounded-2xl m-4">
+            <CardContent className="p-4">
+                <Grid className='flex gap-2'>
+                    <Typography variant="h5" component="div">
+                        {programa.titulo}
+                    </Typography>
+                    <Chip
+                        label={programa.status}
+                        variant="outlined"
+                        style={{
+                            borderColor: statusStyles.borderColor,
+                            backgroundColor: statusStyles.backgroundColor,
+                            color: statusStyles.color,
+                            fontWeight: 'bold',
+                            padding: '2px 4px',
+                        }}
+                    />
+                </Grid>
+
+                {/* Exibir os autores */}
+                <Typography variant="h6">
+                    Autor(es): {isLoading ? 'Carregando...' : autores.map(autor => autor.nome).join(', ') || 'Não disponível'}
+                </Typography>
+
+                <Typography variant="caption">
+                    Data de Criação do Programa: {programa.dataCriacaoPrograma ? new Date(programa.dataCriacaoPrograma).toLocaleDateString() : 'N/A'}
+                </Typography>
+
+                <div className="flex flex-wrap gap-2 my-2">
+                    {programa.linguagens.map((linguagem, index) => (
+                        <Chip color='primary' key={index} label={linguagem} variant="outlined" />
+                    ))}
                 </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-  );
+
+                <Grid className='flex flex-col'>
+                    <CardActions>
+                        <Button
+                            className="text-azulEscuro hover:text-white hover:bg-azulEscuro"
+                            onClick={() => setMostrarDescricao(!mostrarDescricao)}
+                            startIcon={mostrarDescricao ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        >
+                            Descrição
+                        </Button>
+                    </CardActions>
+
+                    {mostrarDescricao && (
+                        <Typography className="mt-2" variant="subtitle2">
+                            {programa.descricao}
+                        </Typography>
+                    )}
+
+                    <div className="flex gap-2 items-center mt-2">
+                        <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleView}>
+                            Visualizar
+                        </Button>
+                        {programa.status === 'RASCUNHO' && (
+                            <Button className="bg-azulEscuroGradient" variant="contained" onClick={handleEdit}>
+                                Editar
+                            </Button>
+                        )}
+                    </div>
+                </Grid>
+            </CardContent>
+        </Card>
+    );
 };

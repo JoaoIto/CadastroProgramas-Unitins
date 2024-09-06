@@ -1,22 +1,39 @@
-import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+"use client";
+import './globals.css';
+import React, { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { Open_Sans } from 'next/font/google';
+import { checkPublicRoute } from '@/app/functions/checkPublicRoute';
+import { Search } from './components/HeaderSearch/cabecalho';
+import { Sidebar } from './components/MenuLateral/sidebar';
+import PrivateRoute from './Utils/PrivaterRoute';
+const openSans = Open_Sans({ subsets: ['latin'] });
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Software Hub',
-  description: 'Software hub para programas de computadores da Universidade!',
+interface RootLayoutProps {
+  children: ReactNode;
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const pathname = usePathname();
+  const isPublicPage = checkPublicRoute(pathname);
+
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={openSans.className}>
+        {!isPublicPage && <Search />}
+        <div className="flex h-full w-full">
+          {!isPublicPage && <Sidebar />}
+          <main className="h-full w-full">
+            {isPublicPage ? children : (
+              <PrivateRoute>
+                {children}
+              </PrivateRoute>
+            )}
+          </main>
+        </div>
+      </body>
     </html>
-  )
-}
+  );
+};
+
+export default RootLayout;

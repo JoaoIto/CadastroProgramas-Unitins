@@ -1,70 +1,225 @@
+import React, { useState } from "react";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ButtonLinkPage from "@/app/components/ButtonLinkPage/ButtonLinkPage";
-import TextField from "@mui/material/TextField";
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
+import { useUserPayload } from "@/app/hooks/user/userPayload";
+import { useRouter } from "next/navigation";
+import ApiUtils from "@/app/Utils/Api/apiMethods";
+import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorageItem";
+import { setProgramaItem } from "@/app/functions/storage/setProgramaSearch";
+import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
+import AlertMessage from "../AlertMessage";
+import Image from 'next/image'
+import { IPrograma } from "@/app/interfaces/IPrograma";
 
-const isSmallScreen = window.innerWidth < 870;
+export function Search() {
+  const token = getStorageItem();
+  const router = useRouter();
+  const { profile, isLoading } = useUserPayload();
+  const isAdmin = profile.perfil === "admin";
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchResults, setSearchResults] = useState<IPrograma[]>([]);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
-export function Cabecalho() {
-    return (
-        <>
-            <div className="w-full h-56 bg-gray-100 flex items-center justify-evenly border-b-8 border-slate-700">
-                {/* Cabeçalho */}
-                <header className={`flex justify-evenly items-center bg-white h-56 w-full ${isSmallScreen ? 'flex-col' : 'flex'}`}>
-                    {isSmallScreen ? (
-                        <div  className={`flex h-full items-center flex-col justify-center space-x-2 m-4`}>
-                            <TextField
-                                type="text"
-                                placeholder="Pesquisar"
-                                className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
-                                InputProps={{
-                                    startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
-                                }}
-                                style={{ maxWidth: '220px' }}
-                            />
-                            <FormControl className="flex">
-                                <FormLabel id="demo-radio-buttons-group-label">Filtrar por: </FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-radio-buttons-group-label"
-                                    defaultValue="female"
-                                    name="radio-buttons-group"
-                                >
-                                    <FormControlLabel value="female" control={<Radio />} label="Nome" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Título" />
-                                </RadioGroup>
-                            </FormControl>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-evenly space-x-2 w-1/2">
-                            <TextField
-                                type="text"
-                                placeholder="Pesquisar"
-                                className="w-[350px] border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg h-20 w-full"
-                                InputProps={{
-                                    startAdornment: <SearchIcon className="h-12 w-12 m-2" />,
-                                }}
-                            />
-                            <FormControl className="flex">
-                                <FormLabel id="demo-radio-buttons-group-label">Filtrar por: </FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-radio-buttons-group-label"
-                                    defaultValue="female"
-                                    name="radio-buttons-group"
-                                >
-                                    <FormControlLabel value="female" control={<Radio />} label="Nome" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Título" />
-                                </RadioGroup>
-                            </FormControl>
-                        </div>
-                    )}
-                </header>
-                {/* Conteúdo principal */}
-            </div>
-        </>
-    );
+  const handleSearch = async () => {
+    try {
+      const response = await ApiUtils.get<IPrograma[]>(
+        `/programa/porUsuario/${searchTitle}`,
+        token
+      );
+      if (response && response.length > 0) {
+        setSearchResults(response);
+        setProgramaItem("programaSearch", JSON.stringify(response)); // Armazena os resultados da pesquisa no sessionStorage
+        setAlertMessage("Programa encontrado com sucesso!");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+        setTimeout(() => {
+          window.location.reload(); // Recarrega a página após a pesquisa
+        }, 2000);
+      } else {
+        setSearchResults([]);
+        setAlertMessage(
+          "O programa com o título pesquisado não foi encontrado."
+        );
+        setAlertSeverity("error");
+        setAlertOpen(true);
+      }
+    } catch (error) {
+      console.error("Erro ao realizar a pesquisa:", error);
+      setSearchResults([]);
+      setAlertMessage("Erro ao realizar a pesquisa. Tente novamente.");
+      setAlertSeverity("error");
+      setAlertOpen(true);
+    }
+  };
+
+  const handleClearSearch = () => {
+    sessionStorage.removeItem("programaSearch"); // Remove a pesquisa do sessionStorage
+    setSearchResults([]); // Limpa os resultados da pesquisa
+    setAlertMessage("Limpando dados de pesquisa");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      window.location.reload(); // Recarrega a página após a pesquisa
+    }, 2000); // Recarrega a página após a pesquisa
+  };
+
+  const handleLogout = () => {
+    tokenService.delete(); // Remove o token
+    setAlertMessage("Saindo da conta");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
+  };
+
+  const handleOpenLogoutModal = () => {
+    setLogoutModalOpen(true);
+  };
+
+  const handleCloseLogoutModal = () => {
+    setLogoutModalOpen(false);
+  };
+
+  const handleProfileRedirect = () => {
+    setAlertMessage("Redirecionando para a página de perfil...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push(`${isAdmin ? "/admin/perfil" : "/perfil"}`);
+    }, 2000); // Redireciona após 2 segundos
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
+  };
+
+  const routerDashboard = () => {
+    setAlertMessage("Redirecionando para a página inicial...");
+    setAlertSeverity("success");
+    setAlertOpen(true);
+    setTimeout(() => {
+      router.push("/");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); // Recarrega a página após o redirecionamento
+    }, 2000);
+  };
+
+  return (
+    <>
+      <div className="flex w-full h-[300px] justify-around">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'auto'}}>
+      <Image
+    className="sm:w-[300px] sm:h-[50px]"
+    src="/logo/softwareHub.png" // Utilize o arquivo responsivo que você carregou
+    alt="Logo Software Hub"
+    width={500} // Tamanho para telas maiores
+    height={80} // Altura padrão para telas maiores
+    style={{ 
+      cursor: 'pointer', 
+      maxWidth: '100%', // Faz com que a imagem se ajuste ao tamanho do container
+      height: 'auto' // Mantém a proporção da imagem
+    }}
+    onClick={routerDashboard} // Mantém o comportamento de redirecionamento ao clicar
+  />
+</div>
+
+  <li className="flex items-center justify-end">
+    <IconButton onClick={handleOpenLogoutModal} color="primary">
+      <ExitToAppIcon />
+    </IconButton>
+    <Button
+      className="bg-azulEscuro"
+      variant="contained"
+      onClick={handleProfileRedirect}
+    >
+      <AccountCircleIcon />
+      <h3 className="sm:hidden font-light text-lg">Perfil</h3>
+    </Button>
+  </li>
+</div>
+
+      {/* Cabeçalho */}
+      <header className="flex justify-evenly sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-full w-full shadow-cinzaTraco shadow-lg">
+        <div className="flex flex-col h-full w-1/2">
+          <label htmlFor="pesquisar">Deseja pesquisar por um título?</label>
+          <TextField
+            type="text"
+            placeholder="Digite o titulo: "
+            className="border border-gray-300 px-6 py-4 rounded-lg focus:outline-none text-lg min-h-20 w-full"
+            InputProps={{
+              startAdornment: <SearchIcon className="h-6 w-6 m-2" />,
+            }}
+            value={searchTitle}
+            onChange={(e) => setSearchTitle(e.target.value)}
+            id="pesquisar"
+          />
+        </div>
+        <div className="h-full flex gap-2 sm:flex-col">
+          <Button
+            variant="contained"
+            className="md:h-12 sm:h-6 sm:w-6 bg-azulEscuroGradient text-white flex items-center justify-center"
+            onClick={handleSearch}
+          >
+            <span className="sm:hidden">Pesquisar</span>
+            <SearchIcon className="lg:hidden md:hidden" />
+          </Button>
+          <Button
+            variant="outlined"
+            className="md:h-12 sm:h-6 sm:w-6 flex items-center justify-center"
+            onClick={handleClearSearch}
+          >
+            <span className="sm:hidden">Limpar</span>
+            <RestartAltIcon className="lg:hidden md:hidden" />
+          </Button>
+        </div>
+      </header>
+
+      {/* Modal de confirmação de logout */}
+      <Dialog open={logoutModalOpen} onClose={handleCloseLogoutModal}>
+        <DialogTitle>Confirmar Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Você tem certeza que deseja sair?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLogoutModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleLogout} color="primary" autoFocus>
+            Sair
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* AlertMessage component */}
+      <AlertMessage
+        open={alertOpen}
+        message={alertMessage}
+        severity={alertSeverity}
+        onClose={handleAlertClose}
+      />
+    </>
+  );
 }
+
+export default Search;
