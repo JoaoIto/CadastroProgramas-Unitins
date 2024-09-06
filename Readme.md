@@ -1,115 +1,129 @@
-# ***Sistema de Cadastros***
+# *****SoftwareHub***: Sistema de Gestão de Propriedade Intelectual de Programas de Computador - Unitins**
 
-- ### **Projeto dedicado a inciação científica do PIBITI, Universidade Estadual do Tocantins juntamente com o Ministério da Ciência e Tecnologia. Um sistema web de cadastro de projetos para programas de computadores...**
+Este projeto é uma iniciativa científica e de extensão da **Universidade Estadual do Tocantins (Unitins)**,  para a criação de um **sistema web revolucionário** que visa inovar, agilizar, facilitar e digitalizar o processo de registro de programas de computador para propriedade intelectual.
+
+Atualmente, o processo de registro é realizado manualmente, em formato físico, o que resulta em **gargalos humanos** e pode demorar **meses** até a finalização do registro junto ao **INPI (Instituto Nacional da Propriedade Industrial)**. Esta plataforma surge como uma solução que irá facilitar tanto o **usuário externo** (que deseja registrar seu software), quanto a **equipe do NIT (Núcleo de Inovação Tecnológica)** da Unitins, que gerencia esse processo. 
 
 <img src=".github\img/printInicial.png"/>
 
-## Links figma:
+Com essa aplicação, é possível:
+- **Acompanhar o processo de registro de forma digital e transparente**.
+- **Automatizar o fluxo de trabalho da equipe do NIT**, gerenciando os documentos e facilitando a tramitação das informações.
+- **Reduzir o tempo de espera** e a quantidade de papelada envolvida no processo de registro.
 
-## [Figjam - Fluxograma](https://www.figma.com/file/HqW6H7awPQV2vcWUTlUja0/Fluxograma-Cadastro-Programas-de-Computadores---PIBIC?node-id=0%3A1&t=y9G0qPcIryB9JzH4-1)
+## **Tecnologias Utilizadas**
 
-## [ FigDessign - Design wireframe final](https://www.figma.com/file/5Lmauoi9y0gQppPdFHEU7Y/Unitins-Software-Hub?type=design&node-id=9%3A2&mode=design&t=g7I8q8xzApcHDm30-1)
+A plataforma utiliza uma arquitetura moderna composta por:
 
-## Pré-requisitos
+- **Front-end**: Desenvolvido em **Next.js**, um poderoso framework React que oferece funcionalidades como renderização híbrida e sistema de rotas integrado.
+- **Back-end**: Desenvolvido em **NestJS**, um framework Node.js eficiente e extensível para construir aplicações de servidor robustas.
+- **Banco de Dados**: **MongoDB**, um banco de dados NoSQL que oferece escalabilidade e flexibilidade no armazenamento dos dados dos projetos e usuários.
 
-Antes de prosseguir com a instalação, verifique se você possui os seguintes pré-requisitos instalados em seu sistema:
+---
+
+## **Links do Projeto**
+
+- [Fluxograma do Sistema](https://www.figma.com/file/HqW6H7awPQV2vcWUTlUja0/Fluxograma-Cadastro-Programas-de-Computadores---PIBIC?node-id=0%3A1&t=y9G0qPcIryB9JzH4-1)
+- [Design Final (Wireframe)](https://www.figma.com/file/5Lmauoi9y0gQppPdFHEU7Y/Unitins-Software-Hub?type=design&node-id=9%3A2&mode=design&t=g7I8q8xzApcHDm30-1)
+
+---
+
+## **Instalação**
 
 ### Front-end
 
-- Node.js e npm: [Download Node.js](https://nodejs.org/)
-
-### Backend
-
-- MongoDB: [Download MongoDB](https://www.mongodb.com/try/download/community)
-- MongoDB Compass: [Download MongoDB Compass](https://www.mongodb.com/try/download/compass)
-- MongoDB CLI: Consulte a documentação do MongoDB para obter instruções de instalação da linha de comando específica para o seu sistema operacional.
-
-## Instalação
-
-Siga os passos abaixo para configurar o projeto em seu ambiente local:
-
-### Front-end
-
-1. Clone este repositório para o seu computador:
-   ```
+1. Clone este repositório:
+   ```bash
    git clone https://github.com/JoaoIto/CadastroProgramas-Unitins.git
    ```
-
-2. Navegue até o diretório do front-end:
-   ```
+   
+2. Acesse o diretório do front-end:
+   ```bash
    cd CadastroProgramas-Unitins/web
    ```
-
-3. Instale as dependências do projeto:
-   ```
+   
+3. Instale as dependências:
+   ```bash
    npm install
    npm install @mui/material @emotion/react @emotion/styled
    ```
 
-### Backend
+### Back-end
 
-1. Certifique-se de que o MongoDB esteja instalado e em execução em sua máquina.
+1. Certifique-se de que o MongoDB esteja instalado e em execução.
 
-2. Clone este repositório para o seu computador (caso ainda não tenha feito isso):
-   ```
-   git clone https://github.com/JoaoIto/CadastroProgramas-Unitins.git
-   ```
-
-3. Navegue até o diretório do backend:
-   ```
+2. Acesse o diretório do back-end:
+   ```bash
    cd CadastroProgramas-Unitins/server
    ```
 
-4. Instale as dependências do projeto:
-   ```
+3. Instale as dependências do NestJS:
+   ```bash
    npm install
    npm install @nestjs/common @nestjs/passport mongoose
    ```
 
-## Configuração do Banco de Dados
+---
 
-Antes de executar o projeto, é necessário configurar o banco de dados:
+## **Configuração do Banco de Dados**
 
 1. Abra o MongoDB Compass e conecte-se ao servidor local.
+2. Crie um novo banco de dados chamado `softwarehub`.
+3. Dentro do banco de dados, crie as coleções: `programas`, `usuarios`, e `programa-usuario`.
 
-2. Crie um novo banco de dados chamado "cadastro_programas".
+---
 
-3. Dentro do banco de dados "cadastro_programas", crie duas coleções: "programas" e "usuarios" e "programa-usuario".
-
-## Executando o projeto
-
-Agora que você tem todas as dependências instaladas e o banco de dados configurado, siga as etapas abaixo para iniciar o front-end e o back-end:
+## **Execução do Projeto**
 
 ### Front-end
 
-1. Navegue até o diretório do front-end (caso ainda não tenha feito isso):
-   ```
+1. Navegue até o diretório do front-end:
+   ```bash
    cd CadastroProgramas-Unitins/web
    ```
 
 2. Inicie o servidor de desenvolvimento:
-   ```
+   ```bash
    npm run dev
    ```
 
-3. O aplicativo estará disponível em: `http://localhost:3000`.
+3. Acesse a aplicação em: `http://localhost:3000`.
 
-### Backend
+### Back-end
 
-1. Navegue até o diretório do backend (caso ainda não tenha feito isso):
-   ```
+1. Navegue até o diretório do back-end:
+   ```bash
    cd CadastroProgramas-Unitins/server
    ```
 
-2. Inicie o servidor do NestJS:
-   ```
+2. Inicie o servidor NestJS:
+   ```bash
    npm run start:dev
    ```
 
-3. O servidor estará em execução em: `http://localhost:3333`.
-
-### Arquivos de Teste
-
-Aqui estão alguns arquivos que você pode baixar e usar para testar o projeto com o banco de dados:
+3. O servidor estará disponível em: `http://localhost:3333`.
 
 ---
+
+## **Objetivos do Projeto**
+
+O principal objetivo deste projeto é fornecer uma plataforma acessível e eficiente para o registro de programas de computador junto à Unitins e ao INPI. Através desta ferramenta, pretendemos:
+- **Digitalizar** e **acelerar** o processo de registro.
+- Eliminar a necessidade de trâmites em papel.
+- **Simplificar a gestão de documentos** para o NIT e os usuários.
+- **Acompanhar** o andamento do processo em tempo real, promovendo maior transparência.
+
+--- 
+
+## **Contribuição**
+
+Se você deseja contribuir com o projeto, siga os seguintes passos:
+
+1. Faça um fork do repositório.
+2. Crie uma nova branch para sua funcionalidade (`git checkout -b feature/nova-funcionalidade`).
+3. Commit suas alterações (`git commit -m 'Adiciona nova funcionalidade'`).
+4. Envie para o repositório remoto (`git push origin feature/nova-funcionalidade`).
+5. Abra um pull request.
+
+---
+
