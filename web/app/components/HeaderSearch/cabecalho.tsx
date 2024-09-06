@@ -20,6 +20,8 @@ import { getStorageItem } from "@/app/functions/storage/getStorageItem/getStorag
 import { setProgramaItem } from "@/app/functions/storage/setProgramaSearch";
 import { tokenService } from "@/app/Utils/Cookies/tokenStorage";
 import AlertMessage from "../AlertMessage";
+import Image from 'next/image'
+import { IPrograma } from "@/app/interfaces/IPrograma";
 
 export function Search() {
   const token = getStorageItem();
@@ -123,28 +125,38 @@ export function Search() {
 
   return (
     <>
-      <div className="flex w-full justify-around px-2 py-6">
-      <h1
-          style={{ textShadow: "2px 2px 2px rgb(211, 211, 211)" }}
-          className="text-azulEscuroGradient font-semibold text-5xl p-2 w-1/2"
-          onClick={routerDashboard}
-        >
-          Software Hub
-        </h1>
-        <li className="flex items-center justify-end">
-          <IconButton onClick={handleOpenLogoutModal} color="primary">
-            <ExitToAppIcon />
-          </IconButton>
-          <Button
-            className="bg-azulEscuro"
-            variant="contained"
-            onClick={handleProfileRedirect}
-          >
-            <AccountCircleIcon />
-            <h3 className="sm:hidden font-light text-lg">Perfil</h3>
-          </Button>
-        </li>
-      </div>
+      <div className="flex w-full h-[300px] justify-around">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'auto'}}>
+      <Image
+    className="sm:w-[300px] sm:h-[50px]"
+    src="/logo/softwareHub.png" // Utilize o arquivo responsivo que você carregou
+    alt="Logo Software Hub"
+    width={500} // Tamanho para telas maiores
+    height={80} // Altura padrão para telas maiores
+    style={{ 
+      cursor: 'pointer', 
+      maxWidth: '100%', // Faz com que a imagem se ajuste ao tamanho do container
+      height: 'auto' // Mantém a proporção da imagem
+    }}
+    onClick={routerDashboard} // Mantém o comportamento de redirecionamento ao clicar
+  />
+</div>
+
+  <li className="flex items-center justify-end">
+    <IconButton onClick={handleOpenLogoutModal} color="primary">
+      <ExitToAppIcon />
+    </IconButton>
+    <Button
+      className="bg-azulEscuro"
+      variant="contained"
+      onClick={handleProfileRedirect}
+    >
+      <AccountCircleIcon />
+      <h3 className="sm:hidden font-light text-lg">Perfil</h3>
+    </Button>
+  </li>
+</div>
+
       {/* Cabeçalho */}
       <header className="flex justify-evenly sm:justify-center sm:border-b-4 sm:border-cinzaTraco items-center bg-white h-full w-full shadow-cinzaTraco shadow-lg">
         <div className="flex flex-col h-full w-1/2">

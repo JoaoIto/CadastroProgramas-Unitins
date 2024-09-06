@@ -7,18 +7,19 @@ import { useRouter } from "next/navigation";
 import AlertMessage from "../AlertMessage";
 import AssignmentIcon from '@mui/icons-material/AssignmentLate';
 import BuildIcon from '@mui/icons-material/Build';
+
 export function Sidebar() {
   const router = useRouter();
   const { profile, isLoading } = useUserPayload();
   const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("success");
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  const isAdmin = profile.perfil === "admin";
+  const isAdmin = profile?.perfil === "admin";
 
   const routerProgramas = () => {
     const message = isAdmin ? "Redirecionando para programas pendentes..." : "Redirecionando para seus programas enviados...";
@@ -32,7 +33,7 @@ export function Sidebar() {
         router.push('/programa/listar');
       }
     }, 2000);
-  };  
+  };
 
   const routerProgramasEmAcompanhamento = () => {
     const message = isAdmin ? "Redirecionando para programas em acompanhamento..." : "Redirecionando para seus programas em análise...";
@@ -40,7 +41,7 @@ export function Sidebar() {
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
-        router.push('/admin/programa/em-analise');
+      router.push('/admin/programa/em-analise');
     }, 2000);
   };
 
@@ -50,8 +51,7 @@ export function Sidebar() {
     setAlertSeverity("success");
     setAlertOpen(true);
     setTimeout(() => {
-        router.push('/admin/programa/em-ajustes');
-        router.push('/admin/programa/em-ajustes');
+      router.push('/admin/programa/em-ajustes');
     }, 2000);
   };
 
@@ -73,7 +73,7 @@ export function Sidebar() {
 
   return (
     <div>
-      <aside className="sticky top-20 left-0 h-[500px] bg-azulEscuro py-12 px-6 rounded-e-3xl shadow-lg shadow-cinzaTraco w-64">
+      <aside className="sticky top-20 left-0 h-[500px] bg-azulEscuro py-12 px-6 rounded-e-3xl shadow-lg shadow-cinzaTraco w-64 sm:w-32">
         <nav aria-labelledby="menu-sidebar">
           <List
             sx={{ width: '100%', maxWidth: 360 }}
@@ -93,20 +93,20 @@ export function Sidebar() {
               <ListItemIcon>
                 <HomeIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="italic" primary="Inicial" />
+              <ListItemText className="hidden md:block" primary="Inicial" />
             </ListItemButton>
             <ListItemButton onClick={routerProgramas}>
               <ListItemIcon>
                 <SendIcon sx={{ color: 'white' }} />
               </ListItemIcon>
-              <ListItemText className="italic" primary={isAdmin ? "Pendentes" : "Enviados"} />
+              <ListItemText className="hidden md:block" primary={isAdmin ? "Pendentes" : "Enviados"} />
             </ListItemButton>
             {isAdmin && (
               <ListItemButton onClick={routerProgramasEmAcompanhamento}>
                 <ListItemIcon>
                   <AssignmentIcon sx={{ color: 'white' }} />
                 </ListItemIcon>
-                <ListItemText primary="Em Acompanhamento" />
+                <ListItemText className="hidden md:block" primary="Em Acompanhamento" />
               </ListItemButton>
             )}
             {isAdmin && (
@@ -114,7 +114,7 @@ export function Sidebar() {
                 <ListItemIcon>
                   <BuildIcon sx={{ color: 'white' }} />
                 </ListItemIcon>
-                <ListItemText primary="Em Ajustes" />
+                <ListItemText className="hidden md:block" primary="Em Ajustes" />
               </ListItemButton>
             )}
           </List>
@@ -125,6 +125,6 @@ export function Sidebar() {
       <AlertMessage open={alertOpen} message={alertMessage} severity={alertSeverity} onClose={handleAlertClose} />
     </div>
   );
-}
+};
 
 export default Sidebar;

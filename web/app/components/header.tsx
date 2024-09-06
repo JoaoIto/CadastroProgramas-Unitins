@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import AlertMessage from "./AlertMessage"; // Import the AlertMessage component
 import { getStorageItem } from "../functions/storage/getStorageItem/getStorageItem";
 import { tokenService } from "../Utils/Cookies/tokenStorage";
+import Image from 'next/image'
 
 export function Header() {
   const token = getStorageItem();
@@ -71,14 +72,22 @@ export function Header() {
   return (
     <>
       <div className="flex w-full justify-around px-2 py-6 h-[120px] shadow-lg shadow-cinzaTraco">
-        <h1
-          style={{ textShadow: "2px 2px 2px rgb(211, 211, 211)" }}
-          className="text-azulEscuroGradient font-semibold text-5xl p-2 w-1/2"
-          onClick={routerDashboard}
-        >
-          Software Hub
-        </h1>
-        <li className="flex items-center justify-end">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'auto' }}>
+      <Image
+    className="sm:w-[300px] sm:h-[50px]"
+    src="/logo/softwareHub.png" // Utilize o arquivo responsivo que você carregou
+    alt="Logo Software Hub"
+    width={500} // Tamanho para telas maiores
+    height={80} // Altura padrão para telas maiores
+    style={{ 
+      cursor: 'pointer', 
+      maxWidth: '100%', // Faz com que a imagem se ajuste ao tamanho do container
+      height: 'auto' // Mantém a proporção da imagem
+    }}
+    onClick={routerDashboard} // Mantém o comportamento de redirecionamento ao clicar
+  />
+</div>
+        <li className="flex items-center">
           <IconButton onClick={handleOpenLogoutModal} color="primary">
             <ExitToAppIcon />
           </IconButton>
