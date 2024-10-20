@@ -2,6 +2,8 @@
 
 Este projeto foi desenvolvido como parte de uma iniciativa científica e de extensão da **Universidade Estadual do Tocantins (Unitins)**, com o objetivo de criar uma **plataforma web inovadora** para a gestão eficiente de registros de propriedade intelectual de programas de computador.
 
+<img src=".github\img/printInicial.png"/>
+
 ## **Propósito do Software**
 
 O *SoftwareHub* digitaliza e otimiza o processo de registro de programas de computador, eliminando a burocracia e garantindo a transparência. Ele visa:
